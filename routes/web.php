@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -33,15 +34,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |----------------------------------------------------------------------
     */
     Route::middleware('role:admin')->group(function () {
+        // Users
         Route::patch('/users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
         Route::post('/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
         Route::resource('users', UserController::class);
 
+        // Master Data
         Route::resource('categories', CategoryController::class);
         Route::resource('locations', LocationController::class);
         Route::resource('suppliers', SupplierController::class);
 
-        Route::get('/settings', fn() => 'Halaman Pengaturan Sistem')->name('settings.index');
+        // Settings
+        Route::get('/settings', [\App\Http\Controllers\SettingController::class, 'index'])->name('settings.index');
+        Route::put('/settings/update', [\App\Http\Controllers\SettingController::class, 'update'])->name('settings.update');
+        Route::delete('/settings/logo', [\App\Http\Controllers\SettingController::class, 'removeLogo'])->name('settings.remove-logo');
+        Route::post('/settings/reset', [\App\Http\Controllers\SettingController::class, 'reset'])->name('settings.reset');
     });
 
     /*
@@ -73,9 +80,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |----------------------------------------------------------------------
     */
     Route::middleware('role:admin,petugas_sarpras,kepala_sekolah')->group(function () {
-        Route::get('/reports', fn() => 'Halaman Laporan')->name('reports.index');
-        Route::get('/reports/pdf', fn() => 'Export PDF')->name('reports.pdf');
-        Route::get('/reports/excel', fn() => 'Export Excel')->name('reports.excel');
+        // Halaman Index
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+
+        // Inventaris
+        Route::get('/reports/inventory', [ReportController::class, 'inventory'])->name('reports.inventory');
+        Route::get('/reports/inventory/pdf', [ReportController::class, 'inventoryPdf'])->name('reports.inventory.pdf');
+        Route::get('/reports/inventory/excel', [ReportController::class, 'inventoryExcel'])->name('reports.inventory.excel');
+        
+        // Peminjaman
+        Route::get('/reports/loans', [ReportController::class, 'loans'])->name('reports.loans');
+        Route::get('/reports/loans/pdf', [ReportController::class, 'loansPdf'])->name('reports.loans.pdf');
+        Route::get('/reports/loans/excel', [ReportController::class, 'loansExcel'])->name('reports.loans.excel');
+
+        // Perawatan
+        Route::get('/reports/maintenances', [ReportController::class, 'maintenances'])->name('reports.maintenances');
+        Route::get('/reports/maintenances/pdf', [ReportController::class, 'maintenancesPdf'])->name('reports.maintenances.pdf');
+        Route::get('/reports/maintenances/excel', [ReportController::class, 'maintenancesExcel'])->name('reports.maintenances.excel');
     });
 
     /*

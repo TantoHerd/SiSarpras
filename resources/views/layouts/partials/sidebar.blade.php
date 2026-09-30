@@ -119,8 +119,8 @@
                 </p>
 
                 <a href="{{ route('reports.index') }}"
-                   class="flex items-center gap-3 px-4 py-2.5 rounded-pill text-body-sm transition-colors
-                          {{ request()->routeIs('reports.*') ? 'bg-primary text-white' : 'text-ink hover:bg-surface-soft' }}">
+                    class="flex items-center gap-3 px-4 py-2.5 rounded-pill text-body-sm transition-colors
+                        {{ request()->routeIs('reports.*') ? 'bg-primary text-white' : 'text-ink hover:bg-surface-soft' }}">
                     <i class="fas fa-chart-bar w-5 text-center {{ request()->routeIs('reports.*') ? '' : 'text-steel' }}"></i>
                     <span>Laporan</span>
                 </a>
