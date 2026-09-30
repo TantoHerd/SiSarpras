@@ -1,0 +1,214 @@
+/* resources/css/app.css */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply font-sans text-ink bg-canvas antialiased;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        @apply text-ink-deep;
+    }
+}
+
+@layer components {
+    /* ============ PILL BUTTONS ============ */
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-pill 
+               font-bold transition-all duration-200 
+               focus:outline-none focus:ring-2 focus:ring-offset-2
+               disabled:opacity-50 disabled:cursor-not-allowed
+               text-body-sm-bold;
+    }
+
+    .btn-primary {
+        @apply btn bg-primary text-white px-6 py-3
+               hover:bg-primary-deep active:bg-primary-deep
+               focus:ring-primary;
+    }
+
+    .btn-ink {
+        @apply btn bg-ink-button text-white px-6 py-3
+               hover:bg-charcoal active:bg-charcoal
+               focus:ring-ink-deep;
+    }
+
+    .btn-secondary {
+        @apply btn bg-transparent text-ink-deep px-6 py-3
+               border-2 border-ink-deep
+               hover:bg-ink-deep hover:text-white
+               focus:ring-ink-deep;
+    }
+
+    .btn-ghost {
+        @apply btn bg-transparent text-ink-deep px-5 py-2.5
+               border-2 border-ink-deep/10
+               hover:border-ink-deep/30 hover:bg-surface-soft
+               focus:ring-ink-deep;
+    }
+
+    .btn-danger {
+        @apply btn bg-critical text-white px-6 py-3
+               hover:bg-critical-strong
+               focus:ring-critical;
+    }
+
+    .btn-sm {
+        @apply text-caption-bold px-4 py-2;
+    }
+
+    /* ============ PILL TAB ============ */
+    .pill-tab {
+        @apply inline-flex items-center px-4 py-2 rounded-pill
+               text-body-sm-bold
+               border border-hairline bg-canvas text-ink
+               transition-colors;
+    }
+
+    .pill-tab-active {
+        @apply bg-ink-deep text-canvas border-ink-deep;
+    }
+
+    /* ============ BADGES ============ */
+    .badge {
+        @apply inline-flex items-center px-2.5 py-1 rounded-pill
+               text-caption-bold whitespace-nowrap;
+    }
+
+    .badge-success { @apply badge bg-success text-white; }
+    .badge-warning { @apply badge bg-warning text-ink-deep; }
+    .badge-critical { @apply badge bg-critical text-white; }
+    .badge-info { @apply badge bg-primary text-white; }
+    .badge-neutral { @apply badge bg-surface-soft text-charcoal; }
+
+    /* ============ CARDS ============ */
+    .card {
+        @apply bg-canvas rounded-3xl border border-hairline-soft p-6;
+    }
+
+    .card-sm {
+        @apply bg-canvas rounded-xl border border-hairline-soft p-5;
+    }
+
+    .card-photo {
+        @apply bg-canvas rounded-3xl overflow-hidden border-0;
+    }
+
+    .card-promo {
+        @apply bg-ink-deep text-canvas rounded-3xl p-12;
+    }
+
+    /* ============ FORM INPUTS ============ */
+    .form-input {
+        @apply w-full h-11 px-3 py-3 rounded-lg
+               border border-hairline bg-canvas text-ink
+               text-body-md
+               focus:border-fb focus:ring-2 focus:ring-fb/20
+               transition-colors;
+    }
+
+    .form-input-error {
+        @apply border-critical-strong focus:border-critical-strong 
+               focus:ring-critical/20;
+    }
+
+    .form-label {
+        @apply block text-body-sm-bold text-ink-deep mb-2;
+    }
+
+    /* ============ SEARCH PILL ============ */
+    .search-pill {
+        @apply flex items-center h-10 px-5 rounded-pill
+               bg-surface-soft text-steel text-body-sm
+               focus-within:ring-2 focus-within:ring-fb/20
+               transition-all;
+    }
+
+    .search-pill input {
+        @apply bg-transparent border-0 focus:ring-0 flex-1 
+               text-body-sm placeholder:text-stone p-0;
+    }
+
+    /* ============ ICON CIRCULAR BUTTON ============ */
+    .btn-icon {
+        @apply w-10 h-10 rounded-circle bg-canvas text-ink
+               flex items-center justify-center
+               hover:bg-surface-soft
+               transition-colors;
+    }
+}
+
+/* ============ PAGINATION META STYLE ============ */
+@layer components {
+    /* Container pagination */
+    nav[role="navigation"] > div:first-child {
+        @apply hidden sm:flex-1 sm:flex sm:items-center sm:justify-between;
+    }
+
+    /* Text info */
+    nav[role="navigation"] p {
+        @apply text-body-sm text-steel;
+    }
+
+    nav[role="navigation"] p span {
+        @apply font-bold text-ink-deep;
+    }
+
+    /* Pagination links */
+    nav[role="navigation"] span[aria-current="page"] > span,
+    nav[role="navigation"] a,
+    nav[role="navigation"] span[aria-disabled="true"] > span {
+        @apply inline-flex items-center justify-center min-w-[36px] h-9 px-3 mx-1
+               rounded-pill text-body-sm-bold transition-colors;
+    }
+
+    /* Active page */
+    nav[role="navigation"] span[aria-current="page"] > span {
+        @apply bg-primary text-white border border-primary;
+    }
+
+    /* Normal link */
+    nav[role="navigation"] a {
+        @apply bg-canvas text-ink border border-hairline hover:bg-surface-soft;
+    }
+
+    /* Disabled */
+    nav[role="navigation"] span[aria-disabled="true"] > span {
+        @apply bg-surface-soft text-disabled border border-hairline-soft cursor-not-allowed;
+    }
+
+    /* Mobile pagination */
+    nav[role="navigation"] > div:last-child {
+        @apply flex items-center justify-between sm:hidden;
+    }
+
+    nav[role="navigation"] > div:last-child a,
+    nav[role="navigation"] > div:last-child span {
+        @apply relative inline-flex items-center px-4 py-2 text-body-sm-bold
+               bg-canvas border border-hairline rounded-pill text-ink
+               hover:bg-surface-soft transition-colors;
+    }
+}
+
+/* ============ SCROLLBAR ============ */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #ced0d4;
+    border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #8595a4;
+}
