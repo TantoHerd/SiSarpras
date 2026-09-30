@@ -80,8 +80,8 @@
                 </a>
 
                 <a href="{{ route('maintenances.index') }}"
-                   class="flex items-center gap-3 px-4 py-2.5 rounded-pill text-body-sm transition-colors
-                          {{ request()->routeIs('maintenances.*') ? 'bg-primary text-white' : 'text-ink hover:bg-surface-soft' }}">
+                    class="flex items-center gap-3 px-4 py-2.5 rounded-pill text-body-sm transition-colors
+                        {{ request()->routeIs('maintenances.*') ? 'bg-primary text-white' : 'text-ink hover:bg-surface-soft' }}">
                     <i class="fas fa-tools w-5 text-center {{ request()->routeIs('maintenances.*') ? '' : 'text-steel' }}"></i>
                     <span>Perawatan</span>
                 </a>

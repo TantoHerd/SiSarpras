@@ -213,8 +213,157 @@
                 </div>
             </div>
 
+            {{-- ============ Card: Maintenance Jatuh Tempo (Kondisional) ============ --}}
+            @if(isset($maintenanceStats) && $maintenanceStats['upcoming'] > 0)
+                <div class="card border-warning/30 bg-gradient-to-br from-warning/5 to-warning/0 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 rounded-full bg-warning/10 blur-2xl pointer-events-none"></div>
+
+                    <div class="relative">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-11 h-11 rounded-xl bg-warning/10 flex items-center justify-center">
+                                <i class="fas fa-tools text-warning"></i>
+                            </div>
+                            <span class="badge-warning">Jadwal</span>
+                        </div>
+
+                        <p class="text-caption text-steel uppercase tracking-wider mb-1">Maintenance Jatuh Tempo</p>
+                        <p class="text-heading-lg text-ink-deep mb-3">
+                            {{ number_format($maintenanceStats['upcoming']) }}
+                        </p>
+
+                        <a href="{{ route('maintenances.index') }}" 
+                        class="inline-flex items-center gap-1.5 text-caption-bold text-warning hover:underline">
+                            Lihat daftar
+                            <i class="fas fa-arrow-right text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+            @endif
+
         </div>
     </section>
+    @endif
+
+    {{-- ==================== JADWAL MAINTENANCE MENDATANG ==================== --}}
+    @if(isset($upcomingMaintenances) && $upcomingMaintenances && $upcomingMaintenances->count() > 0)
+        <section>
+            <div class="flex items-end justify-between mb-4">
+                <div>
+                    <h3 class="text-heading-sm text-ink-deep">Jadwal Maintenance Mendatang</h3>
+                    <p class="text-body-sm text-steel mt-1">Barang yang butuh perawatan dalam 7 hari ke depan</p>
+                </div>
+                <a href="{{ route('maintenances.index') }}" 
+                class="text-body-sm-bold text-primary hover:text-primary-deep inline-flex items-center gap-1.5">
+                    Lihat semua 
+                    <i class="fas fa-arrow-right text-xs"></i>
+                </a>
+            </div>
+
+            <div class="card">
+                <div class="space-y-3">
+                    @foreach($upcomingMaintenances as $maintenance)
+                        <a href="{{ route('maintenances.show', $maintenance->id) }}"
+                        class="flex items-center gap-4 p-3 rounded-xl bg-surface-soft hover:bg-warning/5 border border-transparent hover:border-warning/20 transition-all">
+                            @if($maintenance->item->image)
+                                <img src="{{ asset('storage/' . $maintenance->item->image) }}" 
+                                    alt="{{ $maintenance->item->name }}"
+                                    class="w-12 h-12 rounded-lg object-cover flex-shrink-0">
+                            @else
+                                <div class="w-12 h-12 rounded-lg bg-warning/10 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-tools text-warning"></i>
+                                </div>
+                            @endif
+                            <div class="flex-1 min-w-0">
+                                <p class="text-body-sm-bold text-ink-deep truncate">
+                                    {{ $maintenance->item->name }}
+                                </p>
+                                <p class="text-caption text-steel">
+                                    <i class="fas fa-map-marker-alt text-xs"></i>
+                                    {{ $maintenance->item->location->name ?? '-' }}
+                                    • Jadwal: {{ $maintenance->next_maintenance_date->format('d M Y') }}
+                                </p>
+                            </div>
+                            <div class="text-right flex-shrink-0">
+                                @php
+                                    $daysUntil = now()->startOfDay()->diffInDays($maintenance->next_maintenance_date->startOfDay(), false);
+                                @endphp
+                                @if($daysUntil == 0)
+                                    <span class="badge-critical">Hari Ini</span>
+                                @elseif($daysUntil <= 3)
+                                    <span class="badge-warning">{{ $daysUntil }} hari lagi</span>
+                                @else
+                                    <span class="badge-neutral">{{ $daysUntil }} hari lagi</span>
+                                @endif
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    {{-- ==================== SEDANG DIPERBAIKI ==================== --}}
+    @if(isset($inProgressMaintenances) && $inProgressMaintenances && $inProgressMaintenances->count() > 0)
+        <section>
+            <div class="flex items-end justify-between mb-4">
+                <div>
+                    <h3 class="text-heading-sm text-ink-deep">Sedang Diperbaiki</h3>
+                    <p class="text-body-sm text-steel mt-1">Barang yang masih dalam proses perbaikan</p>
+                </div>
+                <a href="{{ route('maintenances.index', ['status' => 'in_progress']) }}" 
+                class="text-body-sm-bold text-primary hover:text-primary-deep inline-flex items-center gap-1.5">
+                    Lihat semua 
+                    <i class="fas fa-arrow-right text-xs"></i>
+                </a>
+            </div>
+
+            <div class="card">
+                <div class="space-y-3">
+                    @foreach($inProgressMaintenances as $maintenance)
+                        <div class="flex flex-wrap items-center gap-4 p-3 rounded-xl bg-surface-soft">
+                            @if($maintenance->item->image)
+                                <img src="{{ asset('storage/' . $maintenance->item->image) }}" 
+                                    alt="{{ $maintenance->item->name }}"
+                                    class="w-12 h-12 rounded-lg object-cover flex-shrink-0">
+                            @else
+                                <div class="w-12 h-12 rounded-lg bg-warning/10 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-tools text-warning"></i>
+                                </div>
+                            @endif
+                            <div class="flex-1 min-w-0">
+                                <p class="text-body-sm-bold text-ink-deep truncate">
+                                    {{ $maintenance->item->name }}
+                                </p>
+                                <p class="text-caption text-steel truncate">
+                                    <i class="fas fa-user-cog text-xs"></i>
+                                    {{ $maintenance->technician ?? 'Tanpa teknisi' }}
+                                    <span class="text-stone">•</span>
+                                    {{ $maintenance->maintenance_date->diffForHumans() }}
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                @if($maintenance->days_in_progress >= 7)
+                                    <span class="badge-critical">
+                                        <i class="fas fa-exclamation-triangle mr-1 text-xs"></i>
+                                        {{ $maintenance->days_in_progress }} hari
+                                    </span>
+                                @else
+                                    <span class="badge-warning">
+                                        {{ $maintenance->days_in_progress }} hari
+                                    </span>
+                                @endif
+                                <button type="button"
+                                        onclick="openCompleteModalFromDashboard({{ $maintenance->id }}, '{{ addslashes($maintenance->item->name) }}', {{ $maintenance->cost }})"
+                                        class="btn-ghost btn-sm !text-success hover:!bg-success/10">
+                                    <i class="fas fa-check-circle"></i>
+                                    Selesai
+                                </button>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
     @endif
 
     {{-- ==================== CONTENT GRID ==================== --}}
@@ -408,5 +557,72 @@
 
     </section>
 </div>
+
+{{-- ==================== MODAL TANDAI SELESAI (DASHBOARD) ==================== --}}
+@if(isset($inProgressMaintenances) && $inProgressMaintenances && $inProgressMaintenances->count() > 0)
+<div id="complete-modal-dashboard" class="hidden fixed inset-0 bg-ink-deep/60 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+    <div class="bg-canvas rounded-3xl max-w-lg w-full p-6 shadow-sticky">
+        <div class="flex items-center justify-center w-14 h-14 rounded-circle bg-success/10 mx-auto mb-4">
+            <i class="fas fa-check-circle text-success text-2xl"></i>
+        </div>
+        
+        <h3 class="text-heading-sm text-ink-deep text-center mb-2">
+            Tandai Perbaikan Selesai?
+        </h3>
+        <p class="text-body-sm text-steel text-center mb-6">
+            Barang <strong id="dashboard-complete-item-name" class="text-ink-deep"></strong> akan dikembalikan ke kondisi <strong>Baik</strong> dan status <strong>Tersedia</strong>.
+        </p>
+
+        <form id="dashboard-complete-form" method="POST" class="space-y-5">
+            @csrf
+            @method('PATCH')
+
+            <div>
+                <label for="dashboard_completion_note" class="form-label">Catatan Hasil Perbaikan</label>
+                <textarea id="dashboard_completion_note" 
+                          name="completion_note" 
+                          rows="3"
+                          placeholder="Contoh: Lampu sudah diganti, sudah dites nyala normal..."
+                          maxlength="500"
+                          class="form-input !h-auto resize-none"></textarea>
+                <p class="text-caption text-steel mt-1">Opsional.</p>
+            </div>
+
+            <div>
+                <label for="dashboard_final_cost" class="form-label">Biaya Final (Rp)</label>
+                <input type="number" 
+                       id="dashboard_final_cost" 
+                       name="final_cost" 
+                       min="0"
+                       step="1000"
+                       class="form-input">
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button" 
+                        onclick="document.getElementById('complete-modal-dashboard').classList.add('hidden')"
+                        class="btn-ghost flex-1">
+                    Batal
+                </button>
+                <button type="submit" class="btn-primary flex-1">
+                    <i class="fas fa-check-circle"></i>
+                    Ya, Tandai Selesai
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+    function openCompleteModalFromDashboard(id, itemName, currentCost) {
+        document.getElementById('dashboard-complete-item-name').textContent = itemName;
+        document.getElementById('dashboard_final_cost').value = currentCost || '';
+        document.getElementById('dashboard-complete-form').action = `/maintenances/${id}/complete`;
+        document.getElementById('complete-modal-dashboard').classList.remove('hidden');
+    }
+</script>
+@endpush
+@endif
 
 @endsection

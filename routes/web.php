@@ -4,37 +4,24 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LoanController;
+use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\LocationController;
+use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Redirect Root
-|--------------------------------------------------------------------------
-*/
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Authenticated Routes
-|--------------------------------------------------------------------------
-*/
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    /*
-    |----------------------------------------------------------------------
-    | DASHBOARD (semua role)
-    |----------------------------------------------------------------------
-    */
+    // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    /*
-    |----------------------------------------------------------------------
-    | PROFIL (semua role)
-    |----------------------------------------------------------------------
-    */
+    // Profil
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
@@ -46,44 +33,37 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |----------------------------------------------------------------------
     */
     Route::middleware('role:admin')->group(function () {
-        
-        // ============ USERS ============
-        Route::patch('/users/{user}/toggle-active', [\App\Http\Controllers\UserController::class, 'toggleActive'])
-            ->name('users.toggle-active');
-        Route::post('/users/{user}/reset-password', [\App\Http\Controllers\UserController::class, 'resetPassword'])
-            ->name('users.reset-password');
-        Route::resource('users', \App\Http\Controllers\UserController::class);
+        Route::patch('/users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
+        Route::post('/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
+        Route::resource('users', UserController::class);
 
-        // ============ CATEGORIES ============
-        Route::resource('categories', \App\Http\Controllers\CategoryController::class);
+        Route::resource('categories', CategoryController::class);
+        Route::resource('locations', LocationController::class);
+        Route::resource('suppliers', SupplierController::class);
 
-        // ============ LOCATIONS ============
-        Route::resource('locations', \App\Http\Controllers\LocationController::class);
-
-        // ============ SUPPLIERS ============
-        Route::resource('suppliers', \App\Http\Controllers\SupplierController::class);
-
-        // ============ PLACEHOLDER (belum dibuat) ============
-        Route::get('/settings', fn() => 'Halaman Pengaturan Sistem (Admin Only)')->name('settings.index');
+        Route::get('/settings', fn() => 'Halaman Pengaturan Sistem')->name('settings.index');
     });
 
     /*
     |----------------------------------------------------------------------
     | ADMIN + PETUGAS + GURU
-    | Grup ini HARUS di atas resource items & loans untuk menghindari
-    | route statis seperti /loans/request tertutup oleh /loans/{loan}
+    | PENTING: Route statis dulu, baru dinamis
     |----------------------------------------------------------------------
     */
     Route::middleware('role:admin,petugas_sarpras,guru')->group(function () {
-        // Items tersedia
         Route::get('/items/available', fn() => 'Halaman Barang Tersedia')->name('items.available');
-
-        // Loans dari sisi Guru
         Route::get('/my-loans', [LoanController::class, 'myLoans'])->name('loans.my');
+        
+        // Loans request (Guru & semua)
         Route::get('/loans/request', [LoanController::class, 'requestForm'])->name('loans.request');
         Route::post('/loans/request', [LoanController::class, 'requestStore'])->name('loans.request.store');
 
-        // Detail Loan — boleh diakses semua role, tapi ada cek ownership di controller
+        // Loans create (hanya Admin & Petugas) — harus sebelum {loan}
+        Route::middleware('role:admin,petugas_sarpras')->group(function () {
+            Route::get('/loans/create', [LoanController::class, 'create'])->name('loans.create');
+        });
+
+        // Loans show — PALING BAWAH (dinamis)
         Route::get('/loans/{loan}', [LoanController::class, 'show'])->name('loans.show');
     });
 
@@ -94,38 +74,32 @@ Route::middleware(['auth', 'verified'])->group(function () {
     */
     Route::middleware('role:admin,petugas_sarpras,kepala_sekolah')->group(function () {
         Route::get('/reports', fn() => 'Halaman Laporan')->name('reports.index');
-        Route::get('/reports/pdf', fn() => 'Export Laporan PDF')->name('reports.pdf');
-        Route::get('/reports/excel', fn() => 'Export Laporan Excel')->name('reports.excel');
+        Route::get('/reports/pdf', fn() => 'Export PDF')->name('reports.pdf');
+        Route::get('/reports/excel', fn() => 'Export Excel')->name('reports.excel');
     });
 
     /*
     |----------------------------------------------------------------------
-    | ADMIN + PETUGAS SARPRAS (CRUD Items & Loans)
+    | ADMIN + PETUGAS SARPRAS
     |----------------------------------------------------------------------
     */
     Route::middleware('role:admin,petugas_sarpras')->group(function () {
-
-        // ============ ITEMS ============
-        // Barcode harus di atas resource items
+        // Items
         Route::get('/items/{item}/barcode', [ItemController::class, 'barcode'])->name('items.barcode');
         Route::resource('items', ItemController::class);
 
-        // ============ LOANS ============
-        // Return — harus di atas resource loans
+        // Loans — return dulu (statis dengan parameter), baru resource
         Route::get('/loans/{loan}/return', [LoanController::class, 'returnForm'])->name('loans.return.form');
         Route::post('/loans/{loan}/return', [LoanController::class, 'returnStore'])->name('loans.return.store');
+        
+        // Resource loans — kecuali show & create (sudah di grup atas)
+        Route::resource('loans', LoanController::class)->except(['show', 'create']);
 
-        // Resource loans — kecuali show (sudah dipindah ke grup di atas)
-        Route::resource('loans', LoanController::class)->except(['show']);
-
-        // ============ MAINTENANCE ============
-        Route::resource('maintenances', \App\Http\Controllers\MaintenanceController::class);
+        // Maintenances
+        Route::patch('/maintenances/{maintenance}/complete', [MaintenanceController::class, 'complete'])
+            ->name('maintenances.complete');
+        Route::resource('maintenances', MaintenanceController::class);
     });
 });
 
-/*
-|--------------------------------------------------------------------------
-| Auth Routes (Login, Logout, Password Reset)
-|--------------------------------------------------------------------------
-*/
 require __DIR__.'/auth.php';

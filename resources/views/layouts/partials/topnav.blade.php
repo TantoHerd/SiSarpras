@@ -64,6 +64,10 @@
                    class="pill-tab {{ request()->routeIs('loans.index') || request()->routeIs('loans.show') || request()->routeIs('loans.create') || request()->routeIs('loans.return.*') ? 'pill-tab-active' : '' }}">
                     <i class="fas fa-hand-holding mr-2 text-xs"></i> Peminjaman
                 </a>
+                <a href="{{ route('maintenances.index') }}" 
+                    class="pill-tab {{ request()->routeIs('maintenances.*') ? 'pill-tab-active' : '' }}">
+                    <i class="fas fa-tools mr-2 text-xs"></i> Perawatan
+                </a>
             @endif
 
             @if($user->isGuru())

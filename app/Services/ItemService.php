@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use App\Enums\ItemConditionEnum;
+use App\Enums\ItemStatusEnum;
 
 class ItemService
 {
@@ -69,21 +71,26 @@ class ItemService
     public function createItem(array $data, ?UploadedFile $image = null): Item
     {
         return DB::transaction(function () use ($data, $image) {
-            // Generate kode otomatis
             $data['code'] = $this->generateCode($data['category_id']);
 
-            // Upload gambar jika ada
             if ($image) {
                 $data['image'] = $this->uploadImage($image);
             }
 
-            // Set created_by
+            // ============ AUTO-SET STATUS BERDASARKAN KONDISI ============
+            $condition = $data['condition'] ?? 'baik';
+            
+            if ($condition === 'rusak_berat') {
+                $data['status'] = ItemStatusEnum::TIDAK_AKTIF->value;
+            } else {
+                // Default: tersedia
+                $data['status'] = ItemStatusEnum::TERSEDIA->value;
+            }
+
             $data['created_by'] = Auth::id();
 
-            // Simpan
             $item = $this->repository->create($data);
 
-            // Catat history
             $this->logHistory($item, 'created', null, $item->toArray());
 
             return $item;
@@ -98,39 +105,49 @@ class ItemService
         return DB::transaction(function () use ($item, $data, $image) {
             $oldValues = $item->toArray();
 
-            // Deteksi remove_image dari request (bisa string "1" atau boolean true)
-            $removeImage = request()->input('remove_image') == '1' 
-                        || request()->input('remove_image') === true;
+            // Cek apakah user minta hapus gambar
+            $removeImage = request()->input('remove_image') === '1';
 
-            Log::info('Update item', [
-                'item_id' => $item->id,
-                'has_image_upload' => $image ? true : false,
-                'remove_image_flag' => $removeImage,
-                'old_image' => $item->image,
-            ]);
-
-            // CASE 1: Upload gambar baru
+            // Upload gambar baru jika ada
             if ($image) {
-                // Hapus gambar lama
                 if ($item->image && Storage::disk('public')->exists($item->image)) {
                     Storage::disk('public')->delete($item->image);
                 }
                 $data['image'] = $this->uploadImage($image);
             } 
-            // CASE 2: Hapus gambar tanpa upload baru
             elseif ($removeImage) {
                 if ($item->image && Storage::disk('public')->exists($item->image)) {
                     Storage::disk('public')->delete($item->image);
                 }
                 $data['image'] = null;
             }
-            // CASE 3: Tidak ada perubahan gambar — biarkan seperti semula
-            // (tidak perlu set $data['image'])
+
+            // ============ AUTO-UPDATE STATUS BERDASARKAN KONDISI ============
+            // Jangan override status manual kalau user memang mengisi status
+            if (isset($data['condition']) && !isset($data['status'])) {
+                $condition = $data['condition'];
+                
+                // Kalau kondisi diubah jadi "Rusak Berat" → status otomatis "Tidak Aktif"
+                if ($condition === 'rusak_berat' || $condition === ItemConditionEnum::RUSAK_BERAT->value) {
+                    // Hanya update kalau status bukan "Dipinjam" (biar tidak konflik)
+                    if ($item->status !== ItemStatusEnum::DIPINJAM) {
+                        $data['status'] = ItemStatusEnum::TIDAK_AKTIF->value;
+                    }
+                }
+                // Kalau kondisi diubah jadi "Baik" atau "Rusak Ringan" dan statusnya "Tidak Aktif" → jadi "Tersedia"
+                elseif (in_array($condition, ['baik', 'rusak_ringan']) 
+                        || in_array($condition, [ItemConditionEnum::BAIK->value, ItemConditionEnum::RUSAK_RINGAN->value])) {
+                    if ($item->status === ItemStatusEnum::TIDAK_AKTIF) {
+                        $data['status'] = ItemStatusEnum::TERSEDIA->value;
+                    }
+                }
+            }
 
             $data['updated_by'] = Auth::id();
 
             $updated = $this->repository->update($item, $data);
 
+            // Catat history
             $this->logHistory($updated, 'updated', $oldValues, $updated->toArray());
 
             return $updated;

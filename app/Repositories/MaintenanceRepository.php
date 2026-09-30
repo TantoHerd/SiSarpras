@@ -14,19 +14,20 @@ class MaintenanceRepository
     public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
         return Maintenance::query()
-            ->with(['item', 'item.category', 'item.location', 'creator'])
+            ->with(['item', 'item.category', 'item.location', 'creator', 'completer'])
             ->when(!empty($filters['search']), function ($q) use ($filters) {
                 $term = $filters['search'];
                 $q->where(function ($sub) use ($term) {
                     $sub->whereHas('item', function ($item) use ($term) {
                         $item->where('name', 'ILIKE', "%{$term}%")
-                             ->orWhere('code', 'ILIKE', "%{$term}%");
+                            ->orWhere('code', 'ILIKE', "%{$term}%");
                     })
                     ->orWhere('technician', 'ILIKE', "%{$term}%")
                     ->orWhere('description', 'ILIKE', "%{$term}%");
                 });
             })
             ->when(!empty($filters['type']), fn($q) => $q->where('type', $filters['type']))
+            ->when(!empty($filters['status']), fn($q) => $q->where('status', $filters['status']))  // ← TAMBAH
             ->when(!empty($filters['date_from']), fn($q) => $q->where('maintenance_date', '>=', $filters['date_from']))
             ->when(!empty($filters['date_to']), fn($q) => $q->where('maintenance_date', '<=', $filters['date_to']))
             ->latest('maintenance_date')
@@ -119,6 +120,8 @@ class MaintenanceRepository
             'last_month'    => Maintenance::whereBetween('maintenance_date', [$lastMonth, $lastMonthEnd])->count(),
             'routine'       => Maintenance::where('type', 'rutin')->count(),
             'repair'        => Maintenance::where('type', 'perbaikan')->count(),
+            'in_progress'   => Maintenance::where('status', 'in_progress')->count(),  // ← TAMBAH
+            'completed'     => Maintenance::where('status', 'completed')->count(),    // ← TAMBAH
             'total_cost'    => Maintenance::sum('cost'),
             'cost_this_month' => Maintenance::where('maintenance_date', '>=', $thisMonth)->sum('cost'),
             'upcoming'      => $this->countUpcoming(7),

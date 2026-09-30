@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreMaintenanceRequest;
 use App\Http\Requests\UpdateMaintenanceRequest;
+use App\Http\Requests\CompleteMaintenanceRequest;
 use App\Models\Item;
 use App\Models\Maintenance;
 use App\Services\MaintenanceService;
@@ -24,6 +25,7 @@ class MaintenanceController extends Controller
         $filters = [
             'search'    => $request->input('search'),
             'type'      => $request->input('type'),
+            'status'    => $request->input('status'),
             'date_from' => $request->input('date_from'),
             'date_to'   => $request->input('date_to'),
         ];
@@ -39,15 +41,30 @@ class MaintenanceController extends Controller
      */
     public function create(Request $request)
     {
-        // Ambil semua item (bukan cuma yang tersedia)
+        // Ambil semua item dengan relasi
         $items = Item::with(['category', 'location'])
             ->orderBy('name')
             ->get();
 
+        // Siapkan data JSON untuk JavaScript
+        $itemsJson = $items->mapWithKeys(function ($item) {
+            return [
+                $item->id => [
+                    'id'        => $item->id,
+                    'name'      => $item->name,
+                    'code'      => $item->code,
+                    'category'  => $item->category->name ?? '-',
+                    'location'  => $item->location->name ?? '-',
+                    'condition' => $item->condition->label(),
+                    'image'     => $item->image ? asset('storage/' . $item->image) : null,
+                ]
+            ];
+        });
+
         // Pre-select item kalau ada query param
         $selectedItemId = $request->input('item_id');
 
-        return view('maintenances.create', compact('items', 'selectedItemId'));
+        return view('maintenances.create', compact('items', 'itemsJson', 'selectedItemId'));
     }
 
     /**
@@ -126,6 +143,24 @@ class MaintenanceController extends Controller
                 ->with('success', 'Data perawatan berhasil dihapus.');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal menghapus perawatan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Tandai perbaikan sebagai selesai
+     */
+    public function complete(CompleteMaintenanceRequest $request, Maintenance $maintenance)
+    {
+        try {
+            $this->maintenanceService->markAsCompleted($maintenance, $request->validated());
+
+            return redirect()
+                ->route('maintenances.show', $maintenance->id)
+                ->with('success', "Perbaikan \"{$maintenance->item->name}\" berhasil ditandai selesai. Barang sudah tersedia kembali.");
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors());
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal menyelesaikan perbaikan: ' . $e->getMessage());
         }
     }
 }

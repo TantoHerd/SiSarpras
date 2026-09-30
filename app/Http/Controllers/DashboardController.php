@@ -44,11 +44,18 @@ class DashboardController extends Controller
         // Maintenance (untuk admin & petugas)
         $maintenanceStats = null;
         $upcomingMaintenances = null;
+        $inProgressMaintenances = null;
 
         if ($user->isAdmin() || $user->isPetugas()) {
             $maintenanceStats = $this->maintenanceRepository->getStats();
             $upcomingMaintenances = $this->maintenanceRepository->getUpcoming(7, 5);
+            $inProgressMaintenances = \App\Models\Maintenance::with(['item', 'item.location'])
+                ->inProgress()
+                ->orderBy('maintenance_date')
+                ->take(5)
+                ->get();
         }
+
 
         return view('dashboard', compact(
             'stats',
@@ -56,7 +63,8 @@ class DashboardController extends Controller
             'myLoans',
             'activeLoans',
             'maintenanceStats',
-            'upcomingMaintenances'
+            'upcomingMaintenances',
+            'inProgressMaintenances'  // ← TAMBAH
         ));
     }
 }

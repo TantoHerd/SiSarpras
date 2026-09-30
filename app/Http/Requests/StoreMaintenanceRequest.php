@@ -19,6 +19,7 @@ class StoreMaintenanceRequest extends FormRequest
             'item_id'               => ['required', 'exists:items,id'],
             'maintenance_date'      => ['required', 'date'],
             'type'                  => ['required', Rule::in(['rutin', 'perbaikan'])],
+            'is_completed'          => ['nullable', 'boolean'],  // ← TAMBAH INI
             'cost'                  => ['nullable', 'numeric', 'min:0'],
             'description'           => ['nullable', 'string', 'max:1000'],
             'technician'            => ['nullable', 'string', 'max:100'],
