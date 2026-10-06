@@ -48,7 +48,7 @@
 
 <p align="center">
   <kbd>
-    <img src="docs/screenshots/preview.png" alt="SISARPRAS Preview" width="100%">
+    <img src="preview.png" alt="SISARPRAS Preview" width="100%">
   </kbd>
 </p>
 
