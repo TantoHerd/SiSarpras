@@ -355,20 +355,20 @@ Lihat file LICENSE untuk teks lengkap.
 
 🙏 Credits
 Dibangun Dengan
-Laravel — The PHP Framework for Web Artisans
-Tailwind CSS — Utility-first CSS framework
-Alpine.js — Lightweight JavaScript framework
-Font Awesome — Icon library
-DomPDF — PDF generation
-Maatwebsite Excel — Excel export
+- Laravel — The PHP Framework for Web Artisans
+- Tailwind CSS — Utility-first CSS framework
+- Alpine.js — Lightweight JavaScript framework
+- Font Awesome — Icon library
+- DomPDF — PDF generation
+- Maatwebsite Excel — Excel export
 
 Inspirasi Design
-Meta Design System — Pill buttons, cobalt accent, rounded cards
-ThemeSelection Sneat — README structure inspiration
+- Meta Design System — Pill buttons, cobalt accent, rounded cards
+- ThemeSelection Sneat — README structure inspiration
 
 Kontributor
-[Tanto Herdiansyah] — Project Owner & Lead Developer
-Anda bisa menjadi kontributor berikutnya!
+- [Tanto Herdiansyah] — Project Owner & Lead Developer
+- Anda bisa menjadi kontributor berikutnya!
 
 🔥 Tertarik Berkontribusi?
 Kalau project ini bermanfaat, jangan lupa:
