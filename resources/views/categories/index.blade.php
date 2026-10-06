@@ -10,7 +10,7 @@
 <div class="space-y-6">
 
     {{-- ==================== STATISTIK ==================== --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="card-sm">
             <div class="flex items-center justify-between mb-3">
                 <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -39,6 +39,17 @@
             </div>
             <p class="text-caption text-steel uppercase tracking-wider">Kosong</p>
             <p class="text-heading-lg text-ink-deep">{{ number_format($stats['empty']) }}</p>
+        </div>
+
+        {{-- ← BARU: Portal Siswa count --}}
+        <div class="card-sm">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <i class="fas fa-user-graduate text-primary"></i>
+                </div>
+            </div>
+            <p class="text-caption text-steel uppercase tracking-wider">Portal Siswa</p>
+            <p class="text-heading-lg text-ink-deep">{{ number_format($stats['student_loanable'] ?? 0) }}</p>
         </div>
     </div>
 
@@ -78,26 +89,48 @@
             </div>
         </form>
 
-        {{-- Pill Tabs --}}
+        {{-- Filter Baris 1: has_items --}}
         <div class="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-hairline-soft">
-            <span class="text-caption text-steel mr-2">Filter:</span>
-            
+            <span class="text-caption text-steel mr-2">Barang:</span>
+
             {{-- Semua --}}
             <a href="{{ route('categories.index', array_merge(request()->query(), ['has_items' => ''])) }}"
-            class="pill-tab {{ !isset($filters['has_items']) || $filters['has_items'] === '' || $filters['has_items'] === null ? 'pill-tab-active' : '' }}">
+               class="pill-tab {{ !isset($filters['has_items']) || $filters['has_items'] === '' || $filters['has_items'] === null ? 'pill-tab-active' : '' }}">
                 Semua
             </a>
-            
+
             {{-- Ada Barang --}}
             <a href="{{ route('categories.index', array_merge(request()->query(), ['has_items' => '1'])) }}"
-            class="pill-tab {{ ($filters['has_items'] ?? '') === '1' ? 'pill-tab-active' : '' }}">
+               class="pill-tab {{ ($filters['has_items'] ?? '') === '1' ? 'pill-tab-active' : '' }}">
                 Ada Barang
             </a>
-            
+
             {{-- Kosong --}}
             <a href="{{ route('categories.index', array_merge(request()->query(), ['has_items' => '0'])) }}"
-            class="pill-tab {{ ($filters['has_items'] ?? '') === '0' ? 'pill-tab-active' : '' }}">
+               class="pill-tab {{ ($filters['has_items'] ?? '') === '0' ? 'pill-tab-active' : '' }}">
                 Kosong
+            </a>
+        </div>
+
+        {{-- ← BARU: Filter Baris 2: Portal --}}
+        <div class="flex flex-wrap items-center gap-2 mt-3">
+            <span class="text-caption text-steel mr-2">Portal:</span>
+
+            <a href="{{ route('categories.index', array_merge(request()->query(), ['allow_student_loan' => ''])) }}"
+               class="pill-tab {{ !isset($filters['allow_student_loan']) || $filters['allow_student_loan'] === '' || $filters['allow_student_loan'] === null ? 'pill-tab-active' : '' }}">
+                Semua
+            </a>
+
+            <a href="{{ route('categories.index', array_merge(request()->query(), ['allow_student_loan' => '1'])) }}"
+               class="pill-tab {{ ($filters['allow_student_loan'] ?? '') === '1' ? 'pill-tab-active' : '' }}">
+                <i class="fas fa-user-graduate text-xs mr-1"></i>
+                Bisa Dipinjam Siswa
+            </a>
+
+            <a href="{{ route('categories.index', array_merge(request()->query(), ['allow_student_loan' => '0'])) }}"
+               class="pill-tab {{ ($filters['allow_student_loan'] ?? '') === '0' ? 'pill-tab-active' : '' }}">
+                <i class="fas fa-times text-xs mr-1"></i>
+                Hanya Guru
             </a>
         </div>
     </div>
@@ -111,7 +144,9 @@
                     <thead class="bg-surface-soft border-b border-hairline-soft">
                         <tr>
                             <th class="text-left px-5 py-3 text-caption-bold text-steel uppercase tracking-wider">Kategori</th>
-                            <th class="text-left px-5 py-3 text-caption-bold text-steel uppercase tracking-wider hidden lg:table-cell">Deskripsi</th>
+                            <th class="text-left px-5 py-3 text-caption-bold text-steel uppercase tracking-wider hidden xl:table-cell">Deskripsi</th>
+                            <th class="text-center px-5 py-3 text-caption-bold text-steel uppercase tracking-wider hidden lg:table-cell">Mode Tracking</th>
+                            <th class="text-center px-5 py-3 text-caption-bold text-steel uppercase tracking-wider hidden lg:table-cell">Portal</th>
                             <th class="text-center px-5 py-3 text-caption-bold text-steel uppercase tracking-wider">Jumlah Barang</th>
                             <th class="text-right px-5 py-3 text-caption-bold text-steel uppercase tracking-wider">Aksi</th>
                         </tr>
@@ -137,17 +172,47 @@
                                 </td>
 
                                 {{-- Deskripsi --}}
-                                <td class="px-5 py-4 hidden lg:table-cell">
+                                <td class="px-5 py-4 hidden xl:table-cell">
                                     <p class="text-body-sm text-steel line-clamp-2 max-w-md">
                                         {{ $category->description ?? 'Tidak ada deskripsi' }}
                                     </p>
+                                </td>
+
+                                {{-- Mode Tracking --}}
+                                <td class="px-5 py-4 text-center hidden lg:table-cell">
+                                    @if($category->default_tracking_mode === 'per_unit')
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill bg-primary/10 text-primary text-caption-bold">
+                                            <i class="fas fa-fingerprint text-xs"></i>
+                                            Per Unit
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill bg-warning/10 text-warning text-caption-bold">
+                                            <i class="fas fa-layer-group text-xs"></i>
+                                            Per Batch
+                                        </span>
+                                    @endif
+                                </td>
+
+                                {{-- Portal Siswa --}}
+                                <td class="px-5 py-4 text-center hidden lg:table-cell">
+                                    @if($category->allow_student_loan)
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill bg-success/10 text-success text-caption-bold">
+                                            <i class="fas fa-user-graduate text-xs"></i>
+                                            Ya
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill bg-surface-soft text-steel text-caption-bold">
+                                            <i class="fas fa-times text-xs"></i>
+                                            Tidak
+                                        </span>
+                                    @endif
                                 </td>
 
                                 {{-- Jumlah Barang --}}
                                 <td class="px-5 py-4 text-center">
                                     @if($category->items_count > 0)
                                         <a href="{{ route('items.index', ['category_id' => $category->id]) }}"
-                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-pill bg-primary/10 hover:bg-primary/20 transition-colors">
+                                           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-pill bg-primary/10 hover:bg-primary/20 transition-colors">
                                             <i class="fas fa-boxes text-primary text-xs"></i>
                                             <span class="text-caption-bold text-primary">
                                                 {{ $category->items_count }} barang
@@ -164,13 +229,13 @@
                                 <td class="px-5 py-4">
                                     <div class="flex items-center justify-end gap-1">
                                         <a href="{{ route('categories.show', $category->id) }}" 
-                                        class="btn-icon !w-9 !h-9 hover:!bg-primary/10 hover:!text-primary" 
-                                        title="Detail">
+                                           class="btn-icon !w-9 !h-9 hover:!bg-primary/10 hover:!text-primary" 
+                                           title="Detail">
                                             <i class="fas fa-eye text-sm"></i>
                                         </a>
                                         <a href="{{ route('categories.edit', $category->id) }}" 
-                                        class="btn-icon !w-9 !h-9 hover:!bg-warning/10 hover:!text-warning" 
-                                        title="Edit">
+                                           class="btn-icon !w-9 !h-9 hover:!bg-warning/10 hover:!text-warning" 
+                                           title="Edit">
                                             <i class="fas fa-pen text-sm"></i>
                                         </a>
                                         <button type="button"
@@ -265,7 +330,6 @@
         const form = document.getElementById('delete-form');
 
         if (itemsCount > 0) {
-            // Kategori masih dipakai - tidak bisa dihapus
             iconBg.className = 'flex items-center justify-center w-14 h-14 rounded-circle bg-warning/10 mx-auto mb-4';
             icon.className = 'fas fa-exclamation-triangle text-warning text-2xl';
             title.textContent = 'Tidak Dapat Dihapus';
@@ -277,7 +341,6 @@
             submitBtn.onclick = () => document.getElementById('delete-modal').classList.add('hidden');
             form.action = '#';
         } else {
-            // Bisa dihapus
             iconBg.className = 'flex items-center justify-center w-14 h-14 rounded-circle bg-critical/10 mx-auto mb-4';
             icon.className = 'fas fa-exclamation-triangle text-critical text-2xl';
             title.textContent = 'Hapus Kategori?';

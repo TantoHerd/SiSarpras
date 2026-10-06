@@ -24,6 +24,7 @@ class UpdateItemRequest extends FormRequest
             'location_id'   => ['required', 'exists:locations,id'],
             'supplier_id'   => ['nullable', 'exists:suppliers,id'],
             'funding_source_id' => ['nullable', 'exists:funding_sources,id'],
+            'tracking_mode' => ['nullable', 'in:per_unit,per_batch'],
             'brand'         => ['nullable', 'string', 'max:100'],
             'type'          => ['nullable', 'string', 'max:100'],
             'serial_number' => [
@@ -52,6 +53,7 @@ class UpdateItemRequest extends FormRequest
             'image.image'           => 'File harus berupa gambar.',
             'image.mimes'           => 'Format gambar harus jpg, jpeg, png, atau webp.',
             'image.max'             => 'Ukuran gambar maksimal 2MB.',
+            'tracking_mode.in' => 'Mode tracking tidak valid.',
         ];
     }
 }

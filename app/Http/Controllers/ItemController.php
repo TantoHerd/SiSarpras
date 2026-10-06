@@ -27,23 +27,22 @@ class ItemController extends Controller
      */
     public function index(Request $request)
     {
-        // Ambil filter dari query string
         $filters = [
-            'search'      => $request->input('search'),
-            'category_id' => $request->input('category_id'),
-            'location_id' => $request->input('location_id'),
+            'search'             => $request->input('search'),
+            'category_id'        => $request->input('category_id'),
+            'location_id'        => $request->input('location_id'),
             'funding_source_id'  => $request->get('funding_source_id'),
-            'condition'   => $request->input('condition'),
-            'status'      => $request->input('status'),
+            'tracking_mode'      => $request->input('tracking_mode'),
+            'condition'          => $request->input('condition'),
+            'status'             => $request->input('status'),
         ];
 
-        // Ambil data
         $items = $this->itemService->getItems($filters, 15);
         $categories = Category::orderBy('name')->get();
         $locations = Location::orderBy('name')->get();
         $fundingSources = $this->fundingSourceService->allActive();
 
-        return view('items.index', compact('items', 'categories', 'locations','fundingSources', 'filters'));
+        return view('items.index', compact('items', 'categories', 'locations', 'fundingSources', 'filters'));
     }
 
     /**

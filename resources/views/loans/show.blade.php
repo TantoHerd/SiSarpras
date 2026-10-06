@@ -59,6 +59,18 @@
                     <p class="text-caption text-steel">Kategori</p>
                     <p class="text-body-sm text-ink">{{ $loan->item->category->name ?? '-' }}</p>
                 </div>
+                {{-- ← BARU: Jumlah Dipinjam --}}
+                <div>
+                    <p class="text-caption text-steel">Jumlah Dipinjam</p>
+                    <p class="text-body-sm-bold text-ink-deep">
+                        {{ $loan->quantity }} unit
+                        @if($loan->item->isPerBatch())
+                            <span class="text-caption text-steel font-normal">
+                                (stok awal: {{ $loan->item->quantity + $loan->quantity }})
+                            </span>
+                        @endif
+                    </p>
+                </div>
                 <div>
                     <p class="text-caption text-steel">Lokasi</p>
                     <p class="text-body-sm text-ink">{{ $loan->item->location->name ?? '-' }}</p>
@@ -292,3 +304,17 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+    function updatePreview() {
+        
+    const quantity = document.getElementById('quantity');
+    const qty = quantity ? parseInt(quantity.value) || 1 : 1;
+    
+    document.getElementById('prev-item').textContent = itemId 
+        ? itemData[itemId] + (qty > 1 ? ` (${qty} unit)` : '')
+        : '-';
+}
+</script>
+@endpush

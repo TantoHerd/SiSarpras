@@ -15,7 +15,7 @@ class ItemRepository
     public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
         return Item::query()
-            ->with(['category', 'location', 'supplier'])
+            ->with(['category', 'location', 'supplier', 'fundingSource'])
             ->when(!empty($filters['search']), function ($q) use ($filters) {
                 $q->where(function ($sub) use ($filters) {
                     $term = $filters['search'];
@@ -28,10 +28,26 @@ class ItemRepository
             ->when(!empty($filters['category_id']), fn($q) => $q->where('category_id', $filters['category_id']))
             ->when(!empty($filters['location_id']), fn($q) => $q->where('location_id', $filters['location_id']))
             ->when($filters['funding_source_id'] ?? null, function ($q) use ($filters) {
-                    $q->where('funding_source_id', $filters['funding_source_id']);
-                })
-            ->when(!empty($filters['condition']),   fn($q) => $q->where('condition', $filters['condition']))
-            ->when(!empty($filters['status']),      fn($q) => $q->where('status', $filters['status']))
+                $q->where('funding_source_id', $filters['funding_source_id']);
+            })
+            
+            // ← BARU: filter tracking mode (dengan fallback ke kategori)
+            ->when(!empty($filters['tracking_mode']), function ($q) use ($filters) {
+                $mode = $filters['tracking_mode'];
+                
+                $q->where(function ($sub) use ($mode) {
+                    // Override di item
+                    $sub->where('tracking_mode', $mode)
+                        // ATAU fallback ke kategori
+                        ->orWhere(function ($s) use ($mode) {
+                            $s->whereNull('tracking_mode')
+                            ->whereHas('category', fn($c) => $c->where('default_tracking_mode', $mode));
+                        });
+                });
+            })
+            
+            ->when(!empty($filters['condition']), fn($q) => $q->where('condition', $filters['condition']))
+            ->when(!empty($filters['status']), fn($q) => $q->where('status', $filters['status']))
             ->latest()
             ->paginate($perPage)
             ->withQueryString();
@@ -42,7 +58,7 @@ class ItemRepository
      */
     public function findById(int $id): ?Item
     {
-        return Item::with(['category', 'location', 'supplier', 'creator'])
+        return Item::with(['category', 'location', 'supplier', 'fundingSource', 'creator'])
             ->find($id);
     }
 

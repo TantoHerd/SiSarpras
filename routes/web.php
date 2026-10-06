@@ -10,14 +10,49 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\SupplierController;
-use App\Http\Controllers\FundingSourceController;  // ← BARU
+use App\Http\Controllers\FundingSourceController;
+use App\Http\Controllers\StudentController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\PortalController;
+use App\Http\Controllers\PortalRequestController;
 use Illuminate\Support\Facades\Route;
 
+/*
+|----------------------------------------------------------------------
+| ROOT REDIRECT
+|----------------------------------------------------------------------
+*/
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
+/*
+|----------------------------------------------------------------------
+| PORTAL SISWA (Public, no auth)
+| Rate limited: 3 request per menit per IP
+|----------------------------------------------------------------------
+*/
+Route::prefix('portal')
+    ->name('portal.')
+    ->group(function () {
+        // GET — halaman (rate limit longgar)
+        Route::middleware('throttle:60,1')->group(function () {
+            Route::get('/', [PortalController::class, 'index'])->name('index');
+            Route::get('/success', [PortalController::class, 'success'])->name('success');
+            Route::get('/status', [PortalController::class, 'status'])->name('status');
+        });
+
+        // POST — submit (rate limit ketat untuk anti-spam)
+        Route::middleware('throttle:10,1')->group(function () {
+            Route::post('/', [PortalController::class, 'store'])->name('store');
+        });
+    });
+
+/*
+|----------------------------------------------------------------------
+| AUTH ROUTES (butuh login + verified)
+|----------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard
@@ -45,14 +80,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('locations', LocationController::class);
         Route::resource('suppliers', SupplierController::class);
 
-        // ▼▼▼ BARU: Funding Sources (CRUD - admin only) ▼▼▼
+        // Funding Sources (CRUD - admin only)
         Route::get('/funding-sources/create', [FundingSourceController::class, 'create'])->name('funding-sources.create');
         Route::post('/funding-sources', [FundingSourceController::class, 'store'])->name('funding-sources.store');
         Route::get('/funding-sources/export/excel', [FundingSourceController::class, 'exportExcel'])->name('funding-sources.export.excel');
         Route::get('/funding-sources/{funding_source}/edit', [FundingSourceController::class, 'edit'])->name('funding-sources.edit');
         Route::put('/funding-sources/{funding_source}', [FundingSourceController::class, 'update'])->name('funding-sources.update');
         Route::delete('/funding-sources/{funding_source}', [FundingSourceController::class, 'destroy'])->name('funding-sources.destroy');
-        // ▲▲▲ END BARU ▲▲▲
+
+        // Students — import (harus sebelum resource)
+        Route::get('/students/import', [StudentController::class, 'importForm'])->name('students.import.form');
+        Route::post('/students/import', [StudentController::class, 'importStore'])->name('students.import.store');
+        Route::get('/students/import/template', [StudentController::class, 'downloadTemplate'])->name('students.import.template');
+
+        // Students (data siswa untuk portal)
+        Route::resource('students', StudentController::class);
 
         // Settings
         Route::get('/settings', [\App\Http\Controllers\SettingController::class, 'index'])->name('settings.index');
@@ -86,7 +128,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     /*
     |----------------------------------------------------------------------
-    | ADMIN + PETUGAS + KEPALA SEKOLAH (Laporan)
+    | ADMIN + PETUGAS + KEPALA SEKOLAH (Laporan + Funding Index)
     |----------------------------------------------------------------------
     */
     Route::middleware('role:admin,petugas_sarpras,kepala_sekolah')->group(function () {
@@ -108,9 +150,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/reports/maintenances/pdf', [ReportController::class, 'maintenancesPdf'])->name('reports.maintenances.pdf');
         Route::get('/reports/maintenances/excel', [ReportController::class, 'maintenancesExcel'])->name('reports.maintenances.excel');
 
-        // ▼▼▼ BARU: Funding Sources (index - admin, petugas, kepsek) ▼▼▼
+        // Funding Sources — index only (read-only untuk petugas & kepsek)
         Route::get('/funding-sources', [FundingSourceController::class, 'index'])->name('funding-sources.index');
-        // ▲▲▲ END BARU ▲▲▲
     });
 
     /*
@@ -134,6 +175,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Maintenances
         Route::patch('/maintenances/{maintenance}/complete', [MaintenanceController::class, 'complete'])->name('maintenances.complete');
         Route::resource('maintenances', MaintenanceController::class);
+
+        // Portal Requests (prefix admin/portal-requests — biar tidak conflict dengan /portal)
+        Route::prefix('admin/portal-requests')
+            ->name('portal-requests.')
+            ->group(function () {
+                Route::get('/', [PortalRequestController::class, 'index'])->name('index');
+                Route::get('/{portalRequest}', [PortalRequestController::class, 'show'])->name('show');
+                Route::post('/{portalRequest}/approve', [PortalRequestController::class, 'approve'])->name('approve');
+                Route::post('/{portalRequest}/reject', [PortalRequestController::class, 'reject'])->name('reject');
+            });
     });
 });
 

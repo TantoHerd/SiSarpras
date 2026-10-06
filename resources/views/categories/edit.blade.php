@@ -157,6 +157,130 @@
                         @enderror
                     </div>
 
+                    {{-- ← BARU: Mode Tracking --}}
+                    <div>
+                        <label class="form-label">
+                            Mode Tracking Default <span class="text-critical">*</span>
+                        </label>
+                        <p class="text-caption text-steel mb-3">
+                            Digunakan sebagai default untuk item baru di kategori ini.
+                            @if($category->items_count > 0)
+                                <span class="text-warning font-bold">
+                                    ⚠️ Kategori ini sudah memiliki {{ $category->items_count }} barang. Perubahan hanya berlaku untuk barang baru.
+                                </span>
+                            @endif
+                        </p>
+
+                        <div class="space-y-3">
+                            {{-- Per Unit --}}
+                            <label class="cursor-pointer block">
+                                <input type="radio" 
+                                    name="default_tracking_mode" 
+                                    value="per_unit"
+                                    @checked(old('default_tracking_mode', $category->default_tracking_mode) === 'per_unit')
+                                    onchange="updateTrackingPreview()"
+                                    class="tracking-input sr-only">
+                                <div class="tracking-card p-4 rounded-xl border-2 transition-all
+                                            {{ old('default_tracking_mode', $category->default_tracking_mode) === 'per_unit' ? 'border-primary bg-primary/5' : 'border-hairline-soft bg-canvas hover:border-hairline' }}">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-fingerprint text-primary"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <p class="text-body-sm-bold text-ink-deep">Per Unit</p>
+                                                <span class="text-caption text-primary font-bold">Direkomendasikan untuk aset unik</span>
+                                            </div>
+                                            <p class="text-caption text-steel leading-relaxed">
+                                                1 barang = 1 kode unik. Cocok untuk: <strong>Elektronik, Mebel, Lab, Olahraga, Audio Visual</strong>.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+
+                            {{-- Per Batch --}}
+                            <label class="cursor-pointer block">
+                                <input type="radio" 
+                                    name="default_tracking_mode" 
+                                    value="per_batch"
+                                    @checked(old('default_tracking_mode', $category->default_tracking_mode) === 'per_batch')
+                                    onchange="updateTrackingPreview()"
+                                    class="tracking-input sr-only">
+                                <div class="tracking-card p-4 rounded-xl border-2 transition-all
+                                            {{ old('default_tracking_mode', $category->default_tracking_mode) === 'per_batch' ? 'border-warning bg-warning/5' : 'border-hairline-soft bg-canvas hover:border-hairline' }}">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-layer-group text-warning"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <p class="text-body-sm-bold text-ink-deep">Per Batch</p>
+                                                <span class="text-caption text-warning font-bold">Untuk barang habis pakai</span>
+                                            </div>
+                                            <p class="text-caption text-steel leading-relaxed">
+                                                1 barang = N quantity (1 kode untuk grup). Cocok untuk: <strong>ATK, Bangunan, Alat Rumah Tangga</strong>.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+
+                        @error('default_tracking_mode')
+                            <p class="mt-2 text-body-sm text-critical-strong flex items-center gap-1.5">
+                                <i class="fas fa-exclamation-circle text-xs"></i>
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+
+                    {{-- ← BARU: Portal Siswa --}}
+                    <div>
+                        <label class="form-label">
+                            Akses Portal Siswa
+                        </label>
+                        <p class="text-caption text-steel mb-3">
+                            Aktifkan jika barang di kategori ini boleh dipinjam oleh siswa melalui portal.
+                            @if($category->items_count > 0)
+                                <span class="text-warning font-bold">
+                                    ⚠️ Perubahan hanya berlaku untuk tampilan portal, tidak mengubah data barang.
+                                </span>
+                            @endif
+                        </p>
+
+                        <label class="flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors
+                                    {{ old('allow_student_loan', $category->allow_student_loan) ? 'border-primary bg-primary/5' : 'border-hairline-soft bg-canvas hover:border-hairline' }}"
+                            id="portal-toggle-card">
+                            <input type="hidden" name="allow_student_loan" value="0">
+                            <input type="checkbox" 
+                                name="allow_student_loan" 
+                                value="1"
+                                id="allow-student-loan"
+                                @checked(old('allow_student_loan', $category->allow_student_loan))
+                                onchange="togglePortalCard(this)"
+                                class="mt-0.5 w-5 h-5 rounded border-hairline-soft text-primary focus:ring-primary">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <p class="text-body-sm-bold text-ink-deep">Boleh Dipinjam Siswa</p>
+                                    <span class="badge-info text-xs">
+                                        <i class="fas fa-user-graduate mr-1"></i>
+                                        Portal
+                                    </span>
+                                </div>
+                                <p class="text-caption text-steel">
+                                    Kalau aktif, barang-barang di kategori ini akan muncul di <strong>portal siswa</strong> (<code>/portal</code>) dan bisa dipinjam secara mandiri.
+                                </p>
+                            </div>
+                        </label>
+
+                        @error('allow_student_loan')
+                            <p class="mt-2 text-body-sm text-critical-strong flex items-center gap-1.5">
+                                <i class="fas fa-exclamation-circle text-xs"></i>
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
                 </div>
             </div>
 
@@ -330,6 +454,46 @@
 
         document.getElementById('char-count').textContent = document.getElementById('description').value.length;
     }
+
+    function updateTrackingPreview() {
+        const inputs = document.querySelectorAll('.tracking-input');
+        
+        inputs.forEach(input => {
+            const card = input.closest('label').querySelector('.tracking-card');
+            const icon = card.querySelector('div > div:first-child');
+            
+            if (input.checked) {
+                if (input.value === 'per_unit') {
+                    card.classList.add('border-primary', 'bg-primary/5');
+                    card.classList.remove('border-hairline-soft', 'bg-canvas', 'border-warning', 'bg-warning/5');
+                } else {
+                    card.classList.add('border-warning', 'bg-warning/5');
+                    card.classList.remove('border-hairline-soft', 'bg-canvas', 'border-primary', 'bg-primary/5');
+                }
+            } else {
+                card.classList.remove('border-primary', 'bg-primary/5', 'border-warning', 'bg-warning/5');
+                card.classList.add('border-hairline-soft', 'bg-canvas');
+            }
+        });
+    }
+
+    function togglePortalCard(checkbox) {
+        const card = document.getElementById('portal-toggle-card');
+        if (!card) return;
+        
+        if (checkbox.checked) {
+            card.classList.add('border-primary', 'bg-primary/5');
+            card.classList.remove('border-hairline-soft', 'bg-canvas');
+        } else {
+            card.classList.remove('border-primary', 'bg-primary/5');
+            card.classList.add('border-hairline-soft', 'bg-canvas');
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        updateTrackingPreview();
+        // ... init lain
+    });
 
     document.addEventListener('DOMContentLoaded', updatePreview);
 </script>

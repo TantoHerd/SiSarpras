@@ -10,7 +10,18 @@ class Category extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'icon'];
+    // ← tambah default_tracking_mode
+    protected $fillable = [
+        'name',
+        'description',
+        'icon',
+        'default_tracking_mode',
+        'allow_student_loan',
+    ];
+
+    protected $casts = [
+        'allow_student_loan' => 'boolean',
+    ];
 
     // Relations
     public function items()
@@ -29,5 +40,20 @@ class Category extends Model
     public function getItemCountAttribute(): int
     {
         return $this->items()->count();
+    }
+
+    // ← BARU: label untuk tracking mode
+    public function getTrackingModeLabelAttribute(): string
+    {
+        return match ($this->default_tracking_mode) {
+            'per_unit'  => 'Per Unit',
+            'per_batch' => 'Per Batch',
+            default     => 'Per Unit',
+        };
+    }
+
+    public function scopeStudentLoanable($query)
+    {
+        return $query->where('allow_student_loan', true);
     }
 }

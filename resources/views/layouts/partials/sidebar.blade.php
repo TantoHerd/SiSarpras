@@ -62,6 +62,14 @@
                     <i class="fas fa-money-bill w-5 text-center {{ request()->routeIs('funding-sources.*') ? '' : 'text-steel' }}"></i>
                     <span>Sumber Dana</span>
                 </a>
+
+                {{-- Siswa --}}
+                <a href="{{ route('students.index') }}"
+                class="flex items-center gap-3 px-4 py-2.5 rounded-pill text-body-sm transition-colors
+                        {{ request()->routeIs('students.*') ? 'bg-primary text-white' : 'text-ink hover:bg-surface-soft' }}">
+                    <i class="fas fa-user-graduate w-5 text-center {{ request()->routeIs('students.*') ? '' : 'text-steel' }}"></i>
+                    <span>Data Siswa</span>
+                </a>
             </div>
         @endif
 
@@ -84,6 +92,23 @@
                           {{ request()->routeIs('loans.index') || request()->routeIs('loans.show') || request()->routeIs('loans.create') || request()->routeIs('loans.return.*') ? 'bg-primary text-white' : 'text-ink hover:bg-surface-soft' }}">
                     <i class="fas fa-hand-holding w-5 text-center {{ request()->routeIs('loans.index') || request()->routeIs('loans.show') || request()->routeIs('loans.create') || request()->routeIs('loans.return.*') ? '' : 'text-steel' }}"></i>
                     <span>Peminjaman</span>
+                </a>
+
+                {{-- Permintaan Portal --}}
+                @php
+                    $pendingCount = 0;
+                    if (auth()->user()->isAdmin() || auth()->user()->isPetugas()) {
+                        $pendingCount = app(\App\Services\PortalService::class)->countPending();
+                    }
+                @endphp
+                <a href="{{ route('portal-requests.index') }}"
+                class="flex items-center gap-3 px-4 py-2.5 rounded-pill text-body-sm transition-colors
+                        {{ request()->routeIs('portal-requests.*') ? 'bg-primary text-white' : 'text-ink hover:bg-surface-soft' }}">
+                    <i class="fas fa-inbox w-5 text-center {{ request()->routeIs('portal-requests.*') ? '' : 'text-steel' }}"></i>
+                    <span class="flex-1">Permintaan Portal</span>
+                    @if($pendingCount > 0)
+                        <span class="badge-critical text-xs">{{ $pendingCount }}</span>
+                    @endif
                 </a>
 
                 <a href="{{ route('maintenances.index') }}"

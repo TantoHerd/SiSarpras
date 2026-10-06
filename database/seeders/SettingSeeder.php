@@ -40,6 +40,12 @@ class SettingSeeder extends Seeder
             // Notification
             ['notification', 'low_stock_threshold', '3', 'integer', 'Batas stok minimal', false],
             ['notification', 'maintenance_reminder_days', '7', 'integer', 'Pengingat maintenance', false],
+
+            // Portal Settings
+            ['portal', 'portal_siswa_enabled', 'false', 'boolean', 'Aktifkan portal siswa', true],
+            ['portal', 'portal_siswa_max_loans', '3', 'integer', 'Maksimal pinjaman aktif per siswa', false],
+            ['portal', 'portal_siswa_max_days', '7', 'integer', 'Durasi pinjam siswa (hari)', false],
+            ['portal', 'portal_siswa_welcome_text', 'Selamat datang di Portal Peminjaman Siswa.', 'string', 'Teks sambutan portal', true],
         ];
 
         foreach ($settings as $s) {
