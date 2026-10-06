@@ -178,7 +178,10 @@ Guru	        budi@sekolah.sch.id	    password123
 </thead>
 <tbody>
 <tr>
-    <td></td>
+<td>
+    <p>Beckend</p>
+    <p>Database</p>
+</td>
 </tr>
 </tbody>
 </table>
