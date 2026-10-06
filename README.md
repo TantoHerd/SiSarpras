@@ -285,25 +285,25 @@ Pengaturan	            ✅	    ❌	    ❌	    ❌
 🗺️ Roadmap
 
 ✅ Sprint 1 — Quick Wins (Sedang Berjalan)
-    ☑ Fitur 1: Sumber Dana Aset
-    □ Fitur 2: Cetak Label Massal (in progress)
+    - ☑ Fitur 1: Sumber Dana Aset
+    - □ Fitur 2: Cetak Label Massal (in progress)
 
 🚧 Sprint 2 — Fitur Menengah (Planned)
-    □ Fitur 3: Hybrid Tracking Mode (per_unit / per_batch)
-    □ Fitur 4: Portal Siswa untuk Peminjaman
+    - □ Fitur 3: Hybrid Tracking Mode (per_unit / per_batch)
+    - □ Fitur 4: Portal Siswa untuk Peminjaman
 
 🔮 Sprint 3 — Fitur Besar (Planned)
-    □ Fitur 5: Barang Habis Pakai + Stok Opname
-    □ Notifikasi stok menipis (dashboard + bell icon)
-    □ Approval workflow untuk permintaan BHP
+    - □ Fitur 5: Barang Habis Pakai + Stok Opname
+    - □ Notifikasi stok menipis (dashboard + bell icon)
+    - □ Approval workflow untuk permintaan BHP
 
 💡 Future Ideas
-    □ Barcode scanner integration (mobile-friendly)
-    □ Multi-warehouse / multi-lokasi support
-    □ Import barang via Excel
-    □ REST API untuk mobile app
-    □ Notifikasi WhatsApp/Email untuk peminjaman & perawatan
-    □ Audit log lengkap (siapa, kapan, apa)
+    - □ Barcode scanner integration (mobile-friendly)
+    - □ Multi-warehouse / multi-lokasi support
+    - □ Import barang via Excel
+    - □ REST API untuk mobile app
+    - □ Notifikasi WhatsApp/Email untuk peminjaman & perawatan
+    - □ Audit log lengkap (siapa, kapan, apa)
 
 🦸 Contributing
 Contributions are welcome! Berikut caranya:
@@ -322,19 +322,19 @@ Contributions are welcome! Berikut caranya:
    📖 Baca CONTRIBUTING.md untuk panduan lengkap.
 
 📅 Changelog
-Check out the CHANGELOG.md for detailed release notes.
-Latest Release: v1.1.0-sprint1 — Sumber Dana Module
+- Check out the CHANGELOG.md for detailed release notes.
+- Latest Release: v1.1.0-sprint1 — Sumber Dana Module
 
 🛠️ Support
 🐛 Bug Report
-Buka issue di GitHub Issues dengan template Bug Report.
+- Buka issue di GitHub Issues dengan template Bug Report.
 
 💡 Feature Request
-Buka discussion di GitHub Discussions dengan template Feature Request.
+- Buka discussion di GitHub Discussions dengan template Feature Request.
 
 📧 Email
 Untuk pertanyaan yang tidak cocok di issue tracker:
-📧 support@sisarpras.test
+- 📧 support@sisarpras.test
 
 📖 Dokumentasi
 - Wiki (coming soon)
