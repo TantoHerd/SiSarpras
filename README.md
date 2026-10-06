@@ -469,11 +469,11 @@ Contributions are welcome! Berikut caranya:
 - Latest Release: v1.1.0-sprint1 — Sumber Dana Module
 
 🛠️ Support
-🐛 Bug Report
-- Buka issue di GitHub Issues dengan template Bug Report.
+1. 🐛 Bug Report
+    - Buka issue di GitHub Issues dengan template Bug Report.
 
-💡 Feature Request
-- Buka discussion di GitHub Discussions dengan template Feature Request.
+2. 💡 Feature Request
+    - Buka discussion di GitHub Discussions dengan template Feature Request.
 
 📧 Email
 Untuk pertanyaan yang tidak cocok di issue tracker:
