@@ -16,22 +16,22 @@
 
 <p align="center">
   <a href="https://github.com/USERNAME/sisarpras/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/USERNAME/sisarpras?style=flat-square" alt="license">
+    <img src="https://img.shields.io/github/license/TantoHerd/sisarpras?style=flat-square" alt="license">
   </a>
   <a href="https://github.com/USERNAME/sisarpras/releases/">
-    <img src="https://img.shields.io/github/release/USERNAME/sisarpras.svg?style=flat-square" alt="GitHub release">
+    <img src="https://img.shields.io/github/release/TantoHerd/sisarpras.svg?style=flat-square" alt="GitHub release">
   </a>
   <a href="https://github.com/USERNAME/sisarpras/issues">
-    <img src="https://img.shields.io/github/issues/USERNAME/sisarpras.svg?style=flat-square" alt="GitHub issues">
+    <img src="https://img.shields.io/github/issues/TantoHerd/sisarpras.svg?style=flat-square" alt="GitHub issues">
   </a>
   <a href="https://github.com/USERNAME/sisarpras/issues">
-    <img src="https://img.shields.io/github/issues-closed/USERNAME/sisarpras.svg?style=flat-square" alt="GitHub closed issues">
+    <img src="https://img.shields.io/github/issues-closed/TantoHerd/sisarpras.svg?style=flat-square" alt="GitHub closed issues">
   </a>
   <a href="https://github.com/USERNAME/sisarpras/stargazers">
-    <img src="https://img.shields.io/github/stars/USERNAME/sisarpras?style=flat-square" alt="GitHub stars">
+    <img src="https://img.shields.io/github/stars/TantoHerd/sisarpras?style=flat-square" alt="GitHub stars">
   </a>
   <a href="https://github.com/USERNAME/sisarpras/network/members">
-    <img src="https://img.shields.io/github/forks/USERNAME/sisarpras?style=flat-square" alt="GitHub forks">
+    <img src="https://img.shields.io/github/forks/TantoHerd/sisarpras?style=flat-square" alt="GitHub forks">
   </a>
 </p>
 
