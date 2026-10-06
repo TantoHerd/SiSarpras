@@ -48,8 +48,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // ▼▼▼ BARU: Funding Sources (CRUD - admin only) ▼▼▼
         Route::get('/funding-sources/create', [FundingSourceController::class, 'create'])->name('funding-sources.create');
         Route::post('/funding-sources', [FundingSourceController::class, 'store'])->name('funding-sources.store');
-        Route::get('/funding-sources/export/excel', [FundingSourceController::class, 'exportExcel'])
-            ->name('funding-sources.export.excel');
+        Route::get('/funding-sources/export/excel', [FundingSourceController::class, 'exportExcel'])->name('funding-sources.export.excel');
         Route::get('/funding-sources/{funding_source}/edit', [FundingSourceController::class, 'edit'])->name('funding-sources.edit');
         Route::put('/funding-sources/{funding_source}', [FundingSourceController::class, 'update'])->name('funding-sources.update');
         Route::delete('/funding-sources/{funding_source}', [FundingSourceController::class, 'destroy'])->name('funding-sources.destroy');
@@ -121,6 +120,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     */
     Route::middleware('role:admin,petugas_sarpras')->group(function () {
         // Items
+        Route::get('/items/barcode-batch', [ItemController::class, 'barcodeBatch'])->name('items.barcode-batch');
         Route::get('/items/{item}/barcode', [ItemController::class, 'barcode'])->name('items.barcode');
         Route::resource('items', ItemController::class);
 
@@ -132,8 +132,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('loans', LoanController::class)->except(['show', 'create']);
 
         // Maintenances
-        Route::patch('/maintenances/{maintenance}/complete', [MaintenanceController::class, 'complete'])
-            ->name('maintenances.complete');
+        Route::patch('/maintenances/{maintenance}/complete', [MaintenanceController::class, 'complete'])->name('maintenances.complete');
         Route::resource('maintenances', MaintenanceController::class);
     });
 });
