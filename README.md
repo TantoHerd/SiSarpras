@@ -201,17 +201,48 @@ Guru	        budi@sekolah.sch.id	    password123
 </tr>
 </tbody>
 </table>
-Kategori	    Teknologi
-Backend	        Laravel 12, PHP 8.2
-Database	    PostgreSQL 18
-Frontend	    Blade Templates, Tailwind CSS 3, Alpine.js
-Authentication	Laravel Breeze
-PDF Export	    barryvdh/laravel-dompdf
-Excel Export	maatwebsite/excel
-Icons	        Font Awesome 6
-Font	        Montserrat
 
 Design System (Meta-inspired)
+<table>
+<thead>
+<tr>
+    <th>Warna</th>
+    <th>Hex</th>
+    <th>Penggunaan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+    <p>Primary Cobalt</p>
+    <p>Ink Deep</p>
+    <p>Surface Soft</p>
+    <p>Hairline</p>
+    <p>Success</p>
+    <p>Warning</p>
+    <p>Critical</p>
+</td>
+<td>
+    <p>#0064e0</p>
+    <p>#0a1317</p>
+    <p>#f1f4f7</p>
+    <p>#dee3e9</p>
+    <p>#31a24c</p>
+    <p>#f2a918</p>
+    <p>#e41e3f</p>
+</td>
+<td>
+    <p>Buttons, links, accents</p>
+    <p>Text utama, dark backgrounds</p>
+    <p>Backgrounds, cards</p>
+    <p>Borders, dividers</p>
+    <p>Status aktif, kondisi baik</p>
+    <p>Peringatan, rusak ringan</p>
+    <p>Error, rusak berat, delete</p>
+</td>
+</tr>
+</tbody>
+</table>
 Warna	            Hex	        Penggunaan
 Primary Cobalt	    #0064e0	    Buttons, links, accents
 Ink Deep	        #0a1317	    Text utama, dark backgrounds
