@@ -39,51 +39,79 @@ class LoanService
     }
 
     /**
-     * Ajukan peminjaman baru (dari sisi Guru)
+     * Ajukan peminjaman baru
      */
     public function createLoan(array $data): Loan
     {
-        // Cek item ada & tersedia
-        $item = Item::find($data['item_id']);
-        if (!$item) {
-            throw ValidationException::withMessages([
-                'item_id' => 'Barang tidak ditemukan.',
-            ]);
-        }
+        return DB::transaction(function () use ($data) {
+            // Lock item untuk mencegah race condition stok
+            $item = Item::with('category')->lockForUpdate()->find($data['item_id']);
+            
+            if (!$item) {
+                throw ValidationException::withMessages([
+                    'item_id' => 'Barang tidak ditemukan.',
+                ]);
+            }
 
-        if (!$item->isAvailable()) {
-            throw ValidationException::withMessages([
-                'item_id' => 'Barang ini tidak tersedia untuk dipinjam saat ini.',
-            ]);
-        }
+            if (!$item->isAvailable()) {
+                throw ValidationException::withMessages([
+                    'item_id' => 'Barang ini tidak tersedia untuk dipinjam saat ini.',
+                ]);
+            }
 
-        // Tentukan borrower (dari request atau auth user)
-        $borrowerId = $data['borrower_id'] ?? Auth::id();
-        $processedBy = $data['processed_by'] ?? Auth::id();
+            // ============ VALIDASI QUANTITY BERDASARKAN MODE ============
+            $quantity = (int) ($data['quantity'] ?? 1);
 
-        // Cek user punya pinjaman aktif untuk item yang sama
-        if ($this->loanRepository->hasActiveLoan($borrowerId, $item->id)) {
-            throw ValidationException::withMessages([
-                'item_id' => 'Peminjam sudah memiliki pinjaman aktif untuk barang ini.',
-            ]);
-        }
+            if ($item->isPerUnit()) {
+                // Per unit: quantity harus 1
+                if ($quantity !== 1) {
+                    throw ValidationException::withMessages([
+                        'quantity' => 'Barang per unit hanya bisa dipinjam 1 unit per transaksi.',
+                    ]);
+                }
+            } else {
+                // Per batch: cek stok
+                if ($quantity < 1) {
+                    throw ValidationException::withMessages([
+                        'quantity' => 'Jumlah minimal 1.',
+                    ]);
+                }
+                if ($quantity > $item->quantity) {
+                    throw ValidationException::withMessages([
+                        'quantity' => "Stok tidak mencukupi. Tersedia: {$item->quantity}, diminta: {$quantity}.",
+                    ]);
+                }
+            }
 
-        // Cek jumlah pinjaman aktif
-        $maxLoan = $this->settingService->getTyped('max_loan_per_user', 5);
-        $activeCount = $this->loanRepository->countActiveByUser($borrowerId);
-        if ($activeCount >= $maxLoan) {
-            throw ValidationException::withMessages([
-                'item_id' => "Peminjam sudah mencapai batas maksimal {$maxLoan} pinjaman aktif.",
-            ]);
-        }
+            // Tentukan borrower
+            $borrowerId = $data['borrower_id'] ?? Auth::id();
+            $processedBy = $data['processed_by'] ?? Auth::id();
 
-        return DB::transaction(function () use ($data, $item, $borrowerId, $processedBy) {
+            // Cek pinjaman aktif untuk item yang sama
+            if ($this->loanRepository->hasActiveLoan($borrowerId, $item->id)) {
+                throw ValidationException::withMessages([
+                    'item_id' => 'Peminjam sudah memiliki pinjaman aktif untuk barang ini.',
+                ]);
+            }
+
+            // Cek batas maksimal pinjaman aktif per user
+            $maxLoan = $this->settingService->getTyped('max_loan_per_user', 5);
+            $activeCount = $this->loanRepository->countActiveByUser($borrowerId);
+            if ($activeCount >= $maxLoan) {
+                throw ValidationException::withMessages([
+                    'item_id' => "Peminjam sudah mencapai batas maksimal {$maxLoan} pinjaman aktif.",
+                ]);
+            }
+
+            // Hitung tanggal
             $maxDays = $this->settingService->getTyped('max_loan_days', 7);
             $loanDate = Carbon::now();
             $dueDate = $loanDate->copy()->addDays($maxDays);
 
+            // Simpan loan
             $loan = $this->loanRepository->create([
                 'item_id'      => $item->id,
+                'quantity'     => $quantity,  // ← BARU
                 'borrower_id'  => $borrowerId,
                 'processed_by' => $processedBy,
                 'loan_date'    => $loanDate,
@@ -94,9 +122,24 @@ class LoanService
                 'is_fine_paid' => false,
             ]);
 
-            $this->itemRepository->update($item, [
-                'status' => ItemStatusEnum::DIPINJAM->value,
-            ]);
+            // ============ UPDATE STOK & STATUS ITEM ============
+            if ($item->isPerBatch()) {
+                // Per batch: kurangi stok
+                $newQuantity = $item->quantity - $quantity;
+                
+                $this->itemRepository->update($item, [
+                    'quantity' => $newQuantity,
+                    // Kalau stok habis, status jadi tidak_aktif (atau tetap tersedia?)
+                    'status' => $newQuantity <= 0 
+                        ? ItemStatusEnum::TIDAK_AKTIF->value 
+                        : $item->status->value,
+                ]);
+            } else {
+                // Per unit: status jadi dipinjam
+                $this->itemRepository->update($item, [
+                    'status' => ItemStatusEnum::DIPINJAM->value,
+                ]);
+            }
 
             return $loan;
         });
@@ -135,11 +178,27 @@ class LoanService
                 'is_fine_paid' => $isFinePaid,
             ]);
 
-            // Update status item kembali ke tersedia
+            // Update status & stok item
             if ($loan->item) {
-                $this->itemRepository->update($loan->item, [
-                    'status' => ItemStatusEnum::TERSEDIA->value,
-                ]);
+                $item = $loan->item;
+
+                if ($item->isPerBatch()) {
+                    // Per batch: kembalikan stok
+                    $newQuantity = $item->quantity + $loan->quantity;
+                    
+                    $this->itemRepository->update($item, [
+                        'quantity' => $newQuantity,
+                        // Stok kembali ada → status tersedia (kecuali kondisi rusak berat)
+                        'status' => $item->condition->value === 'rusak_berat'
+                            ? ItemStatusEnum::TIDAK_AKTIF->value
+                            : ItemStatusEnum::TERSEDIA->value,
+                    ]);
+                } else {
+                    // Per unit: status kembali tersedia
+                    $this->itemRepository->update($item, [
+                        'status' => ItemStatusEnum::TERSEDIA->value,
+                    ]);
+                }
             }
 
             // Log ke ItemHistory

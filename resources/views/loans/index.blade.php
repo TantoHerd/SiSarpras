@@ -153,6 +153,9 @@
                                         <div class="min-w-0">
                                             <p class="text-body-sm-bold text-ink-deep truncate max-w-[250px]">
                                                 {{ $loan->item->name }}
+                                                @if($loan->quantity > 1)
+                                                    <span class="badge-info text-xs ml-1">×{{ $loan->quantity }}</span>
+                                                @endif
                                             </p>
                                             <p class="text-caption text-steel font-mono">
                                                 {{ $loan->item->code }}
@@ -283,3 +286,17 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+    function updatePreview() {
+        
+    const quantity = document.getElementById('quantity');
+    const qty = quantity ? parseInt(quantity.value) || 1 : 1;
+    
+    document.getElementById('prev-item').textContent = itemId 
+        ? itemData[itemId] + (qty > 1 ? ` (${qty} unit)` : '')
+        : '-';
+}
+</script>
+@endpush

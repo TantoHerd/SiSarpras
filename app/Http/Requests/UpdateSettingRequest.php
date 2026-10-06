@@ -61,11 +61,20 @@ class UpdateSettingRequest extends FormRequest
                     'fine_per_day'       => ['required_if:is_fine_active,1', 'nullable', 'integer', 'min:0'],
                 ];
                 break;
+
+            case 'portal':
+                $rules = [
+                    'portal_siswa_enabled'      => ['nullable', 'boolean'],
+                    'portal_siswa_max_loans'    => ['required', 'integer', 'min:1', 'max:20'],
+                    'portal_siswa_max_days'     => ['required', 'integer', 'min:1', 'max:30'],
+                    'portal_siswa_welcome_text' => ['nullable', 'string', 'max:500'],
+                ];
+                break;
         }
 
         // Tambahkan field global
-        $rules['group_name'] = ['required', 'string', 'in:school,headmaster,preference,loan'];
-        $rules['redirect_tab'] = ['nullable', 'string', 'in:school,headmaster,preference,loan'];
+        $rules['group_name'] = ['required', 'string', 'in:school,headmaster,preference,loan,portal'];
+        $rules['redirect_tab'] = ['nullable', 'string', 'in:school,headmaster,preference,loan,portal'];
 
         return $rules;
     }
@@ -91,6 +100,14 @@ class UpdateSettingRequest extends FormRequest
             'max_loan_days.min'       => 'Batas hari peminjaman minimal 1 hari.',
             'max_loan_per_user.required' => 'Batas pinjam per user wajib diisi.',
             'fine_per_day.required_if'   => 'Denda per hari wajib diisi jika denda diaktifkan.',
+
+            'portal_siswa_max_loans.required' => 'Batas pinjaman siswa wajib diisi.',
+            'portal_siswa_max_loans.min'      => 'Batas pinjaman minimal 1.',
+            'portal_siswa_max_loans.max'      => 'Batas pinjaman maksimal 20.',
+            'portal_siswa_max_days.required'  => 'Durasi pinjam siswa wajib diisi.',
+            'portal_siswa_max_days.min'       => 'Durasi pinjam minimal 1 hari.',
+            'portal_siswa_max_days.max'       => 'Durasi pinjam maksimal 30 hari.',
+            'portal_siswa_welcome_text.max'   => 'Teks sambutan maksimal 500 karakter.',
         ];
     }
 

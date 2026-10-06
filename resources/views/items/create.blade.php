@@ -138,11 +138,12 @@
                             <select id="category_id" 
                                     name="category_id" 
                                     required
-                                    onchange="updateCodePreview()"
+                                    onchange="updateCodePreview(); updateTrackingInfo()"
                                     class="form-input @error('category_id') form-input-error @enderror">
                                 <option value="">Pilih Kategori</option>
                                 @foreach($categories as $cat)
                                     <option value="{{ $cat->id }}" 
+                                            data-tracking-mode="{{ $cat->default_tracking_mode }}"
                                             @selected(old('category_id') == $cat->id)>
                                         {{ $cat->name }}
                                     </option>
@@ -243,6 +244,102 @@
                             @endforeach
                         </select>
                         @error('funding_source_id')
+                            <p class="mt-2 text-body-sm text-critical-strong flex items-center gap-1.5">
+                                <i class="fas fa-exclamation-circle text-xs"></i>
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+
+                    {{-- ← BARU: Mode Tracking --}}
+                    <div>
+                        <label class="form-label">
+                            Mode Tracking
+                        </label>
+                        <p class="text-caption text-steel mb-3">
+                            Tentukan bagaimana barang ini dilacak.
+                            <span id="category-tracking-hint" class="text-primary font-bold"></span>
+                        </p>
+
+                        <div class="space-y-3">
+                            {{-- Ikuti Kategori (default) --}}
+                            <label class="cursor-pointer block">
+                                <input type="radio" 
+                                    name="tracking_mode" 
+                                    value=""
+                                    @checked(old('tracking_mode', '') === '')
+                                    onchange="highlightTracking()"
+                                    class="tracking-input sr-only">
+                                <div class="tracking-card p-4 rounded-xl border-2 transition-all
+                                            {{ old('tracking_mode', '') === '' ? 'border-primary bg-primary/5' : 'border-hairline-soft bg-canvas hover:border-hairline' }}">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-check-circle text-primary"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <p class="text-body-sm-bold text-ink-deep">Ikuti Kategori</p>
+                                                <span class="text-caption text-primary font-bold">Direkomendasikan</span>
+                                            </div>
+                                            <p class="text-caption text-steel leading-relaxed">
+                                                Pakai default dari kategori terpilih. 
+                                                <span id="tracking-mode-detail" class="text-ink-deep font-bold">Pilih kategori dulu.</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+
+                            {{-- Per Unit (override) --}}
+                            <label class="cursor-pointer block">
+                                <input type="radio" 
+                                    name="tracking_mode" 
+                                    value="per_unit"
+                                    @checked(old('tracking_mode') === 'per_unit')
+                                    onchange="highlightTracking()"
+                                    class="tracking-input sr-only">
+                                <div class="tracking-card p-4 rounded-xl border-2 transition-all
+                                            {{ old('tracking_mode') === 'per_unit' ? 'border-cobalt bg-cobalt/5' : 'border-hairline-soft bg-canvas hover:border-hairline' }}">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-cobalt/10 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-fingerprint text-cobalt"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-body-sm-bold text-ink-deep mb-1">Per Unit (Override)</p>
+                                            <p class="text-caption text-steel leading-relaxed">
+                                                1 barang = 1 kode unik. Cocok untuk: <strong>Elektronik, Mebel, Lab</strong>.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+
+                            {{-- Per Batch (override) --}}
+                            <label class="cursor-pointer block">
+                                <input type="radio" 
+                                    name="tracking_mode" 
+                                    value="per_batch"
+                                    @checked(old('tracking_mode') === 'per_batch')
+                                    onchange="highlightTracking()"
+                                    class="tracking-input sr-only">
+                                <div class="tracking-card p-4 rounded-xl border-2 transition-all
+                                            {{ old('tracking_mode') === 'per_batch' ? 'border-warning bg-warning/5' : 'border-hairline-soft bg-canvas hover:border-hairline' }}">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-layer-group text-warning"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-body-sm-bold text-ink-deep mb-1">Per Batch (Override)</p>
+                                            <p class="text-caption text-steel leading-relaxed">
+                                                1 barang = N quantity. Cocok untuk: <strong>ATK, Bangunan, Alat RT</strong>.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+
+                        @error('tracking_mode')
                             <p class="mt-2 text-body-sm text-critical-strong flex items-center gap-1.5">
                                 <i class="fas fa-exclamation-circle text-xs"></i>
                                 {{ $message }}
@@ -506,10 +603,60 @@
         });
     }
 
+    // ============ Update Tracking Mode Info ============
+    function updateTrackingInfo() {
+        const select = document.getElementById('category_id');
+        const selected = select.options[select.selectedIndex];
+        const hint = document.getElementById('category-tracking-hint');
+        const detail = document.getElementById('tracking-mode-detail');
+        
+        if (!select.value) {
+            hint.textContent = '';
+            detail.textContent = 'Pilih kategori dulu.';
+            return;
+        }
+        
+        const mode = selected.dataset.trackingMode || 'per_unit';
+        const label = mode === 'per_batch' ? 'Per Batch' : 'Per Unit';
+        const desc = mode === 'per_batch' 
+            ? '1 kode untuk grup, quantity bisa >1' 
+            : '1 barang = 1 kode unik';
+        
+        hint.textContent = `(Kategori ini default: ${label})`;
+        detail.textContent = `Mode efektif: ${label} — ${desc}`;
+    }
+
+    // ============ Highlight Tracking Card ============
+    function highlightTracking() {
+        const inputs = document.querySelectorAll('.tracking-input');
+        
+        inputs.forEach(input => {
+            const card = input.closest('label').querySelector('.tracking-card');
+            
+            // Reset semua
+            card.classList.remove('border-primary', 'bg-primary/5', 'border-cobalt', 'bg-cobalt/5', 'border-warning', 'bg-warning/5');
+            card.classList.add('border-hairline-soft');
+            
+            if (input.checked) {
+                card.classList.remove('border-hairline-soft');
+                
+                if (input.value === '') {
+                    card.classList.add('border-primary', 'bg-primary/5');
+                } else if (input.value === 'per_unit') {
+                    card.classList.add('border-cobalt', 'bg-cobalt/5');
+                } else if (input.value === 'per_batch') {
+                    card.classList.add('border-warning', 'bg-warning/5');
+                }
+            }
+        });
+    }
+
     // Jalankan saat load (untuk old value)
     document.addEventListener('DOMContentLoaded', function() {
         highlightCondition();
+        highlightTracking();  
         updateCodePreview();
+        updateTrackingInfo();  
     });
 </script>
 @endpush

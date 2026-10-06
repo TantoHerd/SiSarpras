@@ -61,6 +61,26 @@
                             <span id="preview-quantity" class="text-steel">-</span>
                         </div>
                     </div>
+
+                    {{-- ← BARU: Quantity untuk per_batch --}}
+                    <div id="quantity-section" class="mt-4 pt-4 border-t border-hairline-soft hidden">
+                        <label for="quantity" class="form-label">
+                            Jumlah yang Dipinjam <span class="text-critical">*</span>
+                        </label>
+                        <p id="quantity-info" class="text-caption text-steel mb-2"></p>
+                        <input id="quantity" 
+                            type="number" 
+                            name="quantity" 
+                            value="{{ old('quantity', 1) }}"
+                            min="1"
+                            class="form-input @error('quantity') form-input-error @enderror">
+                        @error('quantity')
+                            <p class="mt-2 text-body-sm text-critical-strong flex items-center gap-1.5">
+                                <i class="fas fa-exclamation-circle text-xs"></i>
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
                 </div>
 
                 {{-- Info Durasi --}}
@@ -88,6 +108,13 @@
                     <i class="fas fa-edit text-primary"></i>
                     Detail Pengajuan
                 </h3>
+
+                <input id="quantity" 
+                    type="number" 
+                    name="quantity" 
+                    value="{{ old('quantity', 1) }}"
+                    min="1"
+                    class="form-input @error('quantity') form-input-error @enderror hidden">
 
                 {{-- Hidden input item_id --}}
                 <input type="hidden" 
@@ -247,6 +274,22 @@
     function selectItem(radio) {
         const itemId = radio.value;
         const item = itemsData[itemId];
+        const quantitySection = document.getElementById('quantity-section');
+        const quantityInput = document.getElementById('quantity');
+        const quantityInfo = document.getElementById('quantity-info');
+
+        if (item.tracking_mode === 'per_batch') {
+            quantitySection.classList.remove('hidden');
+            quantityInfo.textContent = `Stok tersedia: ${item.quantity} unit`;
+            quantityInput.max = item.quantity;
+            quantityInput.value = 1;
+        } else {
+            quantitySection.classList.add('hidden');
+            // Pastikan tetap terkirim sebagai 1
+            if (quantityInput) {
+                quantityInput.value = 1;
+            }
+        }
         
         if (!item) return;
 

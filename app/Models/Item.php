@@ -16,7 +16,7 @@ class Item extends Model
     protected $fillable = [
         'code', 'name', 'category_id', 'location_id', 'supplier_id',
         'brand', 'type', 'serial_number', 'purchase_year', 'price',
-        'condition', 'status', 'quantity', 'image', 'barcode',
+        'condition', 'status', 'quantity','tracking_mode', 'image', 'barcode',
         'created_by', 'funding_source_id', 'updated_by'
     ];
 
@@ -92,5 +92,46 @@ class Item extends Model
     public function fundingSource()
     {
         return $this->belongsTo(FundingSource::class);
+    }
+
+    /**
+     * Resolve tracking mode efektif:
+     * item.tracking_mode (override) 
+     *   ?? category.default_tracking_mode 
+     *   ?? 'per_unit'
+     */
+    public function getEffectiveTrackingModeAttribute(): string
+    {
+        return $this->tracking_mode
+            ?? $this->category?->default_tracking_mode
+            ?? 'per_unit';
+    }
+
+    /**
+     * Cek apakah item ini per_unit
+     */
+    public function isPerUnit(): bool
+    {
+        return $this->effective_tracking_mode === 'per_unit';
+    }
+
+    /**
+     * Cek apakah item ini per_batch
+     */
+    public function isPerBatch(): bool
+    {
+        return $this->effective_tracking_mode === 'per_batch';
+    }
+
+    /**
+     * Label untuk tracking mode (untuk tampilan)
+     */
+    public function getTrackingModeLabelAttribute(): string
+    {
+        return match ($this->effective_tracking_mode) {
+            'per_unit'  => 'Per Unit',
+            'per_batch' => 'Per Batch',
+            default     => 'Per Unit',
+        };
     }
 }

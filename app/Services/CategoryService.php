@@ -55,6 +55,8 @@ class CategoryService
                 'name'        => $data['name'],
                 'description' => $data['description'] ?? null,
                 'icon'        => $data['icon'] ?? 'fa-boxes',
+                'default_tracking_mode' => $data['default_tracking_mode'],
+                'allow_student_loan' => $data['allow_student_loan'] ?? false,
             ]);
         });
     }
@@ -76,6 +78,8 @@ class CategoryService
                 'name'        => $data['name'],
                 'description' => $data['description'] ?? null,
                 'icon'        => $data['icon'] ?? 'fa-boxes',
+                'default_tracking_mode' => $data['default_tracking_mode'],
+                'allow_student_loan' => $data['allow_student_loan'] ?? false,
             ]);
         });
     }

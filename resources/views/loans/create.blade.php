@@ -91,7 +91,7 @@
                         <select id="item_select" 
                                 name="item_id" 
                                 required
-                                onchange="updatePreview()"
+                                onchange="updatePreview(); updateQuantityField()"
                                 class="form-input @error('item_id') form-input-error @enderror">
                             <option value="">-- Pilih Barang --</option>
                             @foreach($items as $item)
@@ -106,6 +106,46 @@
                                 {{ $message }}
                             </p>
                         @enderror
+                    </div>
+
+                    {{-- ← BARU: Jumlah --}}
+                    <div id="quantity-field" class="hidden">
+                        <label for="quantity" class="form-label">
+                            Jumlah <span class="text-critical">*</span>
+                        </label>
+                        <div id="quantity-info" class="mb-2 p-3 rounded-xl bg-primary/5 border border-primary/20">
+                            <p class="text-caption text-steel">
+                                <i class="fas fa-info-circle text-primary"></i>
+                                <span id="quantity-info-text">-</span>
+                            </p>
+                        </div>
+                        <input id="quantity" 
+                            type="number" 
+                            name="quantity" 
+                            value="{{ old('quantity', 1) }}"
+                            min="1"
+                            oninput="updatePreview()"
+                            class="form-input @error('quantity') form-input-error @enderror">
+                        @error('quantity')
+                            <p class="mt-2 text-body-sm text-critical-strong flex items-center gap-1.5">
+                                <i class="fas fa-exclamation-circle text-xs"></i>
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+
+                    {{-- ← BARU: Info per unit --}}
+                    <div id="quantity-locked" class="hidden p-3 rounded-xl bg-surface-soft border border-hairline-soft">
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-lock text-steel mt-0.5 text-sm"></i>
+                            <div>
+                                <p class="text-body-sm-bold text-ink-deep">Jumlah: 1 unit</p>
+                                <p class="text-caption text-steel mt-0.5">
+                                    Barang ini Per Unit — 1 barang = 1 kode unik, hanya bisa dipinjam 1 unit.
+                                </p>
+                                <input type="hidden" name="quantity" value="1">
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Keperluan --}}
@@ -169,11 +209,16 @@
 <script>
     const borrowerData = @json($borrowerData);
     const itemData = @json($itemData);
+    const itemDataFull = @json($itemData);
 
     function updatePreview() {
         const borrowerId = document.getElementById('borrower_id').value;
         const itemId = document.getElementById('item_select').value;
         const purpose = document.getElementById('purpose').value;
+        const quantityInput = document.getElementById('quantity');
+        const quantity = quantityInput && !quantityInput.closest('.hidden') 
+            ? quantityInput.value 
+            : 1;
 
         if (!borrowerId && !itemId && !purpose) {
             document.getElementById('preview-empty').classList.remove('hidden');
@@ -187,8 +232,50 @@
         document.getElementById('prev-borrower').textContent = borrowerId ? borrowerData[borrowerId] : '-';
         document.getElementById('prev-item').textContent = itemId ? itemData[itemId] : '-';
         document.getElementById('prev-purpose').textContent = purpose || '-';
+        document.getElementById('prev-item').textContent = itemId 
+            ? itemData[itemId] + (quantity > 1 ? ` (${quantity} unit)` : '')
+            : '-';
     }
 
-    document.addEventListener('DOMContentLoaded', updatePreview);
+    function updateQuantityField() {
+        const itemId = document.getElementById('item_select').value;
+        const quantityField = document.getElementById('quantity-field');
+        const quantityLocked = document.getElementById('quantity-locked');
+        const infoText = document.getElementById('quantity-info-text');
+        const quantityInput = document.getElementById('quantity');
+
+        // Reset
+        quantityField.classList.add('hidden');
+        quantityLocked.classList.add('hidden');
+
+        if (!itemId || !itemDataFull[itemId]) {
+            return;
+        }
+
+        const item = itemDataFull[itemId];
+        const mode = item.tracking_mode;
+        const stock = item.quantity;
+
+        if (mode === 'per_batch') {
+            // Tampilkan input quantity
+            quantityField.classList.remove('hidden');
+            quantityLocked.classList.add('hidden');
+
+            infoText.textContent = `Barang ini Per Batch — stok tersedia: ${stock} unit`;
+            
+            quantityInput.max = stock;
+            quantityInput.value = Math.min(parseInt(quantityInput.value) || 1, stock);
+        } else {
+            // Per unit: kunci quantity
+            quantityField.classList.add('hidden');
+            quantityLocked.classList.remove('hidden');
+        }
+    }
+
+    // Panggil saat load
+    document.addEventListener('DOMContentLoaded', function() {
+        updateQuantityField();
+        updatePreview();
+    });
 </script>
 @endpush

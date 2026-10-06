@@ -77,6 +77,17 @@
                 </select>
             </div>
 
+            {{-- ← BARU: Filter Mode Tracking --}}
+            <select name="tracking_mode" class="form-input">
+                <option value="">Semua Mode Tracking</option>
+                <option value="per_unit" @selected(($filters['tracking_mode'] ?? '') === 'per_unit')>
+                    Per Unit (aset unik)
+                </option>
+                <option value="per_batch" @selected(($filters['tracking_mode'] ?? '') === 'per_batch')>
+                    Per Batch (quantity)
+                </option>
+            </select>
+
             {{-- Submit --}}
             <div class="flex items-center gap-2">
                 <button type="submit" class="btn-ink flex-1">
@@ -123,6 +134,7 @@
                             <th class="text-left px-5 py-3 text-caption-bold text-steel uppercase tracking-wider">Barang</th>
                             <th class="text-left px-5 py-3 text-caption-bold text-steel uppercase tracking-wider hidden lg:table-cell">Kategori</th>
                             <th class="text-left px-5 py-3 text-caption-bold text-steel uppercase tracking-wider hidden lg:table-cell">Lokasi</th>
+                            <th class="text-center px-5 py-3 text-caption-bold text-steel uppercase tracking-wider hidden lg:table-cell">Mode</th>
                             <th class="text-center px-5 py-3 text-caption-bold text-steel uppercase tracking-wider">Stok</th>
                             <th class="text-center px-5 py-3 text-caption-bold text-steel uppercase tracking-wider">Kondisi</th>
                             <th class="text-center px-5 py-3 text-caption-bold text-steel uppercase tracking-wider">Status</th>
@@ -185,6 +197,23 @@
                                     </p>
                                     @if($item->location->floor)
                                         <p class="text-caption text-steel">{{ $item->location->floor }}</p>
+                                    @endif
+                                </td>
+
+                                {{-- ← BARU: Mode Tracking --}}
+                                <td class="px-5 py-4 text-center hidden lg:table-cell">
+                                    @if($item->isPerBatch())
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-pill bg-warning/10 text-warning text-caption-bold"
+                                            title="Per Batch: 1 kode untuk grup">
+                                            <i class="fas fa-layer-group text-xs"></i>
+                                            Batch
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-pill bg-cobalt/10 text-cobalt text-caption-bold"
+                                            title="Per Unit: 1 barang = 1 kode">
+                                            <i class="fas fa-fingerprint text-xs"></i>
+                                            Unit
+                                        </span>
                                     @endif
                                 </td>
 

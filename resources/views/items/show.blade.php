@@ -228,6 +228,33 @@
                         <p class="text-body-sm-bold text-ink-deep">{{ $item->quantity }} unit</p>
                     </div>
                 </div>
+
+                {{-- ← BARU: Mode Tracking --}}
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-surface-soft flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-fingerprint text-steel text-sm"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-caption text-steel uppercase tracking-wider">Mode Tracking</p>
+                        @if($item->isPerBatch())
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill bg-warning/10 text-warning text-caption-bold">
+                                <i class="fas fa-layer-group text-xs"></i>
+                                Per Batch
+                            </span>
+                        @else
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill bg-primary/10 text-primary text-caption-bold">
+                                <i class="fas fa-fingerprint text-xs"></i>
+                                Per Unit
+                            </span>
+                        @endif
+                        @if($item->tracking_mode)
+                            <p class="text-caption text-steel mt-1 italic">Override dari kategori</p>
+                        @else
+                            <p class="text-caption text-steel mt-1 italic">Mengikuti kategori: {{ $item->category->default_tracking_mode === 'per_batch' ? 'Per Batch' : 'Per Unit' }}</p>
+                        @endif
+                    </div>
+                </div>
+
                 {{-- Sumber Dana --}}
                 <div class="flex items-start gap-3">
                     <div class="w-10 h-10 rounded-lg bg-surface-soft flex items-center justify-center flex-shrink-0">

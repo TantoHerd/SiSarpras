@@ -83,10 +83,17 @@ class LoanController extends Controller
             $q->whereIn('name', ['guru']);
         })->orderBy('name')->get();
 
-        // Siapkan data untuk JS
         $borrowerData = $users->pluck('name', 'id');
+
+        // ← BARU: item data dengan tracking mode + stok
         $itemData = $items->mapWithKeys(function ($item) {
-            return [$item->id => $item->name . ' (' . $item->code . ')'];
+            return [
+                $item->id => [
+                    'name'          => $item->name . ' (' . $item->code . ')',
+                    'tracking_mode' => $item->effective_tracking_mode,
+                    'quantity'      => $item->quantity,
+                ]
+            ];
         });
 
         return view('loans.create', compact('items', 'users', 'borrowerData', 'itemData'));
@@ -173,6 +180,7 @@ class LoanController extends Controller
                     'category' => $item->category->name ?? '-',
                     'location' => $item->location->name ?? '-',
                     'quantity' => $item->quantity,
+                    'tracking_mode' => $item->effective_tracking_mode,
                     'image'    => $item->image ? asset('storage/' . $item->image) : null,
                 ]
             ];
