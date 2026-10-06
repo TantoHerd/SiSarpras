@@ -372,12 +372,11 @@ Anda bisa menjadi kontributor berikutnya!
 
 🔥 Tertarik Berkontribusi?
 Kalau project ini bermanfaat, jangan lupa:
-
-⭐ Star repo ini
-🍴 Fork untuk eksplorasi
-🐛 Report bug yang Anda temukan
-💡 Usulkan fitur baru
-📢 Share ke rekan guru/operator sekolah
+- ⭐ Star repo ini
+- 🍴 Fork untuk eksplorasi
+- 🐛 Report bug yang Anda temukan
+- 💡 Usulkan fitur baru
+- 📢 Share ke rekan guru/operator sekolah
 
 <div align="center">
 Dibuat dengan ❤️ untuk pendidikan Indonesia
