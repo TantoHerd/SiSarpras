@@ -335,8 +335,6 @@ Design System (Meta-inspired)
 </tr>
 </tbody>
 </table>
-Chrome	Firefox	Safari	Edge	Opera
-✅	    ✅	    ✅	    ✅	    ✅
 
 Tested on:
 - Chrome 120+
@@ -345,6 +343,86 @@ Tested on:
 - Edge 120+
 
 👥 Roles & Permissions
+<table>
+<thead>
+<tr>
+    <th>Fitur</th>
+    <th>Admin</th>
+    <th>Petugas</th>
+    <th>Kepsek</th>
+    <th>Guru</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+    <p>Dashboard</p>
+    <p>Data Barang (CRUD)</p>
+    <p>Data Barang (view)</p>
+    <p>Peminjaman (approval)</p>
+    <p>Peminjaman (request)</p>
+    <p>Perawatan</p>
+    <p>Laporan</p>
+    <p>Master Data</p>
+    <p>Sumber Dana</p>
+    <p>Manajemen User</p>
+    <p>Pengaturan</p>
+</td>
+<td>
+    <p>✅</p>
+    <p>✅</p>
+    <p>✅</p>
+    <p>✅</p>
+    <p>✅</p>
+    <p>✅</p>
+    <p>✅</p>
+    <p>✅</p>
+    <p>✅</p>
+    <p>✅</p>
+    <p>✅</p>
+</td>
+<td>
+    <p>✅</p>
+    <p>✅</p>
+    <p>✅</p>
+    <p>✅</p>
+    <p>✅</p>
+    <p>✅</p>
+    <p>✅</p>
+    <p>❌</p>
+    <p>❌</p>
+    <p>❌</p>
+    <p>❌</p>
+</td>
+<td>
+    <p>✅</p>
+    <p>❌</p>
+    <p>✅</p>
+    <p>❌</p>
+    <p>❌</p>
+    <p>❌</p>
+    <p>✅</p>
+    <p>❌</p>
+    <p>❌</p>
+    <p>❌</p>
+    <p>❌</p>
+</td>
+<td>
+    <p>✅</p>
+    <p>❌</p>
+    <p>✅</p>
+    <p>❌</p>
+    <p>✅</p>
+    <p>❌</p>
+    <p>❌</p>
+    <p>❌</p>
+    <p>❌</p>
+    <p>❌</p>
+    <p>❌</p>
+</td>
+</tr>
+</tbody>
+</table>
 Fitur	                Admin	Petugas	Kepsek	Guru
 Dashboard	            ✅	    ✅	    ✅	    ✅
 Data Barang (CRUD)	    ✅	    ✅	    ❌	    ❌
