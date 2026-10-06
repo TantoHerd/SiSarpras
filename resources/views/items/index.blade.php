@@ -17,6 +17,14 @@
             </p>
         </div>
         <div class="flex items-center gap-2">
+            <button type="button"
+                    id="btn-batch-label"
+                    onclick="printBatchLabels()"
+                    class="btn-ink hidden">
+                <i class="fas fa-print"></i>
+                <span>Cetak Label Massal</span>
+                <span id="selected-count" class="badge-info ml-1">0</span>
+            </button>
             <a href="{{ route('items.create') }}" class="btn-primary">
                 <i class="fas fa-plus"></i>
                 Tambah Barang
@@ -69,6 +77,17 @@
                 </select>
             </div>
 
+            {{-- ← BARU: Filter Mode Tracking --}}
+            <select name="tracking_mode" class="form-input">
+                <option value="">Semua Mode Tracking</option>
+                <option value="per_unit" @selected(($filters['tracking_mode'] ?? '') === 'per_unit')>
+                    Per Unit (aset unik)
+                </option>
+                <option value="per_batch" @selected(($filters['tracking_mode'] ?? '') === 'per_batch')>
+                    Per Batch (quantity)
+                </option>
+            </select>
+
             {{-- Submit --}}
             <div class="flex items-center gap-2">
                 <button type="submit" class="btn-ink flex-1">
@@ -106,9 +125,16 @@
                 <table class="w-full">
                     <thead class="bg-surface-soft border-b border-hairline-soft">
                         <tr>
+                            <th class="text-center px-3 py-3 w-12">
+                                <input type="checkbox"
+                                    id="select-all"
+                                    onchange="toggleSelectAll(this)"
+                                    class="w-4 h-4 rounded border-hairline-soft text-primary focus:ring-primary cursor-pointer">
+                            </th>
                             <th class="text-left px-5 py-3 text-caption-bold text-steel uppercase tracking-wider">Barang</th>
                             <th class="text-left px-5 py-3 text-caption-bold text-steel uppercase tracking-wider hidden lg:table-cell">Kategori</th>
                             <th class="text-left px-5 py-3 text-caption-bold text-steel uppercase tracking-wider hidden lg:table-cell">Lokasi</th>
+                            <th class="text-center px-5 py-3 text-caption-bold text-steel uppercase tracking-wider hidden lg:table-cell">Mode</th>
                             <th class="text-center px-5 py-3 text-caption-bold text-steel uppercase tracking-wider">Stok</th>
                             <th class="text-center px-5 py-3 text-caption-bold text-steel uppercase tracking-wider">Kondisi</th>
                             <th class="text-center px-5 py-3 text-caption-bold text-steel uppercase tracking-wider">Status</th>
@@ -118,6 +144,13 @@
                     <tbody class="divide-y divide-hairline-soft">
                         @foreach($items as $item)
                             <tr class="hover:bg-surface-soft/50 transition-colors">
+                                <td class="text-center px-3 py-3">
+                                    <input type="checkbox"
+                                        name="item_ids[]"
+                                        value="{{ $item->id }}"
+                                        class="item-checkbox w-4 h-4 rounded border-hairline-soft text-primary focus:ring-primary cursor-pointer"
+                                        onchange="updateSelection()">
+                                </td>
                                 {{-- Barang --}}
                                 <td class="px-5 py-4">
                                     <div class="flex items-center gap-3">
@@ -164,6 +197,23 @@
                                     </p>
                                     @if($item->location->floor)
                                         <p class="text-caption text-steel">{{ $item->location->floor }}</p>
+                                    @endif
+                                </td>
+
+                                {{-- ← BARU: Mode Tracking --}}
+                                <td class="px-5 py-4 text-center hidden lg:table-cell">
+                                    @if($item->isPerBatch())
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-pill bg-warning/10 text-warning text-caption-bold"
+                                            title="Per Batch: 1 kode untuk grup">
+                                            <i class="fas fa-layer-group text-xs"></i>
+                                            Batch
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-pill bg-cobalt/10 text-cobalt text-caption-bold"
+                                            title="Per Unit: 1 barang = 1 kode">
+                                            <i class="fas fa-fingerprint text-xs"></i>
+                                            Unit
+                                        </span>
                                     @endif
                                 </td>
 
@@ -322,6 +372,74 @@
     function closeDeleteModal() {
         document.getElementById('delete-modal-index').classList.add('hidden');
     }
+
+    // ==================== MULTI-SELECT UNTUK CETAK LABEL MASSAL ====================
+
+    /**
+     * Toggle semua checkbox ketika "select all" dicentang
+     */
+    function toggleSelectAll(checkbox) {
+        const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+        itemCheckboxes.forEach(cb => cb.checked = checkbox.checked);
+        updateSelection();
+    }
+
+    /**
+     * Update tampilan tombol "Cetak Label Massal" berdasarkan jumlah item terpilih
+     */
+    function updateSelection() {
+        const checked = document.querySelectorAll('.item-checkbox:checked');
+        const count = checked.length;
+        const btn = document.getElementById('btn-batch-label');
+        const countBadge = document.getElementById('selected-count');
+        const selectAll = document.getElementById('select-all');
+
+        // Update badge jumlah
+        if (countBadge) countBadge.textContent = count;
+
+        // Tampilkan / sembunyikan tombol
+        if (count > 0) {
+            btn.classList.remove('hidden');
+        } else {
+            btn.classList.add('hidden');
+        }
+
+        // Sync state "select all"
+        const allCheckboxes = document.querySelectorAll('.item-checkbox');
+        if (selectAll && allCheckboxes.length > 0) {
+            selectAll.checked = count === allCheckboxes.length;
+            selectAll.indeterminate = count > 0 && count < allCheckboxes.length;
+        }
+    }
+
+    /**
+     * Buka halaman cetak label massal dengan ID item terpilih
+     */
+    function printBatchLabels() {
+        const checked = document.querySelectorAll('.item-checkbox:checked');
+        const ids = Array.from(checked).map(cb => cb.value);
+
+        if (ids.length === 0) {
+            alert('Pilih minimal 1 barang untuk dicetak labelnya.');
+            return;
+        }
+
+        if (ids.length > 100) {
+            alert('Maksimal 100 barang per sekali cetak. Silakan filter dulu.');
+            return;
+        }
+
+        // Redirect ke halaman cetak label massal
+        const url = `{{ route('items.barcode-batch') }}?ids=${ids.join(',')}`;
+        window.open(url, '_blank');
+    }
+
+    /**
+     * Init saat halaman selesai load
+     */
+    document.addEventListener('DOMContentLoaded', function () {
+        updateSelection();
+    });
 </script>
 @endpush
 

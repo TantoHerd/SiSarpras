@@ -11,18 +11,24 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['name' => 'Elektronik', 'description' => 'Barang elektronik dan perangkat digital', 'icon' => 'fa-laptop'],
-            ['name' => 'Mebel', 'description' => 'Perabotan dan furnitur', 'icon' => 'fa-chair'],
-            ['name' => 'ATK', 'description' => 'Alat Tulis Kantor', 'icon' => 'fa-pen'],
-            ['name' => 'Laboratorium', 'description' => 'Alat dan bahan laboratorium', 'icon' => 'fa-flask'],
-            ['name' => 'Olahraga', 'description' => 'Peralatan olahraga', 'icon' => 'fa-futbol'],
-            ['name' => 'Audio Visual', 'description' => 'Perangkat audio dan visual', 'icon' => 'fa-video'],
-            ['name' => 'Bangunan', 'description' => 'Peralatan dan material bangunan', 'icon' => 'fa-building'],
-            ['name' => 'Lainnya', 'description' => 'Kategori barang lainnya', 'icon' => 'fa-boxes'],
+            // per_unit — aset unik
+            ['name' => 'Elektronik',    'default_tracking_mode' => 'per_unit'],
+            ['name' => 'Mebel',         'default_tracking_mode' => 'per_unit'],
+            ['name' => 'Lab',           'default_tracking_mode' => 'per_unit'],
+            ['name' => 'Olahraga',      'default_tracking_mode' => 'per_unit'],
+            ['name' => 'Audio Visual',  'default_tracking_mode' => 'per_unit'],
+            
+            // per_batch — barang habis pakai / quantity banyak
+            ['name' => 'ATK',                 'default_tracking_mode' => 'per_batch'],
+            ['name' => 'Bangunan',            'default_tracking_mode' => 'per_batch'],
+            ['name' => 'Alat Rumah Tangga',   'default_tracking_mode' => 'per_batch'],
         ];
 
-        foreach ($categories as $category) {
-            Category::create($category);
+        foreach ($categories as $cat) {
+            Category::updateOrCreate(
+                ['name' => $cat['name']],
+                ['default_tracking_mode' => $cat['default_tracking_mode']]
+            );
         }
     }
 }

@@ -48,6 +48,7 @@
                     ['key' => 'headmaster',  'label' => 'Kepala Sekolah',     'icon' => 'fa-user-tie'],
                     ['key' => 'preference',  'label' => 'Preferensi',         'icon' => 'fa-cog'],
                     ['key' => 'loan',        'label' => 'Aturan Peminjaman',  'icon' => 'fa-hand-holding'],
+                    ['key' => 'portal',      'label' => 'Portal Siswa',       'icon' => 'fa-user-graduate'],
                 ];
             @endphp
 
@@ -84,6 +85,11 @@
             {{-- TAB: ATURAN PEMINJAMAN --}}
             @if($tab === 'loan')
                 @include('settings.partials.loan')
+            @endif
+
+            {{-- ← BARU: TAB PORTAL SISWA --}}
+            @if($tab === 'portal')
+                @include('settings.partials.portal')
             @endif
 
         </div>

@@ -17,19 +17,23 @@ class StoreItemRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'          => ['required', 'string', 'max:200'],
-            'category_id'   => ['required', 'exists:categories,id'],
-            'location_id'   => ['required', 'exists:locations,id'],
-            'supplier_id'   => ['nullable', 'exists:suppliers,id'],
-            'brand'         => ['nullable', 'string', 'max:100'],
-            'type'          => ['nullable', 'string', 'max:100'],
-            'serial_number' => ['nullable', 'string', 'max:100', 'unique:items,serial_number'],
+            'name'              => ['required', 'string', 'max:200'],
+            'category_id'       => ['required', 'exists:categories,id'],
+            'location_id'       => ['required', 'exists:locations,id'],
+            'supplier_id'       => ['nullable', 'exists:suppliers,id'],
+            'funding_source_id' => ['nullable', 'exists:funding_sources,id'],
+            'tracking_mode'     => ['nullable', 'in:per_unit,per_batch'],  // ← BARU
+            'brand'             => ['nullable', 'string', 'max:100'],
+            'type'              => ['nullable', 'string', 'max:100'],
+            'serial_number'     => [
+                'nullable', 'string', 'max:100',
+                Rule::unique('items', 'serial_number'),
+            ],
             'purchase_year' => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
             'price'         => ['nullable', 'numeric', 'min:0'],
             'condition'     => ['required', Rule::enum(ItemConditionEnum::class)],
             'quantity'      => ['required', 'integer', 'min:1'],
             'image'         => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-            'funding_source_id' => ['nullable', 'integer', 'exists:funding_sources,id'],
         ];
     }
 
@@ -50,6 +54,7 @@ class StoreItemRequest extends FormRequest
             'image.image'           => 'File harus berupa gambar.',
             'image.mimes'           => 'Format gambar harus jpg, jpeg, png, atau webp.',
             'image.max'             => 'Ukuran gambar maksimal 2MB.',
+            'tracking_mode.in'      => 'Mode tracking tidak valid.',
         ];
     }
 

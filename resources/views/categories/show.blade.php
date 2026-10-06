@@ -39,6 +39,28 @@
                         <i class="fas fa-boxes mr-1.5 text-xs"></i>
                         {{ $category->items_count ?? $category->items()->count() }} barang
                     </span>
+
+                    {{-- ← BARU: Mode Tracking --}}
+                    @if($category->default_tracking_mode === 'per_unit')
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill bg-primary/10 text-primary text-caption-bold">
+                            <i class="fas fa-fingerprint text-xs"></i>
+                            Per Unit
+                        </span>
+                    @else
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill bg-warning/10 text-warning text-caption-bold">
+                            <i class="fas fa-layer-group text-xs"></i>
+                            Per Batch
+                        </span>
+                    @endif
+
+                    {{-- ← BARU: Portal Siswa --}}
+                    @if($category->allow_student_loan)
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill bg-success/10 text-success text-caption-bold">
+                            <i class="fas fa-user-graduate text-xs"></i>
+                            Portal Siswa
+                        </span>
+                    @endif
+
                     <span class="badge-neutral">
                         <i class="fas fa-calendar mr-1.5 text-xs"></i>
                         Dibuat {{ $category->created_at->format('d M Y') }}

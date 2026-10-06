@@ -14,7 +14,7 @@ class Loan extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'item_id', 'borrower_id', 'processed_by',
+        'item_id', 'quantity', 'borrower_id', 'processed_by',
         'loan_date', 'due_date', 'return_date',
         'status', 'purpose', 'fine_amount', 'is_fine_paid'
     ];
@@ -25,6 +25,7 @@ class Loan extends Model
         'return_date' => 'datetime',
         'fine_amount' => 'decimal:2',
         'is_fine_paid' => 'boolean',
+        'quantity'     => 'integer',
         'status' => LoanStatusEnum::class,
     ];
 
