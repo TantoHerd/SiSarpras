@@ -181,6 +181,22 @@ Guru	        budi@sekolah.sch.id	    password123
 <td>
     <p>Beckend</p>
     <p>Database</p>
+    <p>Frontend</p>
+    <p>Authentication</p>
+    <p>PDF Export</p>
+    <p>Excel Export</p>
+    <p>Icons</p>
+    <p>Font</p>
+</td>
+<td>
+    <p>Laravel 12, PHP 8.2</p>
+    <p>PostgreSQL 18</p>
+    <p>Blade Templates, Tailwind CSS 3, Alpine.js</p>
+    <p>Laravel Breeze</p>
+    <p>barryvdh/laravel-dompdf</p>
+    <p>maatwebsite/excel</p>
+    <p>Font Awesome 6</p>
+    <p>Montserrat</p>
 </td>
 </tr>
 </tbody>
