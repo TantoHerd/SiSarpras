@@ -315,6 +315,26 @@ Design System (Meta-inspired)
 📋 CODE_OF_CONDUCT.md — Kode etik
 
 🖥️ Browser Support
+<table>
+<thead>
+<tr>
+    <th>Chrome</th>
+    <th>Firefox</th>
+    <th>Safari</th>
+    <th>Edge</th>
+    <th>Opera</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
 Chrome	Firefox	Safari	Edge	Opera
 ✅	    ✅	    ✅	    ✅	    ✅
 
