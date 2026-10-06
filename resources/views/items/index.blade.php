@@ -26,7 +26,7 @@
 
     {{-- ==================== FILTER CARD ==================== --}}
     <div class="card">
-        <form method="GET" action="{{ route('items.index') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+        <form method="GET" action="{{ route('items.index') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {{-- Search --}}
             <div class="lg:col-span-2 relative">
                 <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-steel text-sm pointer-events-none"></i>
@@ -56,6 +56,18 @@
                     </option>
                 @endforeach
             </select>
+            {{-- Filter Sumber Dana --}}
+            <div>
+                <select name="funding_source_id" class="form-input">
+                    <option value="">Semua Sumber Dana</option>
+                    @foreach($fundingSources as $source)
+                        <option value="{{ $source->id }}"
+                                @selected(request('funding_source_id') == $source->id)>
+                            {{ $source->code }} - {{ $source->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
             {{-- Submit --}}
             <div class="flex items-center gap-2">
@@ -121,6 +133,12 @@
                                         <div class="min-w-0">
                                             <p class="text-body-sm-bold text-ink-deep truncate max-w-[250px]">
                                                 {{ $item->name }}
+                                                @if($item->fundingSource)
+                                                    <span class="badge-info text-xs mt-1 inline-flex">
+                                                        <i class="fas fa-money-bill-wave mr-1"></i>
+                                                        {{ $item->fundingSource->code }}
+                                                    </span>
+                                                @endif
                                             </p>
                                             <p class="text-caption text-steel font-mono">
                                                 {{ $item->code }}

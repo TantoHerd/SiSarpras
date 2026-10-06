@@ -228,6 +228,22 @@
                         <p class="text-body-sm-bold text-ink-deep">{{ $item->quantity }} unit</p>
                     </div>
                 </div>
+                {{-- Sumber Dana --}}
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-surface-soft flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-money-bill text-steel text-sm"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-caption text-steel uppercase tracking-wider">Sumber Dana</p>
+                        @if($item->fundingSource)
+                        <p class="text-body-sm-bold text-ink-deep">
+                            {{ $item->fundingSource->code }} - {{ $item->fundingSource->name }}
+                        </p>
+                        @else
+                        <p class="text-body-sm text-stone italic">Belum ditentukan</p>
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
 

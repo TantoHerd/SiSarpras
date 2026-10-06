@@ -31,6 +31,11 @@ class UpdateSettingRequest extends FormRequest
                     'school_npsn'     => ['nullable', 'string', 'max:30'],
                     'school_website'  => ['nullable', 'url', 'max:150'],
                     'school_logo'     => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+                ];
+                break;
+
+            case 'headmaster':
+                $rules = [
                     'headmaster_name' => ['nullable', 'string', 'max:150'],
                     'headmaster_nip'  => ['nullable', 'string', 'max:50'],
                 ];
@@ -59,7 +64,7 @@ class UpdateSettingRequest extends FormRequest
         }
 
         // Tambahkan field global
-        $rules['group_name'] = ['required', 'string', 'in:school,preference,loan'];
+        $rules['group_name'] = ['required', 'string', 'in:school,headmaster,preference,loan'];
         $rules['redirect_tab'] = ['nullable', 'string', 'in:school,headmaster,preference,loan'];
 
         return $rules;

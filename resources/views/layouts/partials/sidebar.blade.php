@@ -55,6 +55,13 @@
                     <i class="fas fa-truck w-5 text-center {{ request()->routeIs('suppliers.*') ? '' : 'text-steel' }}"></i>
                     <span>Supplier</span>
                 </a>
+
+                <a href="{{ route('funding-sources.index') }}"
+                   class="flex items-center gap-3 px-4 py-2.5 rounded-pill text-body-sm transition-colors
+                          {{ request()->routeIs('funding-sources.*') ? 'bg-primary text-white' : 'text-ink hover:bg-surface-soft' }}">
+                    <i class="fas fa-money-bill w-5 text-center {{ request()->routeIs('funding-sources.*') ? '' : 'text-steel' }}"></i>
+                    <span>Sumber Dana</span>
+                </a>
             </div>
         @endif
 

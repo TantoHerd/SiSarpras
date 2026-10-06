@@ -1,8 +1,9 @@
 <?php
-// app/Exports/InventoryReportExport.php
+// app/Exports/FundingSourceExport.php
 
 namespace App\Exports;
 
+use App\Models\FundingSource;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -13,22 +14,14 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class InventoryReportExport implements FromCollection, WithEvents, WithTitle
+class FundingSourceExport implements FromCollection, WithEvents, WithTitle
 {
-    protected $items;
-    protected $summary;
-    protected $filters;
-
-    // Konstanta layout
     protected const HEADER_ROW = 9;
-    protected const TOTAL_COLUMNS = 'O';  // ← dari N ke O (tambah 1 kolom: Sumber Dana)
+    protected const TOTAL_COLUMNS = 'F';
 
-    public function __construct($items, $summary, $filters = [])
-    {
-        $this->items = $items;
-        $this->summary = $summary;
-        $this->filters = $filters;
-    }
+    public function __construct(
+        protected array $filters = []
+    ) {}
 
     public function collection()
     {
@@ -37,7 +30,7 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
 
     public function title(): string
     {
-        return 'Laporan Inventaris';
+        return 'Master Sumber Dana';
     }
 
     public function registerEvents(): array
@@ -49,39 +42,27 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
         ];
     }
 
-    /**
-     * Build laporan lengkap
-     */
     protected function buildReport(Worksheet $sheet): void
     {
         $this->buildHeader($sheet);
         $this->buildTableHeader($sheet);
 
         $lastDataRow = $this->buildTableData($sheet);
-        $totalRow = $this->buildTotalRow($sheet, $lastDataRow);
+        $this->buildSignature($sheet, $lastDataRow);
 
-        $this->buildSignature($sheet, $totalRow);
-
-        // Freeze pane di bawah header tabel
         $sheet->freezePane('A' . (self::HEADER_ROW + 1));
-
-        // Auto-filter di header
         $sheet->setAutoFilter('A' . self::HEADER_ROW . ':' . self::TOTAL_COLUMNS . self::HEADER_ROW);
     }
 
-    /**
-     * Kop surat — logo, nama, alamat, kontak
-     */
     protected function buildHeader(Worksheet $sheet): void
     {
-        // ============ LOGO (jika ada) ============
+        // ============ LOGO ============
         $logoFile = setting('school_logo', 'logo-default.png');
         $logoPath = storage_path('app/public/' . $logoFile);
         $logoExists = $logoFile
             && $logoFile !== 'logo-default.png'
             && file_exists($logoPath);
 
-        // Set tinggi baris untuk kop
         $sheet->getRowDimension(2)->setRowHeight(28);
         $sheet->getRowDimension(3)->setRowHeight(20);
         $sheet->getRowDimension(4)->setRowHeight(16);
@@ -96,7 +77,6 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
             $drawing->setOffsetY(5);
             $drawing->setWorksheet($sheet);
         } else {
-            // Fallback: inisial sekolah
             $sheet->mergeCells('A2:A4');
             $sheet->setCellValue('A2', strtoupper(substr(setting('school_name', 'S'), 0, 1)));
             $sheet->getStyle('A2')->applyFromArray([
@@ -112,8 +92,8 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
             ]);
         }
 
-        // ============ NAMA SEKOLAH (baris 2) ============
-        $sheet->mergeCells('B2:O2');  // ← dari N2
+        // Nama Sekolah
+        $sheet->mergeCells('B2:F2');
         $sheet->setCellValue('B2', strtoupper(setting('school_name', 'NAMA SEKOLAH')));
         $sheet->getStyle('B2')->applyFromArray([
             'font' => ['bold' => true, 'size' => 16, 'color' => ['rgb' => '0A1317']],
@@ -123,8 +103,8 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
             ],
         ]);
 
-        // ============ ALAMAT (baris 3) ============
-        $sheet->mergeCells('B3:O3');  // ← dari N3
+        // Alamat
+        $sheet->mergeCells('B3:F3');
         $sheet->setCellValue('B3', setting('school_address', 'Alamat Sekolah'));
         $sheet->getStyle('B3')->applyFromArray([
             'font' => ['size' => 10, 'color' => ['rgb' => '1C1E21']],
@@ -134,13 +114,13 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
             ],
         ]);
 
-        // ============ KONTAK (baris 4) ============
+        // Kontak
         $contact = [];
         if (setting('school_phone')) $contact[] = 'Telp: ' . setting('school_phone');
         if (setting('school_email')) $contact[] = 'Email: ' . setting('school_email');
         if (setting('school_npsn'))  $contact[] = 'NPSN: ' . setting('school_npsn');
 
-        $sheet->mergeCells('B4:O4');  // ← dari N4
+        $sheet->mergeCells('B4:F4');
         $sheet->setCellValue('B4', implode(' | ', $contact));
         $sheet->getStyle('B4')->applyFromArray([
             'font' => ['size' => 9, 'color' => ['rgb' => '5D6C7B']],
@@ -150,9 +130,9 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
             ],
         ]);
 
-        // ============ GARIS PEMISAH KOP (baris 5) ============
+        // Garis kop
         $sheet->getRowDimension(5)->setRowHeight(4);
-        $sheet->getStyle('A5:O5')->applyFromArray([  // ← dari N5
+        $sheet->getStyle('A5:F5')->applyFromArray([
             'borders' => [
                 'bottom' => [
                     'borderStyle' => Border::BORDER_DOUBLE,
@@ -161,10 +141,10 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
             ],
         ]);
 
-        // ============ JUDUL LAPORAN (baris 6) ============
+        // Judul
         $sheet->getRowDimension(6)->setRowHeight(24);
-        $sheet->mergeCells('A6:O6');  // ← dari N6
-        $sheet->setCellValue('A6', 'LAPORAN INVENTARIS BARANG');
+        $sheet->mergeCells('A6:F6');
+        $sheet->setCellValue('A6', 'MASTER DATA SUMBER DANA');
         $sheet->getStyle('A6')->applyFromArray([
             'font' => ['bold' => true, 'size' => 14, 'color' => ['rgb' => '0A1317']],
             'alignment' => [
@@ -173,14 +153,10 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
             ],
         ]);
 
-        // ============ SUB-JUDUL (baris 7) ============
-        $sheet->mergeCells('A7:O7');  // ← dari N7
+        // Sub-judul
+        $sheet->mergeCells('A7:F7');
         $subtitle = 'Dicetak: ' . now()->translatedFormat('d F Y, H:i') . ' WIB';
-        if (!empty($this->filters['category_id']) 
-            || !empty($this->filters['location_id'])
-            || !empty($this->filters['condition']) 
-            || !empty($this->filters['status'])
-            || !empty($this->filters['funding_source_id'])) {  // ← BARU
+        if (!empty($this->filters['search']) || isset($this->filters['is_active'])) {
             $subtitle = 'Dengan filter diterapkan — ' . $subtitle;
         }
         $sheet->setCellValue('A7', $subtitle);
@@ -189,17 +165,23 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ]);
 
-        // ============ RINGKASAN (baris 8) ============
+        // Ringkasan
         $sheet->getRowDimension(8)->setRowHeight(28);
-        $sheet->mergeCells('A8:O8');  // ← dari N8
+        $sheet->mergeCells('A8:F8');
+
+        $query = FundingSource::query()
+            ->when(!empty($this->filters['search']), fn($q) => $q->search($this->filters['search']))
+            ->when(isset($this->filters['is_active']) && $this->filters['is_active'] !== '', 
+                fn($q) => $q->where('is_active', (bool) $this->filters['is_active']));
+
+        $total = (clone $query)->count();
+        $active = (clone $query)->where('is_active', true)->count();
 
         $summaryText = sprintf(
-            'Total Item: %s   |   Quantity: %s   |   Nilai Aset: %s   |   Baik: %s   |   Rusak: %s',
-            number_format($this->summary['total_items']),
-            number_format($this->summary['total_quantity']),
-            format_currency($this->summary['total_value']),
-            $this->summary['by_condition']['baik'],
-            $this->summary['by_condition']['rusak_ringan'] + $this->summary['by_condition']['rusak_berat']
+            'Total: %s   |   Aktif: %s   |   Nonaktif: %s',
+            number_format($total),
+            number_format($active),
+            number_format($total - $active)
         );
         $sheet->setCellValue('A8', $summaryText);
         $sheet->getStyle('A8')->applyFromArray([
@@ -221,17 +203,9 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
         ]);
     }
 
-    /**
-     * Header tabel
-     */
     protected function buildTableHeader(Worksheet $sheet): void
     {
-        $headers = [
-            'No', 'Kode', 'Nama Barang', 'Kategori', 'Lokasi',
-            'Sumber Dana',  // ← BARU (setelah Lokasi)
-            'Merk', 'Tipe', 'Serial Number', 'Tahun',
-            'Kondisi', 'Status', 'Jumlah', 'Harga Beli', 'Total Harga'
-        ];
+        $headers = ['No', 'Kode', 'Nama', 'Deskripsi', 'Status', 'Jumlah Barang'];
 
         $row = self::HEADER_ROW;
         $sheet->getRowDimension($row)->setRowHeight(30);
@@ -242,7 +216,7 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
             $col++;
         }
 
-        $sheet->getStyle("A{$row}:O{$row}")->applyFromArray([  // ← dari N
+        $sheet->getStyle("A{$row}:F{$row}")->applyFromArray([
             'font' => ['bold' => true, 'size' => 10, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => [
                 'fillType' => Fill::FILL_SOLID,
@@ -262,16 +236,21 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
         ]);
     }
 
-    /**
-     * Data tabel — return last data row
-     */
     protected function buildTableData(Worksheet $sheet): int
     {
         $row = self::HEADER_ROW + 1;
 
-        if ($this->items->count() === 0) {
-            $sheet->mergeCells("A{$row}:O{$row}");  // ← dari N
-            $sheet->setCellValue("A{$row}", 'Tidak ada data barang untuk filter yang dipilih.');
+        $sources = FundingSource::query()
+            ->withCount('items')
+            ->when(!empty($this->filters['search']), fn($q) => $q->search($this->filters['search']))
+            ->when(isset($this->filters['is_active']) && $this->filters['is_active'] !== '', 
+                fn($q) => $q->where('is_active', (bool) $this->filters['is_active']))
+            ->orderBy('code')
+            ->get();
+
+        if ($sources->count() === 0) {
+            $sheet->mergeCells("A{$row}:F{$row}");
+            $sheet->setCellValue("A{$row}", 'Tidak ada data sumber dana untuk filter yang dipilih.');
             $sheet->getStyle("A{$row}")->applyFromArray([
                 'font' => ['italic' => true, 'color' => ['rgb' => '8595A4']],
                 'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
@@ -284,22 +263,13 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
         $no = 1;
         $startDataRow = $row;
 
-        foreach ($this->items as $item) {
+        foreach ($sources as $source) {
             $sheet->setCellValue("A{$row}", $no++);
-            $sheet->setCellValue("B{$row}", $item->code);
-            $sheet->setCellValue("C{$row}", $item->name);
-            $sheet->setCellValue("D{$row}", $item->category->name ?? '-');
-            $sheet->setCellValue("E{$row}", $item->location->name ?? '-');
-            $sheet->setCellValue("F{$row}", $item->fundingSource->code ?? '-');   // ← BARU
-            $sheet->setCellValue("G{$row}", $item->brand ?? '-');                 // ← geser dari F
-            $sheet->setCellValue("H{$row}", $item->type ?? '-');                  // ← geser dari G
-            $sheet->setCellValue("I{$row}", $item->serial_number ?? '-');         // ← geser dari H
-            $sheet->setCellValue("J{$row}", $item->purchase_year ?? '-');         // ← geser dari I
-            $sheet->setCellValue("K{$row}", $item->condition->label());           // ← geser dari J
-            $sheet->setCellValue("L{$row}", $item->status->label());              // ← geser dari K
-            $sheet->setCellValue("M{$row}", $item->quantity);                     // ← geser dari L
-            $sheet->setCellValue("N{$row}", (float) $item->price);                // ← geser dari M
-            $sheet->setCellValue("O{$row}", (float) ($item->price * $item->quantity));  // ← geser dari N
+            $sheet->setCellValue("B{$row}", $source->code);
+            $sheet->setCellValue("C{$row}", $source->name);
+            $sheet->setCellValue("D{$row}", $source->description ?? '-');
+            $sheet->setCellValue("E{$row}", $source->is_active ? 'Aktif' : 'Nonaktif');
+            $sheet->setCellValue("F{$row}", $source->items_count);
 
             $row++;
         }
@@ -307,7 +277,7 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
         $endDataRow = $row - 1;
 
         // Style body
-        $sheet->getStyle("A{$startDataRow}:O{$endDataRow}")->applyFromArray([  // ← dari N
+        $sheet->getStyle("A{$startDataRow}:F{$endDataRow}")->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => Border::BORDER_THIN,
@@ -318,24 +288,16 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
             'alignment' => ['vertical' => Alignment::VERTICAL_CENTER],
         ]);
 
-        // Alignment per kolom (geser +1 karena ada kolom baru)
+        // Alignment khusus
         $sheet->getStyle("A{$startDataRow}:A{$endDataRow}")
             ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-        $sheet->getStyle("M{$startDataRow}:M{$endDataRow}")  // ← dari L (sekarang M = Jumlah)
+        $sheet->getStyle("E{$startDataRow}:F{$endDataRow}")
             ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-        $sheet->getStyle("N{$startDataRow}:O{$endDataRow}")  // ← dari M:N (sekarang N:O = Harga & Total)
-            ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-
-        // Format angka
-        $sheet->getStyle("N{$startDataRow}:O{$endDataRow}")  // ← dari M:N
-            ->getNumberFormat()->setFormatCode('#,##0');
-
-        // Zebra striping
+        // Zebra
         for ($i = $startDataRow; $i <= $endDataRow; $i++) {
             if (($i - $startDataRow) % 2 === 1) {
-                $sheet->getStyle("A{$i}:O{$i}")->getFill()  // ← dari N
+                $sheet->getStyle("A{$i}:F{$i}")->getFill()
                     ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()->setRGB('F8FAFC');
             }
@@ -344,85 +306,30 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
         return $endDataRow;
     }
 
-    /**
-     * Baris total — return total row number
-     */
-    protected function buildTotalRow(Worksheet $sheet, int $lastDataRow): int
+    protected function buildSignature(Worksheet $sheet, int $lastDataRow): void
     {
-        $totalRow = $lastDataRow + 1;
-        $sheet->getRowDimension($totalRow)->setRowHeight(30);
+        $startRow = $lastDataRow + 3;
 
-        // Label — merge A sampai M (dari A:L)
-        $sheet->mergeCells("A{$totalRow}:M{$totalRow}");
-        $sheet->setCellValue("A{$totalRow}", 'TOTAL NILAI ASET');
-        $sheet->getStyle("A{$totalRow}")->applyFromArray([
-            'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'FFFFFF']],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_RIGHT,
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
-        ]);
-
-        // Nilai — merge N:O (dari M:N)
-        $sheet->mergeCells("N{$totalRow}:O{$totalRow}");
-        $sheet->setCellValue("N{$totalRow}", (float) $this->summary['total_value']);
-        $sheet->getStyle("N{$totalRow}")->applyFromArray([
-            'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'FFFFFF']],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_RIGHT,
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
-        ]);
-        $sheet->getStyle("N{$totalRow}")->getNumberFormat()->setFormatCode('#,##0');
-
-        // Background hitam + border
-        $sheet->getStyle("A{$totalRow}:O{$totalRow}")->applyFromArray([  // ← dari N
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '0A1317'],
-            ],
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['rgb' => '0A1317'],
-                ],
-            ],
-        ]);
-
-        return $totalRow;
-    }
-
-    /**
-     * Tanda tangan
-     */
-    protected function buildSignature(Worksheet $sheet, int $totalRow): void
-    {
-        $startRow = $totalRow + 3;
-
-        // Kota & tanggal — geser dari J:N ke K:O
-        $sheet->mergeCells("K{$startRow}:O{$startRow}");
-        $sheet->setCellValue("K{$startRow}", now()->translatedFormat('d F Y'));
-        $sheet->getStyle("K{$startRow}")->applyFromArray([
+        $sheet->mergeCells("D{$startRow}:F{$startRow}");
+        $sheet->setCellValue("D{$startRow}", now()->translatedFormat('d F Y'));
+        $sheet->getStyle("D{$startRow}")->applyFromArray([
             'font' => ['size' => 10, 'color' => ['rgb' => '1C1E21']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ]);
 
-        // Jabatan
         $row = $startRow + 1;
-        $sheet->mergeCells("K{$row}:O{$row}");
-        $sheet->setCellValue("K{$row}", 'Kepala Sekolah,');
-        $sheet->getStyle("K{$row}")->applyFromArray([
+        $sheet->mergeCells("D{$row}:F{$row}");
+        $sheet->setCellValue("D{$row}", 'Kepala Sekolah,');
+        $sheet->getStyle("D{$row}")->applyFromArray([
             'font' => ['size' => 10, 'color' => ['rgb' => '1C1E21']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ]);
 
-        // Space untuk tanda tangan
         $row += 4;
 
-        // Nama
-        $sheet->mergeCells("K{$row}:O{$row}");
-        $sheet->setCellValue("K{$row}", setting('headmaster_name', '_______________________'));
-        $sheet->getStyle("K{$row}")->applyFromArray([
+        $sheet->mergeCells("D{$row}:F{$row}");
+        $sheet->setCellValue("D{$row}", setting('headmaster_name', '_______________________'));
+        $sheet->getStyle("D{$row}")->applyFromArray([
             'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => '0A1317']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
             'borders' => [
@@ -433,28 +340,21 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
             ],
         ]);
 
-        // NIP
         if (setting('headmaster_nip')) {
             $row++;
-            $sheet->mergeCells("K{$row}:O{$row}");
-            $sheet->setCellValue("K{$row}", 'NIP. ' . setting('headmaster_nip'));
-            $sheet->getStyle("K{$row}")->applyFromArray([
+            $sheet->mergeCells("D{$row}:F{$row}");
+            $sheet->setCellValue("D{$row}", 'NIP. ' . setting('headmaster_nip'));
+            $sheet->getStyle("D{$row}")->applyFromArray([
                 'font' => ['size' => 9, 'color' => ['rgb' => '5D6C7B']],
                 'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
             ]);
         }
 
-        // Auto-size kolom — range A:O (dari A:N)
-        foreach (range('A', 'O') as $col) {
+        // Auto-size
+        foreach (range('A', 'F') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
-
-        // Set minimum width untuk kolom tertentu
-        $sheet->getColumnDimension('C')->setWidth(35);  // Nama Barang
-        $sheet->getColumnDimension('D')->setWidth(15);  // Kategori
-        $sheet->getColumnDimension('E')->setWidth(18);  // Lokasi
-        $sheet->getColumnDimension('F')->setWidth(12);  // Sumber Dana ← BARU
-        $sheet->getColumnDimension('N')->setWidth(15);  // Harga Beli (dari M)
-        $sheet->getColumnDimension('O')->setWidth(15);  // Total Harga (dari N)
+        $sheet->getColumnDimension('C')->setWidth(35);
+        $sheet->getColumnDimension('D')->setWidth(40);
     }
 }

@@ -19,6 +19,8 @@ class SettingSeeder extends Seeder
             ['school', 'school_logo', 'logo-default.png', 'file', 'Logo sekolah', true],
             ['school', 'school_npsn', '12345678', 'string', 'NPSN', false],
             ['school', 'school_website', 'https://sekolah.sch.id', 'string', 'Website', true],
+            ['school', 'headmaster_name', '', 'string', 'Dr. H. Ahmad Fauzi, M.Pd', true],
+            ['school', 'headmaster_nip', '', 'string', '197505121999031005', true],
             
             // Preference
             ['preference', 'app_name', 'Sistem Informasi Sarpras', 'string', 'Nama aplikasi', true],
@@ -41,16 +43,16 @@ class SettingSeeder extends Seeder
         ];
 
         foreach ($settings as $s) {
-            DB::table('settings')->insert([
-                'group_name' => $s[0],
-                'key' => $s[1],
-                'value' => $s[2],
-                'type' => $s[3],
-                'description' => $s[4],
-                'is_public' => $s[5],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            \App\Models\Setting::firstOrCreate(
+                ['key' => $s[1]],  // ← patokan: key
+                [
+                    'group_name' => $s[0],
+                    'value' => $s[2],
+                    'type' => $s[3],
+                    'description' => $s[4],
+                    'is_public' => $s[5],
+                ]
+            );
         }
     }
 }

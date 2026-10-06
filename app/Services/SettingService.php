@@ -52,14 +52,11 @@ class SettingService
      */
     public function update(string $key, $value): bool
     {
-        $setting = Setting::where('key', $key)->first();
+        $updated = Setting::where('key', $key)->update(['value' => $value]);
         
-        if (!$setting) return false;
-        
-        $setting->update(['value' => $value]);
         $this->clearCache();
         
-        return true;
+        return $updated > 0;
     }
 
     /**
@@ -76,9 +73,11 @@ class SettingService
     /**
      * Clear cache
      */
+    // app/Services/SettingService.php
     public function clearCache(): void
     {
-        Cache::forget($this->cacheKey);
+        Cache::forget($this->cacheKey);  // 'settings.all'
+        Cache::forget('settings');       // cadangan
     }
 
     /**

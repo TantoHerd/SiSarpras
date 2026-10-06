@@ -43,7 +43,7 @@
 
     {{-- ==================== FILTER ==================== --}}
     <div class="card">
-        <form method="GET" action="{{ route('reports.inventory') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+        <form method="GET" action="{{ route('reports.inventory') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
             {{-- Kategori --}}
             <select name="category_id" class="form-input">
                 <option value="">Semua Kategori</option>
@@ -80,6 +80,16 @@
                 @foreach(\App\Enums\ItemStatusEnum::cases() as $status)
                     <option value="{{ $status->value }}" @selected(($filters['status'] ?? '') === $status->value)>
                         {{ $status->label() }}
+                    </option>
+                @endforeach
+            </select>
+
+            {{-- Sumber Dana --}}
+            <select name="funding_source_id" class="form-input">
+                <option value="">Semua Sumber Dana</option>
+                @foreach($fundingSources as $source)
+                    <option value="{{ $source->id }}" @selected(($filters['funding_source_id'] ?? '') == $source->id)>
+                        {{ $source->code }} - {{ $source->name }}
                     </option>
                 @endforeach
             </select>
@@ -137,6 +147,7 @@
                             <th class="text-left px-4 py-3 text-caption-bold text-steel uppercase tracking-wider">Nama Barang</th>
                             <th class="text-left px-4 py-3 text-caption-bold text-steel uppercase tracking-wider hidden lg:table-cell">Kategori</th>
                             <th class="text-left px-4 py-3 text-caption-bold text-steel uppercase tracking-wider hidden lg:table-cell">Lokasi</th>
+                            <th class="text-left px-4 py-3 text-caption-bold text-steel uppercase tracking-wider hidden lg:table-cell">Sumber Dana</th>
                             <th class="text-center px-4 py-3 text-caption-bold text-steel uppercase tracking-wider">Kondisi</th>
                             <th class="text-center px-4 py-3 text-caption-bold text-steel uppercase tracking-wider">Qty</th>
                             <th class="text-right px-4 py-3 text-caption-bold text-steel uppercase tracking-wider">Harga</th>
@@ -164,6 +175,13 @@
                                 <td class="px-4 py-3 hidden lg:table-cell">
                                     <p class="text-body-sm text-steel">{{ $item->location->name ?? '-' }}</p>
                                 </td>
+                                <td class="px-4 py-3 hidden lg:table-cell">
+                                    @if($item->fundingSource)
+                                        <span class="badge-info text-xs">{{ $item->fundingSource->code }}</span>
+                                    @else
+                                        <span class="text-caption text-stone italic">—</span>
+                                    @endif
+                                </td>
                                 <td class="text-center px-4 py-3">
                                     @php
                                         $condColor = match($item->condition->value) {
@@ -189,7 +207,7 @@
                     </tbody>
                     <tfoot class="bg-ink-deep text-white">
                         <tr>
-                            <td colspan="8" class="text-right px-4 py-4 text-body-md-bold uppercase tracking-wider">
+                            <td colspan="9" class="text-right px-4 py-4 text-body-md-bold uppercase tracking-wider">
                                 Total Nilai Aset
                             </td>
                             <td class="text-right px-4 py-4 text-body-md-bold">
