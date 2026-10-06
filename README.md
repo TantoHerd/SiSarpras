@@ -76,3 +76,18 @@ Getting started is super simple! Follow the steps below:
 2. **Install Composer Dependencies**
    ```bash
    composer install
+
+3. **Copy .env & Generate App Key**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+
+4. **Configure Database**
+   Open .env file and update your PostgreSQL credentials:
+   ```env
+   DB_CONNECTION=pgsql
+   DB_HOST=127.0.0.1
+   DB_PORT=5432
+   DB_DATABASE=sisarpras
+   DB_USERNAME=postgres
+   DB_PASSWORD=your_password
