@@ -423,35 +423,24 @@ Tested on:
 </tr>
 </tbody>
 </table>
-Fitur	                Admin	Petugas	Kepsek	Guru
-Dashboard	            ✅	    ✅	    ✅	    ✅
-Data Barang (CRUD)	    ✅	    ✅	    ❌	    ❌
-Data Barang (view)	    ✅	    ✅	    ✅	    ✅
-Peminjaman (approval)	✅	    ✅	    ❌	    ❌
-Peminjaman (request)	✅	    ✅	    ❌	    ✅
-Perawatan	            ✅	    ✅	    ❌	    ❌
-Laporan	                ✅	    ✅	    ✅	    ❌
-Master Data	            ✅	    ❌	    ❌	    ❌
-Sumber Dana	            ✅	    ❌	    ❌	    ❌
-Manajemen User	        ✅	    ❌	    ❌	    ❌
-Pengaturan	            ✅	    ❌	    ❌	    ❌
+
 
 🗺️ Roadmap
 
-✅ Sprint 1 — Quick Wins (Sedang Berjalan)
+1. ✅ Sprint 1 — Quick Wins (Sedang Berjalan)
     - ☑ Fitur 1: Sumber Dana Aset
     - □ Fitur 2: Cetak Label Massal (in progress)
 
-🚧 Sprint 2 — Fitur Menengah (Planned)
+2. 🚧 Sprint 2 — Fitur Menengah (Planned)
     - □ Fitur 3: Hybrid Tracking Mode (per_unit / per_batch)
     - □ Fitur 4: Portal Siswa untuk Peminjaman
 
-🔮 Sprint 3 — Fitur Besar (Planned)
+3. 🔮 Sprint 3 — Fitur Besar (Planned)
     - □ Fitur 5: Barang Habis Pakai + Stok Opname
     - □ Notifikasi stok menipis (dashboard + bell icon)
     - □ Approval workflow untuk permintaan BHP
 
-💡 Future Ideas
+4. 💡 Future Ideas
     - □ Barcode scanner integration (mobile-friendly)
     - □ Multi-warehouse / multi-lokasi support
     - □ Import barang via Excel
