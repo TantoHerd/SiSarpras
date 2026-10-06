@@ -169,6 +169,19 @@ Guru	        budi@sekolah.sch.id	    password123
 3. Reset password & toggle active oleh admin
 
 🛠️ Tech Stack
+<table>
+<thead>
+<tr>
+    <th>Kategori</th>
+    <th>Teknologi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+    <td></td>
+</tr>
+</tbody>
+</table>
 Kategori	    Teknologi
 Backend	        Laravel 12, PHP 8.2
 Database	    PostgreSQL 18
