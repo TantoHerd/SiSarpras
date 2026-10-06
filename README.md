@@ -243,14 +243,7 @@ Design System (Meta-inspired)
 </tr>
 </tbody>
 </table>
-Warna	            Hex	        Penggunaan
-Primary Cobalt	    #0064e0	    Buttons, links, accents
-Ink Deep	        #0a1317	    Text utama, dark backgrounds
-Surface Soft	    #f1f4f7	    Backgrounds, cards
-Hairline	        #dee3e9	    Borders, dividers
-Success	            #31a24c	    Status aktif, kondisi baik
-Warning	            #f2a918	    Peringatan, rusak ringan
-Critical	        #e41e3f	    Error, rusak berat, delete
+
 
 🧑‍💻 Available Commands
 1. Development Mode (Hot Reload):
