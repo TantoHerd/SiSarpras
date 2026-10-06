@@ -91,3 +91,297 @@ Getting started is super simple! Follow the steps below:
    DB_DATABASE=sisarpras
    DB_USERNAME=postgres
    DB_PASSWORD=your_password
+
+5. **Run Migrations & Seeder**
+   ```bash
+   php artisan migrate --seed
+
+6. **Create Storage Link**
+   ```bash
+   php artisan storage:link
+
+7. **Install Node Modules**
+   ```bash
+   npm install
+   # OR
+   yarn
+
+8. **Build Frontend Assets**
+   ```bash
+   npm run dev
+   # OR
+   yarn dev
+9. **Serve the Application**
+   ```bash
+   php artisan serve
+
+
+🚀 Open http://127.0.0.1:8000 in your browser, and you're good to go!
+
+Default Login:
+Role	        Email	                Password
+Admin	        admin@sekolah.sch.id	password123
+Petugas	        petugas@sekolah.sch.id	password123
+Kepala Sekolah	kepsek@sekolah.sch.id	password123
+Guru	        budi@sekolah.sch.id	    password123
+
+⚠️ Ganti password default setelah login pertama!
+
+🏗️ Available Features
+
+📦 Manajemen Inventaris
+1. Data barang dengan kode otomatis format KATEGORI-TAHUN-BULAN-URUTAN
+2. Kategorisasi, lokasi, supplier, dan Sumber Dana perolehan aset
+3. Upload foto & generate barcode/QR code
+4. Tracking kondisi (baik, rusak ringan, rusak berat)
+5. Filter multi-kriteria & pencarian global
+
+📋 Peminjaman
+1. Pengajuan peminjaman oleh guru & staf
+2. Approval workflow oleh petugas sarpras
+3. Pengembalian dengan tracking keterlambatan
+4. Denda opsional (aktif/nonaktif via settings)
+5. Riwayat peminjaman per user
+
+🔧 Perawatan
+1. 2 jenis perawatan: Rutin & Perbaikan
+2. Two-stage workflow (in_progress → completed)
+3. Update kondisi barang otomatis
+4. Pencatatan biaya perawatan
+
+📊 Laporan
+1. Laporan Inventaris — filter kategori, lokasi, kondisi, sumber dana
+2. Laporan Peminjaman — filter tanggal, status, peminjam
+3. Laporan Perawatan — filter tanggal, jenis, status
+4. Export PDF (dengan kop surat & tanda tangan kepala sekolah)
+5. Export Excel (dengan formatting & auto-filter)
+6. Widget statistik di dashboard
+
+⚙️ Pengaturan
+1. Profil sekolah (nama, alamat, kontak, logo)
+2. Data kepala sekolah untuk tanda tangan laporan
+3. Preferensi aplikasi (nama, versi, timezone, format tanggal)
+4. Pengaturan peminjaman (durasi, batas, denda)
+
+🔐 Manajemen User & Role
+1. 4 role dengan hak akses berbeda: Admin, Petugas Sarpras, Kepala Sekolah, Guru/Staf
+2. Role middleware untuk akses kontrol
+3. Reset password & toggle active oleh admin
+
+🛠️ Tech Stack
+Kategori	    Teknologi
+Backend	        Laravel 12, PHP 8.2
+Database	    PostgreSQL 18
+Frontend	    Blade Templates, Tailwind CSS 3, Alpine.js
+Authentication	Laravel Breeze
+PDF Export	    barryvdh/laravel-dompdf
+Excel Export	maatwebsite/excel
+Icons	        Font Awesome 6
+Font	        Montserrat
+
+Design System (Meta-inspired)
+Warna	            Hex	        Penggunaan
+Primary Cobalt	    #0064e0	    Buttons, links, accents
+Ink Deep	        #0a1317	    Text utama, dark backgrounds
+Surface Soft	    #f1f4f7	    Backgrounds, cards
+Hairline	        #dee3e9	    Borders, dividers
+Success	            #31a24c	    Status aktif, kondisi baik
+Warning	            #f2a918	    Peringatan, rusak ringan
+Critical	        #e41e3f	    Error, rusak berat, delete
+
+🧑‍💻 Available Commands
+1. Development Mode (Hot Reload):
+    ```bash
+    npm run dev
+    # OR
+    yarn dev
+
+2. Production Build:
+   ```bash
+   npm run build
+   # OR
+   yarn build
+
+3. Clear Cache:
+   ```bash
+   php artisan optimize:clear
+
+4. Reset Database (⚠️ Fresh Migrate):
+   ```bash
+   php artisan migrate:fresh --seed
+
+📦 What's Included?
+
+✅ Modul Selesai (Sprint 0-1)
+1. Authentication
+   - Login, Register, Forgot Password, Reset Password
+   - Profile management
+
+2. Dashboard
+   - Statistik inventaris, peminjaman, perawatan
+   - Widget Top 5 Sumber Dana (Sprint 1)
+
+3. Master Data
+   - Kategori, Lokasi, Supplier
+   - Sumber Dana (Sprint 1)
+   - Manajemen User
+
+4. Data Barang (Items)
+   - CRUD lengkap dengan upload foto
+   - Barcode/QR generation
+   - Kode otomatis
+
+5. Peminjaman (Loans)
+   - Request, approval, return
+   - Denda opsional
+
+6. Perawatan (Maintenances)
+   - Rutin & Perbaikan
+   - Two-stage workflow
+
+7. Laporan (Reports)
+   - Inventaris, Peminjaman, Perawatan
+   - Export PDF & Excel
+
+8. Pengaturan (Settings)
+   - 4 tab: Sekolah, Kepsek, Preferensi, Peminjaman
+
+🚧 Sedang Dikerjakan (Sprint 2-3)
+- Cetak Label Massal (in progress)
+- Hybrid Tracking Mode (per_unit / per_batch)
+- Portal Siswa untuk Peminjaman
+- Barang Habis Pakai + Stok Opname
+
+📚 Documentation
+📖 CHANGELOG.md — Riwayat versi
+🤝 CONTRIBUTING.md — Panduan kontribusi
+🔒 SECURITY.md — Kebijakan keamanan
+📋 CODE_OF_CONDUCT.md — Kode etik
+
+🖥️ Browser Support
+Chrome	Firefox	Safari	Edge	Opera
+✅	    ✅	    ✅	    ✅	    ✅
+
+Tested on:
+- Chrome 120+
+- Firefox 121+
+- Safari 17+
+- Edge 120+
+
+👥 Roles & Permissions
+Fitur	                Admin	Petugas	Kepsek	Guru
+Dashboard	            ✅	    ✅	    ✅	    ✅
+Data Barang (CRUD)	    ✅	    ✅	    ❌	    ❌
+Data Barang (view)	    ✅	    ✅	    ✅	    ✅
+Peminjaman (approval)	✅	    ✅	    ❌	    ❌
+Peminjaman (request)	✅	    ✅	    ❌	    ✅
+Perawatan	            ✅	    ✅	    ❌	    ❌
+Laporan	                ✅	    ✅	    ✅	    ❌
+Master Data	            ✅	    ❌	    ❌	    ❌
+Sumber Dana	            ✅	    ❌	    ❌	    ❌
+Manajemen User	        ✅	    ❌	    ❌	    ❌
+Pengaturan	            ✅	    ❌	    ❌	    ❌
+
+🗺️ Roadmap
+
+✅ Sprint 1 — Quick Wins (Sedang Berjalan)
+    ☑ Fitur 1: Sumber Dana Aset
+    □ Fitur 2: Cetak Label Massal (in progress)
+
+🚧 Sprint 2 — Fitur Menengah (Planned)
+    □ Fitur 3: Hybrid Tracking Mode (per_unit / per_batch)
+    □ Fitur 4: Portal Siswa untuk Peminjaman
+
+🔮 Sprint 3 — Fitur Besar (Planned)
+    □ Fitur 5: Barang Habis Pakai + Stok Opname
+    □ Notifikasi stok menipis (dashboard + bell icon)
+    □ Approval workflow untuk permintaan BHP
+
+💡 Future Ideas
+    □ Barcode scanner integration (mobile-friendly)
+    □ Multi-warehouse / multi-lokasi support
+    □ Import barang via Excel
+    □ REST API untuk mobile app
+    □ Notifikasi WhatsApp/Email untuk peminjaman & perawatan
+    □ Audit log lengkap (siapa, kapan, apa)
+
+🦸 Contributing
+Contributions are welcome! Berikut caranya:
+
+1. Fork the repository
+2. Create your feature branch
+   ```bash
+   git checkout -b feature/amazing-feature
+3. Commit your changes (gunakan Conventional Commits)
+   ```bash
+   git commit -m 'feat(items): add bulk import functionality'
+4. Push to the branch
+   ```bash
+   git push origin feature/amazing-feature
+5. Create a Pull Request
+   📖 Baca CONTRIBUTING.md untuk panduan lengkap.
+
+📅 Changelog
+Check out the CHANGELOG.md for detailed release notes.
+Latest Release: v1.1.0-sprint1 — Sumber Dana Module
+
+🛠️ Support
+🐛 Bug Report
+Buka issue di GitHub Issues dengan template Bug Report.
+
+💡 Feature Request
+Buka discussion di GitHub Discussions dengan template Feature Request.
+
+📧 Email
+Untuk pertanyaan yang tidak cocok di issue tracker:
+📧 support@sisarpras.test
+
+📖 Dokumentasi
+- Wiki (coming soon)
+- CHANGELOG
+
+📄 License
+This project is open-sourced software licensed under the MIT license.
+```text
+MIT License
+
+Copyright (c) 2026 SISARPRAS
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction...
+```
+Lihat file LICENSE untuk teks lengkap.
+
+🙏 Credits
+Dibangun Dengan
+Laravel — The PHP Framework for Web Artisans
+Tailwind CSS — Utility-first CSS framework
+Alpine.js — Lightweight JavaScript framework
+Font Awesome — Icon library
+DomPDF — PDF generation
+Maatwebsite Excel — Excel export
+
+Inspirasi Design
+Meta Design System — Pill buttons, cobalt accent, rounded cards
+ThemeSelection Sneat — README structure inspiration
+
+Kontributor
+[Tanto Herdiansyah] — Project Owner & Lead Developer
+Anda bisa menjadi kontributor berikutnya!
+
+🔥 Tertarik Berkontribusi?
+Kalau project ini bermanfaat, jangan lupa:
+
+⭐ Star repo ini
+🍴 Fork untuk eksplorasi
+🐛 Report bug yang Anda temukan
+💡 Usulkan fitur baru
+📢 Share ke rekan guru/operator sekolah
+
+<div align="center">
+Dibuat dengan ❤️ untuk pendidikan Indonesia
+
+⬆ Kembali ke atas
+
+</div> ```
