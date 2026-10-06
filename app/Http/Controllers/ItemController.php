@@ -13,11 +13,13 @@ use App\Models\Location;
 use App\Models\Supplier;
 use App\Services\ItemService;
 use Illuminate\Http\Request;
+use App\Services\FundingSourceService;
 
 class ItemController extends Controller
 {
     public function __construct(
-        protected ItemService $itemService
+        protected ItemService $itemService,
+        protected FundingSourceService $fundingSourceService
     ) {}
 
     /**
@@ -30,6 +32,7 @@ class ItemController extends Controller
             'search'      => $request->input('search'),
             'category_id' => $request->input('category_id'),
             'location_id' => $request->input('location_id'),
+            'funding_source_id'  => $request->get('funding_source_id'),
             'condition'   => $request->input('condition'),
             'status'      => $request->input('status'),
         ];
@@ -38,8 +41,9 @@ class ItemController extends Controller
         $items = $this->itemService->getItems($filters, 15);
         $categories = Category::orderBy('name')->get();
         $locations = Location::orderBy('name')->get();
+        $fundingSources = $this->fundingSourceService->allActive();
 
-        return view('items.index', compact('items', 'categories', 'locations', 'filters'));
+        return view('items.index', compact('items', 'categories', 'locations','fundingSources', 'filters'));
     }
 
     /**
@@ -50,8 +54,9 @@ class ItemController extends Controller
         $categories = Category::orderBy('name')->get();
         $locations = Location::orderBy('name')->get();
         $suppliers = Supplier::orderBy('name')->get();
+        $fundingSources = $this->fundingSourceService->allActive();
 
-        return view('items.create', compact('categories', 'locations', 'suppliers'));
+        return view('items.create', compact('categories', 'locations', 'suppliers', 'fundingSources'));
     }
 
     /**
@@ -100,8 +105,9 @@ class ItemController extends Controller
         $categories = Category::orderBy('name')->get();
         $locations = Location::orderBy('name')->get();
         $suppliers = Supplier::orderBy('name')->get();
+        $fundingSources = $this->fundingSourceService->allActive();
 
-        return view('items.edit', compact('item', 'categories', 'locations', 'suppliers'));
+        return view('items.edit', compact('item', 'categories', 'locations', 'suppliers', 'fundingSources'));
     }
 
     /**

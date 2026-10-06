@@ -27,6 +27,9 @@ class ItemRepository
             })
             ->when(!empty($filters['category_id']), fn($q) => $q->where('category_id', $filters['category_id']))
             ->when(!empty($filters['location_id']), fn($q) => $q->where('location_id', $filters['location_id']))
+            ->when($filters['funding_source_id'] ?? null, function ($q) use ($filters) {
+                    $q->where('funding_source_id', $filters['funding_source_id']);
+                })
             ->when(!empty($filters['condition']),   fn($q) => $q->where('condition', $filters['condition']))
             ->when(!empty($filters['status']),      fn($q) => $q->where('status', $filters['status']))
             ->latest()

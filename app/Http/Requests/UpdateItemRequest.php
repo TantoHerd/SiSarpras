@@ -23,6 +23,7 @@ class UpdateItemRequest extends FormRequest
             'category_id'   => ['required', 'exists:categories,id'],
             'location_id'   => ['required', 'exists:locations,id'],
             'supplier_id'   => ['nullable', 'exists:suppliers,id'],
+            'funding_source_id' => ['nullable', 'exists:funding_sources,id'],
             'brand'         => ['nullable', 'string', 'max:100'],
             'type'          => ['nullable', 'string', 'max:100'],
             'serial_number' => [
@@ -43,6 +44,7 @@ class UpdateItemRequest extends FormRequest
             'name.required'         => 'Nama barang wajib diisi.',
             'category_id.required'  => 'Kategori wajib dipilih.',
             'location_id.required'  => 'Lokasi wajib dipilih.',
+            'funding_source_id.exists' => 'Sumber dana yang dipilih tidak valid.',
             'serial_number.unique'  => 'Nomor seri sudah terdaftar di barang lain.',
             'price.min'             => 'Harga tidak boleh negatif.',
             'condition.required'    => 'Kondisi barang wajib dipilih.',

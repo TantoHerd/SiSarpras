@@ -7,13 +7,15 @@ use App\Repositories\ItemRepository;
 use App\Repositories\LoanRepository;
 use App\Repositories\MaintenanceRepository;
 use Illuminate\Support\Facades\Auth;
+use App\Services\FundingSourceService;
 
 class DashboardController extends Controller
 {
     public function __construct(
         protected ItemRepository $itemRepository,
         protected LoanRepository $loanRepository,
-        protected MaintenanceRepository $maintenanceRepository
+        protected MaintenanceRepository $maintenanceRepository,
+        protected FundingSourceService $fundingSourceService
     ) {}
 
     public function index()
@@ -56,6 +58,9 @@ class DashboardController extends Controller
                 ->get();
         }
 
+        $fundingSourcesTop = $this->fundingSourceService->topByItemCount(5);
+        $fundingSourcesTotal = \App\Models\FundingSource::count();
+        $fundingSourcesActive = \App\Models\FundingSource::where('is_active', true)->count();
 
         return view('dashboard', compact(
             'stats',
@@ -64,7 +69,10 @@ class DashboardController extends Controller
             'activeLoans',
             'maintenanceStats',
             'upcomingMaintenances',
-            'inProgressMaintenances'  // ← TAMBAH
+            'inProgressMaintenances',  // ← TAMBAH
+            'fundingSourcesTop',
+            'fundingSourcesTotal',
+            'fundingSourcesActive'
         ));
     }
 }

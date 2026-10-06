@@ -19,11 +19,12 @@ class ReportRepository
     public function getInventoryData(array $filters = [])
     {
         $query = Item::query()
-            ->with(['category', 'location', 'supplier'])
+            ->with(['category', 'location', 'supplier', 'fundingSource'])  // ← tambah fundingSource
             ->when(!empty($filters['category_id']), fn($q) => $q->where('category_id', $filters['category_id']))
             ->when(!empty($filters['location_id']), fn($q) => $q->where('location_id', $filters['location_id']))
             ->when(!empty($filters['condition']), fn($q) => $q->where('condition', $filters['condition']))
             ->when(!empty($filters['status']), fn($q) => $q->where('status', $filters['status']))
+            ->when(!empty($filters['funding_source_id']), fn($q) => $q->where('funding_source_id', $filters['funding_source_id']))  // ← BARU
             ->orderBy('category_id')
             ->orderBy('name');
 
@@ -37,7 +38,10 @@ class ReportRepository
     {
         $query = Item::query()
             ->when(!empty($filters['category_id']), fn($q) => $q->where('category_id', $filters['category_id']))
-            ->when(!empty($filters['location_id']), fn($q) => $q->where('location_id', $filters['location_id']));
+            ->when(!empty($filters['location_id']), fn($q) => $q->where('location_id', $filters['location_id']))
+            ->when(!empty($filters['condition']), fn($q) => $q->where('condition', $filters['condition']))  // ← BARU (biar konsisten)
+            ->when(!empty($filters['status']), fn($q) => $q->where('status', $filters['status']))            // ← BARU (biar konsisten)
+            ->when(!empty($filters['funding_source_id']), fn($q) => $q->where('funding_source_id', $filters['funding_source_id']));  // ← BARU
 
         $allItems = (clone $query)->get();
 

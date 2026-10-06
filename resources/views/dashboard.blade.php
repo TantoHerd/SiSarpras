@@ -121,6 +121,69 @@
         </div>
     </section>
 
+    {{-- ============ WIDGET: TOP 5 SUMBER DANA ============ --}}
+    @if(isset($fundingSourcesTop) && $fundingSourcesTop->count() > 0)
+        <div class="card">
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <h3 class="text-body-md-bold text-ink-deep flex items-center gap-2">
+                        <i class="fas fa-money-bill text-primary"></i>
+                        Top 5 Sumber Dana
+                    </h3>
+                    <p class="text-caption text-steel mt-1">
+                        Berdasarkan jumlah aset
+                    </p>
+                </div>
+                <div class="text-right">
+                    <p class="text-caption text-steel">Total</p>
+                    <p class="text-body-sm-bold text-ink-deep">
+                        {{ $fundingSourcesTotal }} sumber
+                        <span class="text-success">({{ $fundingSourcesActive }} aktif)</span>
+                    </p>
+                </div>
+            </div>
+
+            @php
+                $maxCount = $fundingSourcesTop->max('items_count') ?: 1;
+            @endphp
+
+            <div class="space-y-3">
+                @foreach($fundingSourcesTop as $source)
+                    @php
+                        $percentage = ($source->items_count / $maxCount) * 100;
+                    @endphp
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="badge-info text-xs font-mono shrink-0">
+                                    {{ $source->code }}
+                                </span>
+                                <span class="text-body-sm text-ink-deep truncate">
+                                    {{ $source->name }}
+                                </span>
+                            </div>
+                            <span class="text-body-sm-bold text-ink-deep shrink-0 ml-2">
+                                {{ $source->items_count }}
+                            </span>
+                        </div>
+                        <div class="w-full bg-surface-soft rounded-full h-2 overflow-hidden">
+                            <div class="h-full bg-primary rounded-full transition-all duration-500"
+                                style="width: {{ $percentage }}%"></div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="mt-5 pt-4 border-t border-hairline-soft">
+                <a href="{{ route('funding-sources.index') }}" 
+                class="text-body-sm text-primary hover:underline inline-flex items-center gap-1">
+                    Lihat semua sumber dana
+                    <i class="fas fa-arrow-right text-xs"></i>
+                </a>
+            </div>
+        </div>
+    @endif
+
     {{-- ==================== PERLU PERHATIAN (Ringkasan Peminjaman) ==================== --}}
     @if($loanStats && (auth()->user()->isAdmin() || auth()->user()->isPetugas() || auth()->user()->isKepalaSekolah()))
     <section>

@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\FundingSourceController;  // ← BARU
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
@@ -43,6 +44,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('categories', CategoryController::class);
         Route::resource('locations', LocationController::class);
         Route::resource('suppliers', SupplierController::class);
+
+        // ▼▼▼ BARU: Funding Sources (CRUD - admin only) ▼▼▼
+        Route::get('/funding-sources/create', [FundingSourceController::class, 'create'])->name('funding-sources.create');
+        Route::post('/funding-sources', [FundingSourceController::class, 'store'])->name('funding-sources.store');
+        Route::get('/funding-sources/export/excel', [FundingSourceController::class, 'exportExcel'])
+            ->name('funding-sources.export.excel');
+        Route::get('/funding-sources/{funding_source}/edit', [FundingSourceController::class, 'edit'])->name('funding-sources.edit');
+        Route::put('/funding-sources/{funding_source}', [FundingSourceController::class, 'update'])->name('funding-sources.update');
+        Route::delete('/funding-sources/{funding_source}', [FundingSourceController::class, 'destroy'])->name('funding-sources.destroy');
+        // ▲▲▲ END BARU ▲▲▲
 
         // Settings
         Route::get('/settings', [\App\Http\Controllers\SettingController::class, 'index'])->name('settings.index');
@@ -97,6 +108,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/reports/maintenances', [ReportController::class, 'maintenances'])->name('reports.maintenances');
         Route::get('/reports/maintenances/pdf', [ReportController::class, 'maintenancesPdf'])->name('reports.maintenances.pdf');
         Route::get('/reports/maintenances/excel', [ReportController::class, 'maintenancesExcel'])->name('reports.maintenances.excel');
+
+        // ▼▼▼ BARU: Funding Sources (index - admin, petugas, kepsek) ▼▼▼
+        Route::get('/funding-sources', [FundingSourceController::class, 'index'])->name('funding-sources.index');
+        // ▲▲▲ END BARU ▲▲▲
     });
 
     /*

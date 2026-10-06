@@ -29,6 +29,7 @@ class StoreItemRequest extends FormRequest
             'condition'     => ['required', Rule::enum(ItemConditionEnum::class)],
             'quantity'      => ['required', 'integer', 'min:1'],
             'image'         => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'funding_source_id' => ['nullable', 'integer', 'exists:funding_sources,id'],
         ];
     }
 

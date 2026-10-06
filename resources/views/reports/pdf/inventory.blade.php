@@ -303,11 +303,16 @@
     <div class="judul">
         <h2>Laporan Inventaris Barang</h2>
         <p>
-            @if(!empty($filters['category_id']) || !empty($filters['location_id']) || !empty($filters['condition']) || !empty($filters['status']))
+            @if(!empty($filters['category_id']) || !empty($filters['location_id']) || !empty($filters['condition']) || !empty($filters['status']) || !empty($filters['funding_source_id']))
                 Dengan filter diterapkan — 
             @endif
             Dicetak: {{ now()->translatedFormat('d F Y, H:i') }} WIB
         </p>
+        @if($selectedSource ?? false)
+            <p style="font-size: 9px; color: #0064e0; font-weight: bold; margin-top: 2px;">
+                Filter Sumber Dana: {{ $selectedSource->code }} - {{ $selectedSource->name }}
+            </p>
+        @endif
     </div>
 
     {{-- ==================== RINGKASAN ==================== --}}
@@ -346,6 +351,7 @@
                     <th>Nama Barang</th>
                     <th style="width: 65px;">Kategori</th>
                     <th style="width: 75px;">Lokasi</th>
+                    <th style="width: 55px;">Sumber Dana</th>
                     <th style="width: 55px;" class="text-center">Kondisi</th>
                     <th style="width: 32px;" class="text-center">Qty</th>
                     <th style="width: 65px;" class="text-right">Harga</th>
@@ -366,6 +372,9 @@
                         <td>{{ $item->category->name ?? '-' }}</td>
                         <td>{{ $item->location->name ?? '-' }}</td>
                         <td class="text-center">
+                            {{ $item->fundingSource->code ?? '—' }}
+                        </td>
+                        <td class="text-center">
                             <span class="badge badge-{{ str_replace('_', '-', $item->condition->value) }}">
                                 {{ $item->condition->label() }}
                             </span>
@@ -382,7 +391,7 @@
 
                 {{-- Total --}}
                 <tr class="total-row">
-                    <td colspan="7" class="text-right">TOTAL NILAI ASET</td>
+                    <td colspan="8" class="text-right">TOTAL NILAI ASET</td>
                     <td colspan="2" class="text-right">{{ format_currency($summary['total_value']) }}</td>
                 </tr>
             </tbody>

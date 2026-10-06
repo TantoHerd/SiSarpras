@@ -9,6 +9,7 @@ use App\Services\SettingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 
 class SettingController extends Controller
 {
@@ -36,18 +37,25 @@ class SettingController extends Controller
     public function update(UpdateSettingRequest $request)
     {
         try {
-            $data = $request->validated();
+            // ← PERBAIKAN: ambil SEMUA input kecuali _token & _method
+            $data = $request->except(['_token', '_method']);
+
+            Log::info('SETTING UPDATE DEBUG', [
+                'data_keys' => array_keys($data),
+                'headmaster_name' => $request->input('headmaster_name'),
+                'headmaster_nip' => $request->input('headmaster_nip'),
+            ]);
+            
             $group = $request->input('group_name', 'school');
             $redirectTab = $request->input('redirect_tab', $group);
 
             // Loop semua field, update satu per satu
             foreach ($data as $key => $value) {
                 // Skip field yang bukan setting
-                if (in_array($key, ['group_name', 'redirect_tab', '_token', '_method'])) {
+                if (in_array($key, ['group_name', 'redirect_tab'])) {
                     continue;
                 }
 
-                // Konversi boolean '0'/'1' atau checkbox
                 $setting = Setting::where('key', $key)->first();
                 if (!$setting) continue;
 
@@ -60,13 +68,11 @@ class SettingController extends Controller
                 if ($setting->type === 'file' && $request->hasFile($key)) {
                     $file = $request->file($key);
                     
-                    // Hapus file lama
                     if ($setting->value && $setting->value !== 'logo-default.png' 
                         && Storage::disk('public')->exists($setting->value)) {
                         Storage::disk('public')->delete($setting->value);
                     }
                     
-                    // Simpan file baru
                     $path = $file->store('logo', 'public');
                     $value = $path;
                 } elseif ($setting->type === 'file') {
@@ -76,6 +82,9 @@ class SettingController extends Controller
 
                 $this->settingService->update($key, $value);
             }
+
+            // ← BARU: clear cache setelah update
+            $this->settingService->clearCache();
 
             return redirect()
                 ->route('settings.index', ['tab' => $redirectTab])

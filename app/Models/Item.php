@@ -17,7 +17,7 @@ class Item extends Model
         'code', 'name', 'category_id', 'location_id', 'supplier_id',
         'brand', 'type', 'serial_number', 'purchase_year', 'price',
         'condition', 'status', 'quantity', 'image', 'barcode',
-        'created_by', 'updated_by'
+        'created_by', 'funding_source_id', 'updated_by'
     ];
 
     protected $casts = [
@@ -87,5 +87,10 @@ class Item extends Model
         return $this->status === ItemStatusEnum::TERSEDIA 
             && $this->condition !== ItemConditionEnum::RUSAK_BERAT
             && $this->quantity > 0;
+    }
+
+    public function fundingSource()
+    {
+        return $this->belongsTo(FundingSource::class);
     }
 }

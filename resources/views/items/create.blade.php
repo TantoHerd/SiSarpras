@@ -224,6 +224,31 @@
                             @enderror
                         </div>
                     </div>
+
+                    {{-- Sumber Dana --}}
+                    <div>
+                        <label for="funding_source_id" class="form-label">
+                            Sumber Dana
+                            <span class="text-caption text-steel font-normal ml-1">(opsional)</span>
+                        </label>
+                        <select id="funding_source_id" 
+                                name="funding_source_id" 
+                                class="form-input @error('funding_source_id') form-input-error @enderror">
+                            <option value="">-- Pilih Sumber Dana --</option>
+                            @foreach($fundingSources as $source)
+                                <option value="{{ $source->id }}" 
+                                        @selected(old('funding_source_id', $item->funding_source_id ?? null) == $source->id)>
+                                    {{ $source->code }} - {{ $source->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('funding_source_id')
+                            <p class="mt-2 text-body-sm text-critical-strong flex items-center gap-1.5">
+                                <i class="fas fa-exclamation-circle text-xs"></i>
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
                 </div>
             </div>
 

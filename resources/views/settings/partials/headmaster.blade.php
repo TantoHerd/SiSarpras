@@ -2,7 +2,7 @@
 <form method="POST" action="{{ route('settings.update') }}" class="space-y-6">
     @csrf
     @method('PUT')
-    <input type="hidden" name="group_name" value="school">
+    <input type="hidden" name="group_name" value="headmaster">
     <input type="hidden" name="redirect_tab" value="headmaster">
 
     <div>

@@ -12,11 +12,13 @@ use App\Services\Reports\ReportService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Services\FundingSourceService;
 
 class ReportController extends Controller
 {
     public function __construct(
-        protected ReportService $reportService
+        protected ReportService $reportService,
+        protected FundingSourceService $fundingSourceService,
     ) {}
 
     /**
@@ -34,18 +36,22 @@ class ReportController extends Controller
     public function inventory(Request $request)
     {
         $filters = [
-            'category_id' => $request->input('category_id'),
-            'location_id' => $request->input('location_id'),
-            'condition'   => $request->input('condition'),
-            'status'      => $request->input('status'),
+            'category_id'       => $request->input('category_id'),
+            'location_id'       => $request->input('location_id'),
+            'condition'         => $request->input('condition'),
+            'status'            => $request->input('status'),
+            'funding_source_id' => $request->input('funding_source_id'),  // ← BARU
         ];
 
-        $items = $this->reportService->inventory($filters);
-        $summary = $this->reportService->inventorySummary($filters);
-        $categories = Category::orderBy('name')->get();
-        $locations = Location::orderBy('name')->get();
+        $items          = $this->reportService->inventory($filters);
+        $summary        = $this->reportService->inventorySummary($filters);
+        $categories     = Category::orderBy('name')->get();
+        $locations      = Location::orderBy('name')->get();
+        $fundingSources = $this->fundingSourceService->allActive();  // ← BARU
 
-        return view('reports.inventory', compact('items', 'summary', 'categories', 'locations', 'filters'));
+        return view('reports.inventory', compact(
+            'items', 'summary', 'categories', 'locations', 'fundingSources', 'filters'
+        ));
     }
 
     /**
@@ -94,16 +100,23 @@ class ReportController extends Controller
     public function inventoryPdf(Request $request)
     {
         $filters = [
-            'category_id' => $request->input('category_id'),
-            'location_id' => $request->input('location_id'),
-            'condition'   => $request->input('condition'),
-            'status'      => $request->input('status'),
+            'category_id'       => $request->input('category_id'),
+            'location_id'       => $request->input('location_id'),
+            'condition'         => $request->input('condition'),
+            'status'            => $request->input('status'),
+            'funding_source_id' => $request->input('funding_source_id'),  // ← BARU
         ];
 
-        $items = $this->reportService->inventory($filters);
+        $items   = $this->reportService->inventory($filters);
         $summary = $this->reportService->inventorySummary($filters);
+        
+        // ← BARU: ambil nama sumber dana yang dipilih untuk header PDF
+        $selectedSource = null;
+        if (!empty($filters['funding_source_id'])) {
+            $selectedSource = $this->fundingSourceService->find($filters['funding_source_id']);
+        }
 
-        $pdf = Pdf::loadView('reports.pdf.inventory', compact('items', 'summary', 'filters'))
+        $pdf = Pdf::loadView('reports.pdf.inventory', compact('items', 'summary', 'filters', 'selectedSource'))
             ->setPaper('a4', 'landscape')
             ->setOption('isRemoteEnabled', true)
             ->setOption('isHtml5ParserEnabled', true);
@@ -119,13 +132,14 @@ class ReportController extends Controller
     public function inventoryExcel(Request $request)
     {
         $filters = [
-            'category_id' => $request->input('category_id'),
-            'location_id' => $request->input('location_id'),
-            'condition'   => $request->input('condition'),
-            'status'      => $request->input('status'),
+            'category_id'       => $request->input('category_id'),
+            'location_id'       => $request->input('location_id'),
+            'condition'         => $request->input('condition'),
+            'status'            => $request->input('status'),
+            'funding_source_id' => $request->input('funding_source_id'),  // ← BARU
         ];
 
-        $items = $this->reportService->inventory($filters);
+        $items   = $this->reportService->inventory($filters);
         $summary = $this->reportService->inventorySummary($filters);
 
         $filename = 'Laporan-Inventaris-' . now()->format('Ymd-His') . '.xlsx';
