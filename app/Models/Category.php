@@ -17,6 +17,7 @@ class Category extends Model
         'icon',
         'default_tracking_mode',
         'allow_student_loan',
+        'default_item_type',
     ];
 
     protected $casts = [

@@ -229,6 +229,45 @@
                     </div>
                 </div>
 
+                {{-- ← BARU: Tipe Barang --}}
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-surface-soft flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-cube text-steel text-sm"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-caption text-steel uppercase tracking-wider">Tipe Barang</p>
+                        @if($item->item_type === 'consumable')
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill bg-warning/10 text-warning text-caption-bold">
+                                <i class="fas fa-boxes text-xs"></i>
+                                Habis Pakai
+                            </span>
+                        @else
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill bg-primary/10 text-primary text-caption-bold">
+                                <i class="fas fa-box text-xs"></i>
+                                Aset Tetap
+                            </span>
+                        @endif
+                    </div>
+                </div>
+
+                {{-- ← BARU: Minimal Stok (kalau consumable) --}}
+                @if($item->isConsumable() && $item->min_stock)
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-surface-soft flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-steel text-sm"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-caption text-steel uppercase tracking-wider">Minimal Stok</p>
+                            <p class="text-body-sm-bold {{ $item->isLowStock() ? 'text-critical' : 'text-ink-deep' }}">
+                                {{ $item->min_stock }}
+                                @if($item->isLowStock())
+                                    <span class="badge-critical text-xs ml-1">Stok Menipis</span>
+                                @endif
+                            </p>
+                        </div>
+                    </div>
+                @endif
+
                 {{-- ← BARU: Mode Tracking --}}
                 <div class="flex items-start gap-3">
                     <div class="w-10 h-10 rounded-lg bg-surface-soft flex items-center justify-center flex-shrink-0">
@@ -336,6 +375,59 @@
                 </div>
             @endif
         </div>
+
+        {{-- ← BARU: Riwayat Pergerakan Stok (khusus consumable) --}}
+        @if($item->isConsumable())
+            <div class="card">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 class="text-heading-sm text-ink-deep">Riwayat Pergerakan Stok</h3>
+                        <p class="text-body-sm text-steel mt-1">10 pergerakan terakhir</p>
+                    </div>
+                    <a href="{{ route('stock-movements.index', ['item_id' => $item->id]) }}" 
+                    class="text-body-sm text-primary hover:underline inline-flex items-center gap-1">
+                        Lihat semua
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </a>
+                </div>
+
+                @php
+                    $movements = app(\App\Services\StockMovementService::class)->forItem($item->id, 10);
+                @endphp
+
+                @if($movements->count() > 0)
+                    <div class="space-y-3">
+                        @foreach($movements as $movement)
+                            <div class="flex items-center gap-3 p-3 rounded-lg bg-surface-soft/50">
+                                <div class="w-8 h-8 rounded-circle flex items-center justify-center flex-shrink-0
+                                            {{ $movement->type->value === 'in' ? 'bg-success/10' : ($movement->type->value === 'out' ? 'bg-critical/10' : 'bg-warning/10') }}">
+                                    <i class="fas {{ $movement->type->icon() }} text-xs
+                                            {{ $movement->type->value === 'in' ? 'text-success' : ($movement->type->value === 'out' ? 'text-critical' : 'text-warning') }}"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-body-sm text-ink">
+                                        <strong>{{ $movement->type->value === 'out' ? '-' : '+' }}{{ $movement->quantity }}</strong>
+                                        unit
+                                        <span class="text-steel text-caption ml-1">
+                                            ({{ $movement->stock_before }} → {{ $movement->stock_after }})
+                                        </span>
+                                    </p>
+                                    <p class="text-caption text-steel">
+                                        {{ $movement->created_at->diffForHumans() }}
+                                        • {{ $movement->creator->name ?? 'Sistem' }}
+                                    </p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-8">
+                        <i class="fas fa-exchange-alt text-steel text-3xl mb-2"></i>
+                        <p class="text-body-sm text-steel">Belum ada pergerakan stok</p>
+                    </div>
+                @endif
+            </div>
+        @endif
 
     </div>
 </div>

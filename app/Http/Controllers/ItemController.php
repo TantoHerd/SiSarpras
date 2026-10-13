@@ -33,6 +33,7 @@ class ItemController extends Controller
             'location_id'        => $request->input('location_id'),
             'funding_source_id'  => $request->get('funding_source_id'),
             'tracking_mode'      => $request->input('tracking_mode'),
+            'item_type'          => $request->input('item_type'),
             'condition'          => $request->input('condition'),
             'status'             => $request->input('status'),
         ];

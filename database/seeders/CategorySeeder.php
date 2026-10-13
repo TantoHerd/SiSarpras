@@ -11,23 +11,27 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            // per_unit — aset unik
-            ['name' => 'Elektronik',    'default_tracking_mode' => 'per_unit'],
-            ['name' => 'Mebel',         'default_tracking_mode' => 'per_unit'],
-            ['name' => 'Lab',           'default_tracking_mode' => 'per_unit'],
-            ['name' => 'Olahraga',      'default_tracking_mode' => 'per_unit'],
-            ['name' => 'Audio Visual',  'default_tracking_mode' => 'per_unit'],
+            // per_unit + asset
+            ['name' => 'Elektronik',         'default_tracking_mode' => 'per_unit',  'default_item_type' => 'asset'],
+            ['name' => 'Mebel',              'default_tracking_mode' => 'per_unit',  'default_item_type' => 'asset'],
+            ['name' => 'Lab',                'default_tracking_mode' => 'per_unit',  'default_item_type' => 'asset'],
+            ['name' => 'Olahraga',           'default_tracking_mode' => 'per_unit',  'default_item_type' => 'asset'],
+            ['name' => 'Audio Visual',       'default_tracking_mode' => 'per_unit',  'default_item_type' => 'asset'],
             
-            // per_batch — barang habis pakai / quantity banyak
-            ['name' => 'ATK',                 'default_tracking_mode' => 'per_batch'],
-            ['name' => 'Bangunan',            'default_tracking_mode' => 'per_batch'],
-            ['name' => 'Alat Rumah Tangga',   'default_tracking_mode' => 'per_batch'],
+            // per_batch + consumable (BHP)
+            ['name' => 'ATK',                'default_tracking_mode' => 'per_batch', 'default_item_type' => 'consumable'],
+            ['name' => 'Bahan Lab',          'default_tracking_mode' => 'per_batch', 'default_item_type' => 'consumable'],
+            ['name' => 'Alat Rumah Tangga',  'default_tracking_mode' => 'per_batch', 'default_item_type' => 'consumable'],
+            ['name' => 'Bangunan',           'default_tracking_mode' => 'per_batch', 'default_item_type' => 'asset'],
         ];
 
         foreach ($categories as $cat) {
             Category::updateOrCreate(
                 ['name' => $cat['name']],
-                ['default_tracking_mode' => $cat['default_tracking_mode']]
+                [
+                    'default_tracking_mode' => $cat['default_tracking_mode'],
+                    'default_item_type'     => $cat['default_item_type'],
+                ]
             );
         }
     }

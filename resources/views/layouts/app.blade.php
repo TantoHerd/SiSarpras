@@ -84,6 +84,46 @@
             document.getElementById('sidebar').classList.add('-translate-x-full');
             document.getElementById('sidebar-overlay').classList.add('hidden');
         });
+
+        function notificationBell() {
+            return {
+                open: false,
+                loading: false,
+                unreadCount: {{ auth()->user()->unreadNotifications()->count() }},
+                notifications: [],
+
+                init() {
+                    // Polling setiap 60 detik
+                    setInterval(() => this.fetchNotifications(), 60000);
+                },
+
+                toggle() {
+                    this.open = !this.open;
+                    if (this.open) {
+                        this.fetchNotifications();
+                    }
+                },
+
+                async fetchNotifications() {
+                    this.loading = true;
+                    try {
+                        const res = await fetch('{{ route('notifications.dropdown') }}', {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                            }
+                        });
+                        const data = await res.json();
+                        this.notifications = data.notifications;
+                        this.unreadCount = data.unread_count;
+                    } catch (e) {
+                        console.error('Failed to fetch notifications:', e);
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            }
+        }
     </script>
 
     @stack('scripts')

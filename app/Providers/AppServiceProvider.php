@@ -23,7 +23,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(\App\Repositories\ReportRepository::class);   
         $this->app->bind(\App\Repositories\FundingSourceRepository::class);  
         $this->app->bind(\App\Repositories\StudentRepository::class); 
-        $this->app->bind(\App\Repositories\PortalRequestRepository::class);                                               
+        $this->app->bind(\App\Repositories\PortalRequestRepository::class);
+        $this->app->bind(\App\Repositories\StockMovementRepository::class);
+        $this->app->bind(\App\Repositories\StockRequestRepository::class);   
+        $this->app->bind(\App\Repositories\StockOpnameRepository::class);                                               
 
         $this->app->bind(
             \App\Repositories\LoanRepository::class,
@@ -43,6 +46,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Services\FundingSourceService::class);
         $this->app->singleton(\App\Services\StudentService::class);
         $this->app->singleton(\App\Services\PortalService::class);
+        $this->app->singleton(\App\Services\StockMovementService::class);
+        $this->app->singleton(\App\Services\StockRequestService::class);
+        $this->app->singleton(\App\Services\StockOpnameService::class);
     }
 
     public function boot(): void
