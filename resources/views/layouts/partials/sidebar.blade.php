@@ -94,6 +94,22 @@
                     <span>Peminjaman</span>
                 </a>
 
+                {{-- ← BARU: Permintaan BHP --}}
+                <a href="{{ route('stock-requests.index') }}"
+                class="flex items-center gap-3 px-4 py-2.5 rounded-pill text-body-sm transition-colors
+                        {{ request()->routeIs('stock-requests.*') ? 'bg-primary text-white' : 'text-ink hover:bg-surface-soft' }}">
+                    <i class="fas fa-boxes w-5 text-center {{ request()->routeIs('stock-requests.*') ? '' : 'text-steel' }}"></i>
+                    <span class="flex-1">Permintaan BHP</span>
+                    @php
+                        $pendingStockCount = (auth()->user()->isAdmin() || auth()->user()->isPetugas())
+                            ? app(\App\Services\StockRequestService::class)->countPending()
+                            : 0;
+                    @endphp
+                    @if($pendingStockCount > 0)
+                        <span class="badge-critical text-xs">{{ $pendingStockCount }}</span>
+                    @endif
+                </a>
+
                 {{-- Permintaan Portal --}}
                 @php
                     $pendingCount = 0;
@@ -117,6 +133,30 @@
                     <i class="fas fa-tools w-5 text-center {{ request()->routeIs('maintenances.*') ? '' : 'text-steel' }}"></i>
                     <span>Perawatan</span>
                 </a>
+
+                {{-- ← BARU: Pergerakan Stok --}}
+                <a href="{{ route('stock-movements.index') }}"
+                class="flex items-center gap-3 px-4 py-2.5 rounded-pill text-body-sm transition-colors
+                        {{ request()->routeIs('stock-movements.*') ? 'bg-primary text-white' : 'text-ink hover:bg-surface-soft' }}">
+                    <i class="fas fa-exchange-alt w-5 text-center {{ request()->routeIs('stock-movements.*') ? '' : 'text-steel' }}"></i>
+                    <span>Pergerakan Stok</span>
+                </a>
+
+                {{-- ← BARU: Stok Opname --}}
+                <a href="{{ route('stock-opnames.index') }}"
+                class="flex items-center gap-3 px-4 py-2.5 rounded-pill text-body-sm transition-colors
+                        {{ request()->routeIs('stock-opnames.*') ? 'bg-primary text-white' : 'text-ink hover:bg-surface-soft' }}">
+                    <i class="fas fa-clipboard-list w-5 text-center {{ request()->routeIs('stock-opnames.*') ? '' : 'text-steel' }}"></i>
+                    <span class="flex-1">Stok Opname</span>
+                    @php
+                        $draftOpnameCount = (auth()->user()->isAdmin() || auth()->user()->isPetugas())
+                            ? \App\Models\StockOpname::where('status', 'draft')->count()
+                            : 0;
+                    @endphp
+                    @if($draftOpnameCount > 0)
+                        <span class="badge-warning text-xs">{{ $draftOpnameCount }}</span>
+                    @endif
+                </a>
             </div>
         @endif
 
@@ -139,6 +179,12 @@
                           {{ request()->routeIs('loans.my') || (request()->routeIs('loans.show') && !auth()->user()->isAdmin() && !auth()->user()->isPetugas()) ? 'bg-primary text-white' : 'text-ink hover:bg-surface-soft' }}">
                     <i class="fas fa-clock w-5 text-center {{ request()->routeIs('loans.my') ? '' : 'text-steel' }}"></i>
                     <span>Riwayat Pinjam</span>
+                </a>
+                <a href="{{ route('stock-requests.index') }}"
+                    class="flex items-center gap-3 px-4 py-2.5 rounded-pill text-body-sm transition-colors
+                        {{ request()->routeIs('stock-requests.*') ? 'bg-primary text-white' : 'text-ink hover:bg-surface-soft' }}">
+                    <i class="fas fa-boxes w-5 text-center {{ request()->routeIs('stock-requests.*') ? '' : 'text-steel' }}"></i>
+                    <span>Permintaan BHP</span>
                 </a>
             </div>
         @endif

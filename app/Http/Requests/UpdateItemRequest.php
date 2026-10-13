@@ -19,41 +19,73 @@ class UpdateItemRequest extends FormRequest
         $itemId = $this->route('item')->id;
 
         return [
-            'name'          => ['required', 'string', 'max:200'],
-            'category_id'   => ['required', 'exists:categories,id'],
-            'location_id'   => ['required', 'exists:locations,id'],
-            'supplier_id'   => ['nullable', 'exists:suppliers,id'],
+            'name'              => ['required', 'string', 'max:200'],
+            'category_id'       => ['required', 'exists:categories,id'],
+            'location_id'       => ['required', 'exists:locations,id'],
+            'supplier_id'       => ['nullable', 'exists:suppliers,id'],
             'funding_source_id' => ['nullable', 'exists:funding_sources,id'],
-            'tracking_mode' => ['nullable', 'in:per_unit,per_batch'],
-            'brand'         => ['nullable', 'string', 'max:100'],
-            'type'          => ['nullable', 'string', 'max:100'],
-            'serial_number' => [
-                'nullable', 'string', 'max:100',
-                Rule::unique('items', 'serial_number')->ignore($itemId),
-            ],
-            'purchase_year' => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
-            'price'         => ['nullable', 'numeric', 'min:0'],
-            'condition'     => ['required', Rule::enum(ItemConditionEnum::class)],
-            'quantity'      => ['required', 'integer', 'min:1'],
-            'image'         => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'tracking_mode'     => ['nullable', 'in:per_unit,per_batch'],
+            'brand'             => ['nullable', 'string', 'max:100'],
+            'type'              => ['nullable', 'string', 'max:100'],
+            'serial_number'     => ['nullable', 'string', 'max:100', Rule::unique('items', 'serial_number')->ignore($itemId)],
+            'purchase_year'     => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
+            'price'             => ['nullable', 'numeric', 'min:0'],
+            'condition'         => ['required', Rule::enum(ItemConditionEnum::class)],
+            'quantity'          => ['required', 'integer', 'min:1'],
+            'image'             => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'item_type'         => ['required', 'in:asset,consumable'],
+            'min_stock'         => ['nullable', 'integer', 'min:0', 'required_if:item_type,consumable'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'name.required'         => 'Nama barang wajib diisi.',
-            'category_id.required'  => 'Kategori wajib dipilih.',
-            'location_id.required'  => 'Lokasi wajib dipilih.',
-            'funding_source_id.exists' => 'Sumber dana yang dipilih tidak valid.',
-            'serial_number.unique'  => 'Nomor seri sudah terdaftar di barang lain.',
-            'price.min'             => 'Harga tidak boleh negatif.',
-            'condition.required'    => 'Kondisi barang wajib dipilih.',
-            'quantity.min'          => 'Jumlah minimal 1.',
-            'image.image'           => 'File harus berupa gambar.',
-            'image.mimes'           => 'Format gambar harus jpg, jpeg, png, atau webp.',
-            'image.max'             => 'Ukuran gambar maksimal 2MB.',
-            'tracking_mode.in' => 'Mode tracking tidak valid.',
+            'name.required'             => 'Nama barang wajib diisi.',
+            'category_id.required'      => 'Kategori wajib dipilih.',
+            'location_id.required'      => 'Lokasi wajib dipilih.',
+            'funding_source_id.exists'  => 'Sumber dana yang dipilih tidak valid.',
+            'serial_number.unique'      => 'Nomor seri sudah terdaftar di barang lain.',
+            'price.min'                 => 'Harga tidak boleh negatif.',
+            'condition.required'        => 'Kondisi barang wajib dipilih.',
+            'quantity.min'              => 'Jumlah minimal 1.',
+            'image.image'               => 'File harus berupa gambar.',
+            'image.mimes'               => 'Format gambar harus jpg, jpeg, png, atau webp.',
+            'image.max'                 => 'Ukuran gambar maksimal 2MB.',
+            'tracking_mode.in'          => 'Mode tracking tidak valid.',
+            'item_type.required'        => 'Tipe item wajib dipilih.',
+            'item_type.in'              => 'Tipe item tidak valid.',
+            'min_stock.integer'         => 'Minimal stok harus berupa angka.',
+            'min_stock.min'             => 'Minimal stok tidak boleh negatif.',
+            'min_stock.required_if'     => 'Minimal stok wajib diisi untuk barang habis pakai.',
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        // Normalize serial_number (null jika kosong)
+        if (empty($this->serial_number)) {
+            $this->merge(['serial_number' => null]);
+        }
+
+        // Default condition
+        if (empty($this->condition)) {
+            $this->merge(['condition' => 'baik']);
+        }
+
+        // Default quantity
+        if (empty($this->quantity)) {
+            $this->merge(['quantity' => 1]);
+        }
+
+        // Kalau tidak ada item_type, default 'asset'
+        if (!$this->filled('item_type')) {
+            $this->merge(['item_type' => 'asset']);
+        }
+
+        // Kalau item_type asset, kosongkan min_stock
+        if ($this->input('item_type') === 'asset') {
+            $this->merge(['min_stock' => null]);
+        }
     }
 }

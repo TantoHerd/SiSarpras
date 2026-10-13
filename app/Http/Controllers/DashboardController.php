@@ -8,6 +8,8 @@ use App\Repositories\LoanRepository;
 use App\Repositories\MaintenanceRepository;
 use Illuminate\Support\Facades\Auth;
 use App\Services\FundingSourceService;
+use App\Services\StockRequestService;
+use App\Services\StockMovementService;
 
 class DashboardController extends Controller
 {
@@ -15,7 +17,9 @@ class DashboardController extends Controller
         protected ItemRepository $itemRepository,
         protected LoanRepository $loanRepository,
         protected MaintenanceRepository $maintenanceRepository,
-        protected FundingSourceService $fundingSourceService
+        protected FundingSourceService $fundingSourceService,
+        protected StockRequestService $stockRequestService,
+        protected StockMovementService $stockMovementService,
     ) {}
 
     public function index()
@@ -62,6 +66,12 @@ class DashboardController extends Controller
         $fundingSourcesTotal = \App\Models\FundingSource::count();
         $fundingSourcesActive = \App\Models\FundingSource::where('is_active', true)->count();
 
+        // Stock stats
+        $stockPendingCount  = $this->stockRequestService->countPending();
+        $stockMovementToday = $this->stockMovementService->getStats()['today'];
+        $lowStockItems      = \App\Models\Item::lowStock()->with('category')->take(5)->get();
+        $lowStockCount      = \App\Models\Item::lowStock()->count();
+
         return view('dashboard', compact(
             'stats',
             'loanStats',
@@ -72,7 +82,11 @@ class DashboardController extends Controller
             'inProgressMaintenances',  // ← TAMBAH
             'fundingSourcesTop',
             'fundingSourcesTotal',
-            'fundingSourcesActive'
+            'fundingSourcesActive',
+            'stockPendingCount',
+            'stockMovementToday',
+            'lowStockItems',
+            'lowStockCount',
         ));
     }
 }

@@ -98,11 +98,107 @@
                 <input type="text" placeholder="Cari barang, user...">
             </div>
 
-            {{-- Notification Button --}}
-            <button class="relative btn-icon" aria-label="Notifikasi">
-                <i class="far fa-bell text-lg"></i>
-                <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-critical rounded-circle"></span>
-            </button>
+            {{-- ← UBAH: Notification Button dengan dropdown --}}
+            <div class="relative" x-data="notificationBell()" x-init="init()">
+                {{-- Bell Button --}}
+                <button @click="toggle()" 
+                        class="relative btn-icon" 
+                        aria-label="Notifikasi">
+                    <i class="far fa-bell text-lg"></i>
+                    <span x-show="unreadCount > 0" 
+                        x-text="unreadCount > 9 ? '9+' : unreadCount"
+                        class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-critical text-white text-[10px] font-bold rounded-full flex items-center justify-center"></span>
+                </button>
+
+                {{-- Dropdown --}}
+                <div x-show="open" 
+                    @click.away="open = false"
+                    x-transition:enter="transition ease-out duration-150"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-100"
+                    x-transition:leave-start="opacity-100 scale-100"
+                    x-transition:leave-end="opacity-0 scale-95"
+                    class="absolute right-0 mt-3 w-[380px] max-w-[calc(100vw-2rem)] bg-canvas rounded-2xl shadow-sticky border border-hairline-soft overflow-hidden z-50"
+                    style="display: none;">
+
+                    {{-- ============ HEADER ============ --}}
+                    <div class="px-5 py-4 border-b border-hairline-soft flex items-center justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-body-md-bold text-ink-deep">Notifikasi</p>
+                            <p class="text-caption text-steel mt-0.5" x-show="unreadCount > 0">
+                                <span x-text="unreadCount" class="text-primary font-bold"></span> belum dibaca
+                            </p>
+                            <p class="text-caption text-steel mt-0.5" x-show="unreadCount === 0">
+                                Tidak ada notifikasi baru
+                            </p>
+                        </div>
+                        <a href="{{ route('notifications.index') }}" 
+                        class="text-caption-bold text-primary hover:text-primary-deep whitespace-nowrap">
+                            Lihat Semua →
+                        </a>
+                    </div>
+
+                    {{-- ============ BODY ============ --}}
+                    <div class="max-h-[380px] overflow-y-auto">
+
+                        {{-- Loading --}}
+                        <div x-show="loading" class="px-5 py-10 text-center">
+                            <i class="fas fa-spinner fa-spin text-primary text-xl"></i>
+                            <p class="text-caption text-steel mt-2">Memuat...</p>
+                        </div>
+
+                        {{-- Empty --}}
+                        <div x-show="!loading && notifications.length === 0" class="px-5 py-10 text-center">
+                            <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-surface-soft mb-3">
+                                <i class="far fa-bell text-steel text-xl"></i>
+                            </div>
+                            <p class="text-body-sm text-steel">Tidak ada notifikasi</p>
+                        </div>
+
+                        {{-- List --}}
+                        <div x-show="!loading && notifications.length > 0">
+                            <template x-for="notif in notifications" :key="notif.id">
+                                <a :href="'/notifications/' + notif.id + '/read'"
+                                class="flex items-start gap-3 px-5 py-4 hover:bg-surface-soft transition-colors border-b border-hairline-soft last:border-0"
+                                :class="!notif.read_at ? 'bg-primary/5' : ''">
+                                    {{-- Icon --}}
+                                    <div class="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-exclamation-triangle text-warning text-sm"></i>
+                                    </div>
+
+                                    {{-- Content --}}
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-body-sm text-ink-deep font-semibold mb-0.5">
+                                            Stok Menipis
+                                        </p>
+                                        <p class="text-caption text-steel leading-snug line-clamp-2" x-text="notif.message"></p>
+                                        <p class="text-[11px] text-stone mt-1" x-text="notif.created_at"></p>
+                                    </div>
+
+                                    {{-- Unread dot --}}
+                                    <div x-show="!notif.read_at" 
+                                        class="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+                                </a>
+                            </template>
+                        </div>
+
+                    </div>
+
+                    {{-- ============ FOOTER ============ --}}
+                    <div x-show="!loading && notifications.length > 0" 
+                        class="px-5 py-3 border-t border-hairline-soft bg-surface-soft/50">
+                        <form method="POST" action="{{ route('notifications.mark-all-read') }}">
+                            @csrf
+                            <button type="submit" 
+                                    class="w-full text-caption-bold text-primary hover:text-primary-deep py-1">
+                                <i class="fas fa-check-double text-xs mr-1"></i>
+                                Tandai Semua Dibaca
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
 
             {{-- User Dropdown --}}
             <div class="relative" x-data="{ open: false }">

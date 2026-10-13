@@ -16,6 +16,10 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\PortalRequestController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\StockMovementController;
+use App\Http\Controllers\StockRequestController;
+use App\Http\Controllers\StockOpnameController;
+use App\Http\Controllers\NotificationController;
 
 /*
 |----------------------------------------------------------------------
@@ -63,6 +67,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // ← BARU: Notifications
+    Route::prefix('notifications')
+        ->name('notifications.')
+        ->group(function () {
+            Route::get('/', [NotificationController::class, 'index'])->name('index');
+            Route::get('/dropdown', [NotificationController::class, 'dropdown'])->name('dropdown');
+            Route::get('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+            Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+            Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');
+            Route::delete('/', [NotificationController::class, 'destroyAll'])->name('destroy-all');
+        });
 
     /*
     |----------------------------------------------------------------------
@@ -185,7 +201,64 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 Route::post('/{portalRequest}/approve', [PortalRequestController::class, 'approve'])->name('approve');
                 Route::post('/{portalRequest}/reject', [PortalRequestController::class, 'reject'])->name('reject');
             });
+
+        // ← BARU: Stock Opname
+        Route::prefix('stock-opnames')
+            ->name('stock-opnames.')
+            ->group(function () {
+                Route::get('/', [StockOpnameController::class, 'index'])->name('index');
+                Route::get('/create', [StockOpnameController::class, 'create'])->name('create');
+                Route::post('/', [StockOpnameController::class, 'store'])->name('store');
+                Route::get('/{stockOpname}', [StockOpnameController::class, 'show'])->name('show');
+                Route::put('/{stockOpname}/physical', [StockOpnameController::class, 'updatePhysical'])->name('update-physical');
+                Route::post('/{stockOpname}/complete', [StockOpnameController::class, 'complete'])->name('complete');
+                Route::post('/{stockOpname}/cancel', [StockOpnameController::class, 'cancel'])->name('cancel');
+                Route::delete('/{stockOpname}', [StockOpnameController::class, 'destroy'])->name('destroy');
+            });
     });
+
+    /*
+    |----------------------------------------------------------------------
+    | STOCK MOVEMENTS (Admin + Petugas)
+    |----------------------------------------------------------------------
+    */
+    Route::middleware('role:admin,petugas_sarpras')
+        ->prefix('stock-movements')
+        ->name('stock-movements.')
+        ->group(function () {
+            Route::get('/', [StockMovementController::class, 'index'])->name('index');
+            Route::get('/{stockMovement}', [StockMovementController::class, 'show'])->name('show');
+        });
+
+    /*
+    |----------------------------------------------------------------------
+    | STOCK REQUESTS (Guru + Staf + Petugas + Admin)
+    |----------------------------------------------------------------------
+    */
+    Route::prefix('stock-requests')
+        ->name('stock-requests.')
+        ->group(function () {
+            // Index — guru lihat milik sendiri, petugas/admin lihat semua
+            Route::get('/', [StockRequestController::class, 'index'])->name('index');
+
+            // Create (guru + staf + petugas + admin)
+            Route::middleware('role:admin,petugas_sarpras,guru')
+                ->group(function () {
+                    Route::get('/create', [StockRequestController::class, 'create'])->name('create');
+                    Route::post('/', [StockRequestController::class, 'store'])->name('store');
+                });
+
+            // Approve/Reject (petugas + admin)
+            Route::middleware('role:admin,petugas_sarpras')
+                ->group(function () {
+                    Route::post('/{stockRequest}/approve', [StockRequestController::class, 'approve'])->name('approve');
+                    Route::post('/{stockRequest}/reject', [StockRequestController::class, 'reject'])->name('reject');
+                });
+
+            // Show & Delete (semua role dengan ownership check di controller)
+            Route::get('/{stockRequest}', [StockRequestController::class, 'show'])->name('show');
+            Route::delete('/{stockRequest}', [StockRequestController::class, 'destroy'])->name('destroy');
+        });
 });
 
 require __DIR__.'/auth.php';

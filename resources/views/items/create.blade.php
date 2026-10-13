@@ -251,6 +251,97 @@
                         @enderror
                     </div>
 
+                    {{-- ← BARU: Tipe Item --}}
+                    <div>
+                        <label class="form-label">
+                            Tipe Barang <span class="text-critical">*</span>
+                        </label>
+                        <p class="text-caption text-steel mb-3">
+                            Tentukan jenis barang: aset tetap atau habis pakai.
+                        </p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {{-- Asset --}}
+                            <label class="cursor-pointer block">
+                                <input type="radio" 
+                                    name="item_type" 
+                                    value="asset"
+                                    @checked(old('item_type', 'asset') === 'asset')
+                                    onchange="toggleMinStock(this)"
+                                    class="item-type-input sr-only">
+                                <div class="item-type-card p-4 rounded-xl border-2 transition-all
+                                            {{ old('item_type', 'asset') === 'asset' ? 'border-primary bg-primary/5' : 'border-hairline-soft bg-canvas hover:border-hairline' }}">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-box text-primary"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-body-sm-bold text-ink-deep mb-1">Aset Tetap</p>
+                                            <p class="text-caption text-steel">
+                                                Barang inventaris. Bisa dipinjam.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+
+                            {{-- Consumable --}}
+                            <label class="cursor-pointer block">
+                                <input type="radio" 
+                                    name="item_type" 
+                                    value="consumable"
+                                    @checked(old('item_type') === 'consumable')
+                                    onchange="toggleMinStock(this)"
+                                    class="item-type-input sr-only">
+                                <div class="item-type-card p-4 rounded-xl border-2 transition-all
+                                            {{ old('item_type') === 'consumable' ? 'border-warning bg-warning/5' : 'border-hairline-soft bg-canvas hover:border-hairline' }}">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-boxes text-warning"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-body-sm-bold text-ink-deep mb-1">Habis Pakai</p>
+                                            <p class="text-caption text-steel">
+                                                BHP. Diminta, stok berkurang.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+
+                        @error('item_type')
+                            <p class="mt-2 text-body-sm text-critical-strong flex items-center gap-1.5">
+                                <i class="fas fa-exclamation-circle text-xs"></i>
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+
+                    {{-- ← BARU: Min Stock (muncul kalau consumable) --}}
+                    <div id="min-stock-wrapper" class="{{ old('item_type') === 'consumable' ? '' : 'hidden' }}">
+                        <label for="min_stock" class="form-label">
+                            Minimal Stok
+                            <span class="text-caption text-steel font-normal ml-1">(untuk notifikasi stok menipis)</span>
+                        </label>
+                        <input id="min_stock" 
+                            type="number" 
+                            name="min_stock" 
+                            value="{{ old('min_stock') }}"
+                            min="0"
+                            placeholder="Contoh: 5"
+                            class="form-input @error('min_stock') form-input-error @enderror">
+                        <p class="text-caption text-steel mt-1">
+                            Notifikasi muncul kalau stok ≤ nilai ini.
+                        </p>
+                        @error('min_stock')
+                            <p class="mt-2 text-body-sm text-critical-strong flex items-center gap-1.5">
+                                <i class="fas fa-exclamation-circle text-xs"></i>
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+
                     {{-- ← BARU: Mode Tracking --}}
                     <div>
                         <label class="form-label">
@@ -651,12 +742,38 @@
         });
     }
 
+    function toggleMinStock(radio) {
+        const wrapper = document.getElementById('min-stock-wrapper');
+        const input = document.getElementById('min_stock');
+        
+        // Reset highlight semua card
+        document.querySelectorAll('.item-type-card').forEach(card => {
+            card.classList.remove('border-primary', 'bg-primary/5', 'border-warning', 'bg-warning/5');
+            card.classList.add('border-hairline-soft');
+        });
+        
+        // Highlight yang dipilih
+        const card = radio.closest('label').querySelector('.item-type-card');
+        card.classList.remove('border-hairline-soft');
+        
+        if (radio.value === 'consumable') {
+            card.classList.add('border-warning', 'bg-warning/5');
+            wrapper.classList.remove('hidden');
+        } else {
+            card.classList.add('border-primary', 'bg-primary/5');
+            wrapper.classList.add('hidden');
+            input.value = ''; // reset min_stock kalau asset
+        }
+    }
+
     // Jalankan saat load (untuk old value)
     document.addEventListener('DOMContentLoaded', function() {
         highlightCondition();
         highlightTracking();  
         updateCodePreview();
-        updateTrackingInfo();  
+        updateTrackingInfo();
+        const checked = document.querySelector('.item-type-input:checked');
+        if (checked) toggleMinStock(checked);  
     });
 </script>
 @endpush

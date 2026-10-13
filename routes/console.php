@@ -19,3 +19,8 @@ Artisan::command('inspire', function () {
 Schedule::command('loans:update-overdue')
     ->dailyAt('00:05')
     ->description('Update status peminjaman terlambat');
+
+// Cek stok menipis setiap 6 jam
+Schedule::command('stock:check-low-stock')
+    ->everySixHours()
+    ->description('Cek item dengan stok menipis');

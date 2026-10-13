@@ -184,6 +184,66 @@
         </div>
     @endif
 
+    {{-- ============ WIDGET: STOK & BHP ============ --}}
+    @if(auth()->user()->isAdmin() || auth()->user()->isPetugas())
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            {{-- Widget 1: Permintaan BHP Pending --}}
+            @if($stockPendingCount > 0)
+                <div class="card bg-warning/5 border-warning/20">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-lg bg-warning/10 flex items-center justify-center">
+                                <i class="fas fa-boxes text-warning text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-body-md-bold text-ink-deep">Permintaan BHP</h3>
+                                <p class="text-caption text-steel">Menunggu review</p>
+                            </div>
+                        </div>
+                        <span class="badge-warning text-lg font-bold">{{ $stockPendingCount }}</span>
+                    </div>
+                    <a href="{{ route('stock-requests.index', ['status' => 'pending']) }}" 
+                    class="text-body-sm text-primary hover:underline inline-flex items-center gap-1">
+                        Lihat semua
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </a>
+                </div>
+            @endif
+
+            {{-- Widget 2: Stok Menipis --}}
+            @if($lowStockCount > 0)
+                <div class="card bg-critical/5 border-critical/20">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-lg bg-critical/10 flex items-center justify-center">
+                                <i class="fas fa-exclamation-triangle text-critical text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-body-md-bold text-ink-deep">Stok Menipis</h3>
+                                <p class="text-caption text-steel">{{ $lowStockCount }} barang perlu restock</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        @foreach($lowStockItems as $item)
+                            <div class="flex items-center justify-between text-body-sm">
+                                <span class="text-ink truncate">{{ $item->name }}</span>
+                                <span class="text-critical font-bold">{{ $item->quantity }}/{{ $item->min_stock }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                    <a href="{{ route('items.index', ['item_type' => 'consumable']) }}" 
+                    class="text-body-sm text-primary hover:underline inline-flex items-center gap-1 mt-3">
+                        Lihat semua BHP
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </a>
+                </div>
+            @endif
+
+        </div>
+    @endif
+
     {{-- ==================== PERLU PERHATIAN (Ringkasan Peminjaman) ==================== --}}
     @if($loanStats && (auth()->user()->isAdmin() || auth()->user()->isPetugas() || auth()->user()->isKepalaSekolah()))
     <section>

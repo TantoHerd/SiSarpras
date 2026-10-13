@@ -77,6 +77,17 @@
                 </select>
             </div>
 
+            {{-- ← BARU: Filter Tipe Barang --}}
+            <select name="item_type" class="form-input">
+                <option value="">Semua Tipe</option>
+                <option value="asset" @selected(($filters['item_type'] ?? '') === 'asset')>
+                    Aset Tetap
+                </option>
+                <option value="consumable" @selected(($filters['item_type'] ?? '') === 'consumable')>
+                    Habis Pakai
+                </option>
+            </select>
+
             {{-- ← BARU: Filter Mode Tracking --}}
             <select name="tracking_mode" class="form-input">
                 <option value="">Semua Mode Tracking</option>
@@ -132,6 +143,7 @@
                                     class="w-4 h-4 rounded border-hairline-soft text-primary focus:ring-primary cursor-pointer">
                             </th>
                             <th class="text-left px-5 py-3 text-caption-bold text-steel uppercase tracking-wider">Barang</th>
+                            <th class="text-left px-5 py-3 text-caption-bold text-steel uppercase tracking-wider">Sumber Dana</th>
                             <th class="text-left px-5 py-3 text-caption-bold text-steel uppercase tracking-wider hidden lg:table-cell">Kategori</th>
                             <th class="text-left px-5 py-3 text-caption-bold text-steel uppercase tracking-wider hidden lg:table-cell">Lokasi</th>
                             <th class="text-center px-5 py-3 text-caption-bold text-steel uppercase tracking-wider hidden lg:table-cell">Mode</th>
@@ -143,7 +155,7 @@
                     </thead>
                     <tbody class="divide-y divide-hairline-soft">
                         @foreach($items as $item)
-                            <tr class="hover:bg-surface-soft/50 transition-colors">
+                            <tr class="hover:bg-surface-soft/50 transition-colors {{ $item->isLowStock() ? 'bg-critical/5' : '' }}">
                                 <td class="text-center px-3 py-3">
                                     <input type="checkbox"
                                         name="item_ids[]"
@@ -166,21 +178,32 @@
                                         <div class="min-w-0">
                                             <p class="text-body-sm-bold text-ink-deep truncate max-w-[250px]">
                                                 {{ $item->name }}
-                                                @if($item->fundingSource)
-                                                    <span class="badge-info text-xs mt-1 inline-flex">
-                                                        <i class="fas fa-money-bill-wave mr-1"></i>
-                                                        {{ $item->fundingSource->code }}
-                                                    </span>
-                                                @endif
                                             </p>
-                                            <p class="text-caption text-steel font-mono">
-                                                {{ $item->code }}
-                                            </p>
-                                            @if($item->brand)
-                                                <p class="text-caption text-steel">{{ $item->brand }}</p>
+                                            <p class="text-sm-bold text-ink-deep truncate">
+                                            {{-- ← BARU: Badge item_type --}}
+                                            @if($item->item_type === 'consumable')
+                                                <span class="badge-warning text-xs ml-1">BHP</span>
+                                             @else
+                                                <span class="badge-info text-xs ml-1">Aset</span>
                                             @endif
+
+                                            {{-- Badge stok menipis --}}
+                                            @if($item->isLowStock())
+                                                <span class="badge-critical text-xs ml-1">
+                                                    <i class="fas fa-exclamation-triangle mr-0.5"></i> Menipis
+                                                </span>
+                                            @endif
+                                            </p>
                                         </div>
                                     </div>
+                                </td>
+
+                                {{-- Sumber Dana --}}
+                                <td class="px-5 py-4 hidden lg:table-cell">
+                                    <span class="badge-info text-xs mt-1 inline-flex">
+                                        <i class="fas fa-money-bill mr-1"></i>
+                                        {{ $item->fundingSource->code }}
+                                    </span>
                                 </td>
 
                                 {{-- Kategori --}}
@@ -219,7 +242,14 @@
 
                                 {{-- Stok --}}
                                 <td class="px-5 py-4 text-center">
-                                    <span class="text-body-sm-bold text-ink-deep">{{ $item->quantity }}</span>
+                                    <span class="text-body-sm-bold {{ $item->isLowStock() ? 'text-critical' : 'text-ink-deep' }}">
+                                        {{ $item->quantity }}
+                                    </span>
+                                    @if($item->isLowStock() && $item->min_stock)
+                                        <p class="text-caption text-critical">
+                                            min: {{ $item->min_stock }}
+                                        </p>
+                                    @endif
                                 </td>
 
                                 {{-- Kondisi --}}

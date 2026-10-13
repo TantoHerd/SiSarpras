@@ -47,4 +47,9 @@ class Location extends Model
     {
         return $this->items()->count();
     }
+
+    public function stockOpnames()
+    {
+        return $this->hasMany(StockOpname::class);
+    }
 }

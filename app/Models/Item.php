@@ -16,7 +16,7 @@ class Item extends Model
     protected $fillable = [
         'code', 'name', 'category_id', 'location_id', 'supplier_id',
         'brand', 'type', 'serial_number', 'purchase_year', 'price',
-        'condition', 'status', 'quantity','tracking_mode', 'image', 'barcode',
+        'condition', 'status', 'quantity','tracking_mode', 'item_type', 'min_stock', 'image', 'barcode',
         'created_by', 'funding_source_id', 'updated_by'
     ];
 
@@ -133,5 +133,80 @@ class Item extends Model
             'per_batch' => 'Per Batch',
             default     => 'Per Unit',
         };
+    }
+
+    /* ─────────── Item Type ─────────── */
+
+    /**
+     * Cek apakah item ini asset
+     */
+    public function isAsset(): bool
+    {
+        return $this->item_type === 'asset';
+    }
+
+    /**
+     * Cek apakah item ini consumable (BHP)
+     */
+    public function isConsumable(): bool
+    {
+        return $this->item_type === 'consumable';
+    }
+
+    /**
+     * Label item type
+     */
+    public function getItemTypeLabelAttribute(): string
+    {
+        return match ($this->item_type) {
+            'asset'      => 'Aset',
+            'consumable' => 'Habis Pakai',
+            default      => 'Aset',
+        };
+    }
+
+    /**
+     * Cek apakah stok menipis
+     */
+    public function isLowStock(): bool
+    {
+        if (!$this->isConsumable()) return false;
+        if ($this->min_stock === null) return false;
+        
+        return $this->quantity <= $this->min_stock;
+    }
+
+    /**
+     * Badge untuk stok
+     */
+    public function getStockBadgeAttribute(): string
+    {
+        if ($this->isLowStock()) {
+            return 'badge-critical';
+        }
+        
+        return 'badge-success';
+    }
+
+    public function scopeConsumable($query)
+    {
+        return $query->where('item_type', 'consumable');
+    }
+
+    public function scopeAsset($query)
+    {
+        return $query->where('item_type', 'asset');
+    }
+
+    public function scopeLowStock($query)
+    {
+        return $query->where('item_type', 'consumable')
+            ->whereNotNull('min_stock')
+            ->whereColumn('quantity', '<=', 'min_stock');
+    }
+
+    public function stockMovements()
+    {
+        return $this->hasMany(StockMovement::class)->latest('created_at');
     }
 }

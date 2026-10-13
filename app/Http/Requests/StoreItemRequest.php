@@ -25,15 +25,14 @@ class StoreItemRequest extends FormRequest
             'tracking_mode'     => ['nullable', 'in:per_unit,per_batch'],  // ← BARU
             'brand'             => ['nullable', 'string', 'max:100'],
             'type'              => ['nullable', 'string', 'max:100'],
-            'serial_number'     => [
-                'nullable', 'string', 'max:100',
-                Rule::unique('items', 'serial_number'),
-            ],
-            'purchase_year' => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
-            'price'         => ['nullable', 'numeric', 'min:0'],
-            'condition'     => ['required', Rule::enum(ItemConditionEnum::class)],
-            'quantity'      => ['required', 'integer', 'min:1'],
-            'image'         => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'serial_number'     => ['nullable', 'string', 'max:100', Rule::unique('items', 'serial_number')],
+            'purchase_year'     => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
+            'price'             => ['nullable', 'numeric', 'min:0'],
+            'condition'         => ['required', Rule::enum(ItemConditionEnum::class)],
+            'quantity'          => ['required', 'integer', 'min:1'],
+            'image'             => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'item_type'         => ['required', 'in:asset,consumable'],
+            'min_stock'         => ['nullable', 'integer', 'min:0', 'required_if:item_type,consumable'],
         ];
     }
 
@@ -55,6 +54,11 @@ class StoreItemRequest extends FormRequest
             'image.mimes'           => 'Format gambar harus jpg, jpeg, png, atau webp.',
             'image.max'             => 'Ukuran gambar maksimal 2MB.',
             'tracking_mode.in'      => 'Mode tracking tidak valid.',
+            'item_type.required'    => 'Tipe item wajib dipilih.',
+            'item_type.in'          => 'Tipe item tidak valid.',
+            'min_stock.integer'     => 'Minimal stok harus berupa angka.',
+            'min_stock.min'         => 'Minimal stok tidak boleh negatif.',
+            'min_stock.required_if' => 'Minimal stok wajib diisi untuk barang habis pakai.',
         ];
     }
 
@@ -73,6 +77,16 @@ class StoreItemRequest extends FormRequest
         // Default quantity
         if (empty($this->quantity)) {
             $this->merge(['quantity' => 1]);
+        }
+
+        // Kalau tidak ada item_type, default 'asset'
+        if (!$this->filled('item_type')) {
+            $this->merge(['item_type' => 'asset']);
+        }
+
+        // Kalau item_type asset, kosongkan min_stock
+        if ($this->input('item_type') === 'asset') {
+            $this->merge(['min_stock' => null]);
         }
     }
 }

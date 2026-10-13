@@ -45,7 +45,9 @@ class ItemRepository
                         });
                 });
             })
-            
+
+            // ← BARU: filter item_type
+            ->when(!empty($filters['item_type']), fn($q) => $q->where('item_type', $filters['item_type']))
             ->when(!empty($filters['condition']), fn($q) => $q->where('condition', $filters['condition']))
             ->when(!empty($filters['status']), fn($q) => $q->where('status', $filters['status']))
             ->latest()
