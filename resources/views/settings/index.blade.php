@@ -24,21 +24,6 @@
         </button>
     </div>
 
-    {{-- ==================== FLASH ==================== --}}
-    @if(session('success'))
-        <div class="flex items-start gap-3 p-4 rounded-xl bg-success/10 border border-success/20">
-            <i class="fas fa-check-circle text-success text-lg mt-0.5"></i>
-            <p class="text-body-sm text-ink">{{ session('success') }}</p>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="flex items-start gap-3 p-4 rounded-xl bg-critical/10 border border-critical/20">
-            <i class="fas fa-exclamation-circle text-critical text-lg mt-0.5"></i>
-            <p class="text-body-sm text-ink">{{ session('error') }}</p>
-        </div>
-    @endif
-
     {{-- ==================== TAB NAVIGATION ==================== --}}
     <div class="card !p-0 overflow-hidden">
         <div class="flex flex-wrap border-b border-hairline-soft">

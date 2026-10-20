@@ -310,6 +310,25 @@
                         @endif
                     </div>
                 </div>
+
+                {{-- ← BARU: Info Garansi --}}
+                @if($item->isAsset() && $item->warranty_start_date)
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-surface-soft flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-shield-alt text-steel text-sm"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-caption text-steel uppercase tracking-wider">Garansi</p>
+                            <p class="text-body-sm-bold text-ink-deep">
+                                {{ $item->warranty_duration_months }} bulan
+                            </p>
+                            <p class="text-caption {{ $item->isWarrantyActive() ? 'text-success' : 'text-critical' }}">
+                                {{ $item->isWarrantyActive() ? 'Berakhir pada' : 'Telah berakhir pada' }} 
+                                {{ $item->warranty_end_date->format('d M Y') }}
+                            </p>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
 

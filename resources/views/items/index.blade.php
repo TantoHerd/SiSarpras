@@ -77,7 +77,7 @@
                 </select>
             </div>
 
-            {{-- ← BARU: Filter Tipe Barang --}}
+            {{-- Filter Tipe Barang --}}
             <select name="item_type" class="form-input">
                 <option value="">Semua Tipe</option>
                 <option value="asset" @selected(($filters['item_type'] ?? '') === 'asset')>
@@ -88,7 +88,7 @@
                 </option>
             </select>
 
-            {{-- ← BARU: Filter Mode Tracking --}}
+            {{-- Filter Mode Tracking --}}
             <select name="tracking_mode" class="form-input">
                 <option value="">Semua Mode Tracking</option>
                 <option value="per_unit" @selected(($filters['tracking_mode'] ?? '') === 'per_unit')>
@@ -179,31 +179,48 @@
                                             <p class="text-body-sm-bold text-ink-deep truncate max-w-[250px]">
                                                 {{ $item->name }}
                                             </p>
-                                            <p class="text-sm-bold text-ink-deep truncate">
-                                            {{-- ← BARU: Badge item_type --}}
-                                            @if($item->item_type === 'consumable')
-                                                <span class="badge-warning text-xs ml-1">BHP</span>
-                                             @else
-                                                <span class="badge-info text-xs ml-1">Aset</span>
-                                            @endif
+                                            <div class="flex flex-wrap items-center gap-1 mt-1">
+                                                {{-- Badge item_type --}}
+                                                @if($item->item_type === 'consumable')
+                                                    <span class="badge-warning text-xs">BHP</span>
+                                                @else
+                                                    <span class="badge-info text-xs">Aset</span>
+                                                @endif
 
-                                            {{-- Badge stok menipis --}}
-                                            @if($item->isLowStock())
-                                                <span class="badge-critical text-xs ml-1">
-                                                    <i class="fas fa-exclamation-triangle mr-0.5"></i> Menipis
-                                                </span>
-                                            @endif
-                                            </p>
+                                                {{-- Badge Garansi (Hanya Aset) --}}
+                                                @if($item->isAsset() && $item->warranty_start_date)
+                                                    @if($item->isWarrantyActive())
+                                                        <span class="badge-success text-xs" title="Garansi s/d {{ $item->warranty_end_date->format('d M Y') }}">
+                                                            <i class="fas fa-shield-alt mr-0.5"></i> Garansi
+                                                        </span>
+                                                    @else
+                                                        <span class="badge-critical text-xs" title="Garansi habis pada {{ $item->warranty_end_date->format('d M Y') }}">
+                                                            <i class="fas fa-shield-alt mr-0.5"></i> Expired
+                                                        </span>
+                                                    @endif
+                                                @endif
+
+                                                {{-- Badge Stok Menipis --}}
+                                                @if($item->isLowStock())
+                                                    <span class="badge-critical text-xs">
+                                                        <i class="fas fa-exclamation-triangle mr-0.5"></i> Menipis
+                                                    </span>
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
 
                                 {{-- Sumber Dana --}}
                                 <td class="px-5 py-4 hidden lg:table-cell">
-                                    <span class="badge-info text-xs mt-1 inline-flex">
-                                        <i class="fas fa-money-bill mr-1"></i>
-                                        {{ $item->fundingSource->code }}
-                                    </span>
+                                    @if($item->fundingSource)
+                                        <span class="badge-info text-xs mt-1 inline-flex">
+                                            <i class="fas fa-money-bill mr-1"></i>
+                                            {{ $item->fundingSource->code }}
+                                        </span>
+                                    @else
+                                        <span class="text-caption text-stone italic">-</span>
+                                    @endif
                                 </td>
 
                                 {{-- Kategori --}}
@@ -218,12 +235,12 @@
                                     <p class="text-body-sm text-ink">
                                         {{ $item->location->name ?? '-' }}
                                     </p>
-                                    @if($item->location->floor)
+                                    @if($item->location && $item->location->floor)
                                         <p class="text-caption text-steel">{{ $item->location->floor }}</p>
                                     @endif
                                 </td>
 
-                                {{-- ← BARU: Mode Tracking --}}
+                                {{-- Mode Tracking --}}
                                 <td class="px-5 py-4 text-center hidden lg:table-cell">
                                     @if($item->isPerBatch())
                                         <span class="inline-flex items-center gap-1 px-2 py-1 rounded-pill bg-warning/10 text-warning text-caption-bold"
@@ -405,18 +422,12 @@
 
     // ==================== MULTI-SELECT UNTUK CETAK LABEL MASSAL ====================
 
-    /**
-     * Toggle semua checkbox ketika "select all" dicentang
-     */
     function toggleSelectAll(checkbox) {
         const itemCheckboxes = document.querySelectorAll('.item-checkbox');
         itemCheckboxes.forEach(cb => cb.checked = checkbox.checked);
         updateSelection();
     }
 
-    /**
-     * Update tampilan tombol "Cetak Label Massal" berdasarkan jumlah item terpilih
-     */
     function updateSelection() {
         const checked = document.querySelectorAll('.item-checkbox:checked');
         const count = checked.length;
@@ -424,17 +435,14 @@
         const countBadge = document.getElementById('selected-count');
         const selectAll = document.getElementById('select-all');
 
-        // Update badge jumlah
         if (countBadge) countBadge.textContent = count;
 
-        // Tampilkan / sembunyikan tombol
         if (count > 0) {
             btn.classList.remove('hidden');
         } else {
             btn.classList.add('hidden');
         }
 
-        // Sync state "select all"
         const allCheckboxes = document.querySelectorAll('.item-checkbox');
         if (selectAll && allCheckboxes.length > 0) {
             selectAll.checked = count === allCheckboxes.length;
@@ -442,9 +450,6 @@
         }
     }
 
-    /**
-     * Buka halaman cetak label massal dengan ID item terpilih
-     */
     function printBatchLabels() {
         const checked = document.querySelectorAll('.item-checkbox:checked');
         const ids = Array.from(checked).map(cb => cb.value);
@@ -459,14 +464,10 @@
             return;
         }
 
-        // Redirect ke halaman cetak label massal
         const url = `{{ route('items.barcode-batch') }}?ids=${ids.join(',')}`;
         window.open(url, '_blank');
     }
 
-    /**
-     * Init saat halaman selesai load
-     */
     document.addEventListener('DOMContentLoaded', function () {
         updateSelection();
     });

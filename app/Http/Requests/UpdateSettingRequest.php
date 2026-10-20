@@ -43,13 +43,14 @@ class UpdateSettingRequest extends FormRequest
 
             case 'preference':
                 $rules = [
-                    'app_name'          => ['required', 'string', 'max:100'],
-                    'app_short_name'    => ['required', 'string', 'max:30'],
-                    'app_version'       => ['required', 'string', 'max:20'],
-                    'timezone'          => ['required', 'string', 'max:50'],
-                    'date_format'       => ['required', 'in:d-m-Y,Y-m-d,d/m/Y,j F Y'],
-                    'currency_symbol'   => ['required', 'string', 'max:10'],
-                    'currency_position' => ['required', 'in:before,after'],
+                    'app_name'              => ['required', 'string', 'max:100'],
+                    'app_short_name'        => ['required', 'string', 'max:30'],
+                    'app_version'           => ['required', 'string', 'max:20'],
+                    'timezone'              => ['required', 'string', 'max:50'],
+                    'date_format'           => ['required', 'in:d-m-Y,Y-m-d,d/m/Y,j F Y'],
+                    'currency_symbol'       => ['required', 'string', 'max:10'],
+                    'currency_position'     => ['required', 'in:before,after'],
+                    'warranty_reminder_days' => ['nullable', 'integer', 'min:1', 'max:365'],
                 ];
                 break;
 

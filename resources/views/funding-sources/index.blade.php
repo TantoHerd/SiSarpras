@@ -14,7 +14,7 @@
         <div class="card-sm">
             <div class="flex items-center justify-between mb-3">
                 <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <i class="fas fa-money-bill-wave text-primary"></i>
+                    <i class="fas fa-money-bill text-primary"></i>
                 </div>
             </div>
             <p class="text-caption text-steel uppercase tracking-wider">Total Sumber Dana</p>
@@ -126,7 +126,7 @@
                                 <td class="px-5 py-4">
                                     <div class="flex items-center gap-3">
                                         <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                            <i class="fas fa-money-bill-wave text-primary"></i>
+                                            <i class="fas fa-money-bill text-primary"></i>
                                         </div>
                                         <div class="min-w-0">
                                             <p class="text-body-sm-bold text-ink-deep truncate max-w-[250px]">
@@ -206,7 +206,7 @@
             {{-- Empty State --}}
             <div class="py-16 px-6 text-center">
                 <div class="inline-flex items-center justify-center w-20 h-20 rounded-circle bg-surface-soft mb-5">
-                    <i class="fas fa-money-bill-wave text-steel text-3xl"></i>
+                    <i class="fas fa-money-bill text-steel text-3xl"></i>
                 </div>
                 <h3 class="text-heading-sm text-ink-deep mb-2">
                     @if(array_filter($filters))

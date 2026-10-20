@@ -53,8 +53,13 @@
             </p>
         </div>
         <div class="flex items-center gap-2">
+            {{-- ← BARU: Tombol Import --}}
+            <a href="{{ route('users.import.form') }}" class="btn-ghost">
+                <i class="fas fa-file-excel"></i>
+                Import Excel
+            </a>
             <a href="{{ route('users.create') }}" class="btn-primary">
-                <i class="fas fa-user-plus"></i>
+                <i class="fas fa-plus"></i>
                 Tambah User
             </a>
         </div>

@@ -2,8 +2,8 @@
 @extends('layouts.app')
 
 @section('title', 'Permintaan Portal')
-@section('page_title', 'Permintaan dari Portal Siswa')
-@section('page_subtitle', 'Review dan proses permintaan peminjaman dari siswa')
+@section('page_title', 'Permintaan dari Portal')
+@section('page_subtitle', 'Review dan proses permintaan peminjaman dari siswa / guru')
 
 @section('content')
 
@@ -76,7 +76,7 @@
                 <input type="text" 
                        name="search" 
                        value="{{ $filters['search'] ?? '' }}"
-                       placeholder="Cari NIS, nama, atau kelas siswa..."
+                       placeholder="Cari NIS, nama, atau kelas pemohon..."
                        class="form-input pl-11">
             </div>
 
@@ -131,9 +131,9 @@
                 <table class="w-full">
                     <thead class="bg-surface-soft border-b border-hairline-soft">
                         <tr>
-                            <th class="text-left px-5 py-3 text-caption-bold text-steel uppercase tracking-wider">Siswa</th>
+                            <th class="text-left px-5 py-3 text-caption-bold text-steel uppercase tracking-wider">Pemohon</th>
                             <th class="text-left px-5 py-3 text-caption-bold text-steel uppercase tracking-wider">Barang</th>
-                            <th class="text-center px-5 py-3 text-caption-bold text-steel uppercase tracking-wider hidden lg:table-cell">Jumlah</th>
+                            <th class="text-center px-5 py-3 text-caption-bold text-steel uppercase tracking-wider hidden lg:table-cell">Total</th>
                             <th class="text-left px-5 py-3 text-caption-bold text-steel uppercase tracking-wider hidden lg:table-cell">Diajukan</th>
                             <th class="text-center px-5 py-3 text-caption-bold text-steel uppercase tracking-wider">Status</th>
                             <th class="text-right px-5 py-3 text-caption-bold text-steel uppercase tracking-wider">Aksi</th>
@@ -143,7 +143,7 @@
                         @foreach($requests as $req)
                             <tr class="hover:bg-surface-soft/50 transition-colors {{ $req->isPending() ? 'bg-warning/5' : '' }}">
 
-                                {{-- Siswa --}}
+                                {{-- Pemohon --}}
                                 <td class="px-5 py-4">
                                     <div class="flex items-center gap-3">
                                         <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -160,22 +160,27 @@
                                     </div>
                                 </td>
 
-                                {{-- Barang --}}
+                                {{-- Barang (Multi-item Summary) --}}
                                 <td class="px-5 py-4">
-                                    <p class="text-body-sm-bold text-ink-deep truncate max-w-[250px]">
-                                        {{ $req->item->name ?? '-' }}
-                                    </p>
-                                    <p class="text-caption text-steel font-mono">
-                                        {{ $req->item->code ?? '-' }}
-                                    </p>
+                                    @if($req->items->count() > 0)
+                                        <p class="text-body-sm-bold text-ink-deep">
+                                            {{ $req->items->count() }} jenis barang
+                                        </p>
+                                        <p class="text-caption text-steel truncate max-w-[200px]">
+                                            {{ $req->items->first()->item->name ?? '-' }}
+                                            @if($req->items->count() > 1)
+                                                <span class="text-stone">+{{ $req->items->count() - 1 }} lainnya</span>
+                                            @endif
+                                        </p>
+                                    @else
+                                        <span class="text-caption text-stone italic">Tidak ada barang</span>
+                                    @endif
                                 </td>
 
-                                {{-- Jumlah --}}
+                                {{-- Total Unit --}}
                                 <td class="px-5 py-4 text-center hidden lg:table-cell">
-                                    <span class="text-body-sm-bold text-ink-deep">{{ $req->quantity }}</span>
-                                    @if($req->item && $req->item->isPerBatch())
-                                        <span class="text-caption text-steel block">unit</span>
-                                    @endif
+                                    <span class="text-body-sm-bold text-ink-deep">{{ $req->items->sum('quantity') }}</span>
+                                    <span class="text-caption text-steel block">unit</span>
                                 </td>
 
                                 {{-- Diajukan --}}
@@ -206,7 +211,7 @@
 
                                         @if($req->isPending())
                                             <button type="button"
-                                                    onclick="quickApprove({{ $req->id }}, '{{ addslashes($req->student_name) }}', '{{ addslashes($req->item->name ?? '') }}')"
+                                                    onclick="quickApprove({{ $req->id }}, '{{ addslashes($req->student_name) }}', {{ $req->items->count() }})"
                                                     class="btn-icon !w-9 !h-9 hover:!bg-success/10 hover:!text-success" 
                                                     title="Setujui">
                                                 <i class="fas fa-check text-sm"></i>
@@ -250,7 +255,7 @@
                     @if(array_filter($filters))
                         Tidak ada permintaan yang cocok dengan filter yang dipilih.
                     @else
-                        Belum ada siswa yang mengajukan peminjaman melalui portal.
+                        Belum ada pemohon yang mengajukan peminjaman melalui portal.
                     @endif
                 </p>
                 @if(array_filter($filters))
@@ -308,7 +313,7 @@
                           placeholder="Contoh: Barang sedang digunakan untuk kegiatan lain..."
                           class="form-input !h-auto resize-none"></textarea>
                 <p class="text-caption text-steel mt-1">
-                    Minimal 5 karakter. Alasan akan ditampilkan ke siswa.
+                    Minimal 5 karakter. Alasan akan ditampilkan ke pemohon.
                 </p>
             </div>
 
@@ -328,9 +333,10 @@
 
 @push('scripts')
 <script>
-    function quickApprove(id, studentName, itemName) {
+    // ← PERBAIKAN: Parameter ke-3 sekarang menerima jumlah item (itemsCount)
+    function quickApprove(id, studentName, itemsCount) {
         document.getElementById('approve-message').innerHTML = 
-            `Permintaan dari <strong class="text-ink-deep">${studentName}</strong> untuk barang <strong class="text-ink-deep">${itemName}</strong> akan disetujui. Loan akan otomatis dibuat.`;
+            `Permintaan dari <strong class="text-ink-deep">${studentName}</strong> sebanyak <strong class="text-ink-deep">${itemsCount} jenis barang</strong> akan disetujui. Loan akan otomatis dibuat untuk setiap barang.`;
         document.getElementById('approve-form').action = `/admin/portal-requests/${id}/approve`;
         document.getElementById('approve-modal').classList.remove('hidden');
     }

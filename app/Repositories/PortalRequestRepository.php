@@ -19,7 +19,8 @@ class PortalRequestRepository
     public function paginate(?string $status = null, ?string $search = null, int $perPage = 15): LengthAwarePaginator
     {
         return $this->model
-            ->with(['item', 'student', 'processor'])
+            // ← PERBAIKAN: Ubah 'item' menjadi 'items.item'
+            ->with(['items.item', 'student', 'processor']) 
             ->when($status, fn($q) => $q->where('status', $status))
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($sub) use ($search) {
@@ -39,7 +40,8 @@ class PortalRequestRepository
     public function findByNis(string $nis): Collection
     {
         return $this->model
-            ->with(['item', 'loan'])
+            // ← PERBAIKAN
+            ->with(['items.item', 'loan'])
             ->byNis($nis)
             ->latest()
             ->limit(20)
@@ -48,7 +50,8 @@ class PortalRequestRepository
 
     public function find(int $id): PortalRequest
     {
-        return $this->model->with(['item', 'student', 'processor', 'loan'])->findOrFail($id);
+        // ← PERBAIKAN
+        return $this->model->with(['items.item', 'student', 'processor', 'loan'])->findOrFail($id);
     }
 
     public function create(array $data): PortalRequest
@@ -77,7 +80,7 @@ class PortalRequestRepository
     {
         return $this->model
             ->byNis($nis)
-            ->where('item_id', $itemId)
+            ->whereHas('items', fn($q) => $q->where('item_id', $itemId)) // ← PERBAIKAN
             ->pending()
             ->exists();
     }

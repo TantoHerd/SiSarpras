@@ -9,11 +9,19 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
+use App\Models\Student;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
+use App\Models\Item;
+use App\Services\PortalBhpService;
+use App\Services\PortalLoanService;
 
 class PortalController extends Controller
 {
     public function __construct(
-        protected PortalService $portalService
+        protected PortalService $portalService,
+        protected PortalBhpService $bhpService,
+        protected PortalLoanService $loanService,
     ) {}
 
     /**
@@ -136,4 +144,136 @@ class PortalController extends Controller
 
         return view('portal.status', compact('nis', 'requests'));
     }
+
+    /**
+     * API: Cari identitas (siswa atau guru/staf) by nama
+     * Digunakan untuk autofill di portal.
+     */
+    public function searchIdentity(Request $request): JsonResponse
+    {
+        $term = $request->get('q');
+        $type = $request->get('type', 'all'); // 'student', 'user', 'all'
+
+        if (strlen($term) < 3) {
+            return response()->json([]);
+        }
+
+        $results = collect();
+
+        // Cari Siswa
+        if ($type === 'all' || $type === 'student') {
+            $students = Student::active()
+                ->where('name', 'ILIKE', "%{$term}%")
+                ->orWhere('nis', 'ILIKE', "%{$term}%")
+                ->take(5)
+                ->get()
+                ->map(fn($s) => [
+                    'id'    => $s->id,
+                    'type'  => 'student',
+                    'name'  => $s->name,
+                    'id_number' => $s->nis,
+                    'phone' => $s->phone ?? '-',
+                    'class' => $s->class,
+                ]);
+            $results = $results->merge($students);
+        }
+
+        // Cari Guru/Staf/Petugas (kecuali admin)
+        if ($type === 'all' || $type === 'user') {
+            $users = User::where('name', 'ILIKE', "%{$term}%")
+                ->orWhere('nip', 'ILIKE', "%{$term}%")
+                ->whereHas('role', fn($q) => $q->whereIn('name', ['guru', 'petugas_sarpras']))
+                ->take(5)
+                ->get()
+                ->map(fn($u) => [
+                    'id'    => $u->id,
+                    'type'  => 'user',
+                    'name'  => $u->name,
+                    'id_number' => $u->nip ?? '-',
+                    'phone' => $u->phone ?? '-',
+                    'class' => 'Guru/Staf',
+                ]);
+            $results = $results->merge($users);
+        }
+
+        return response()->json($results->take(10)->values());
+    }
+
+    /**
+     * Form Permintaan BHP
+     */
+    public function bhpForm(): View
+    {
+        $items = Item::consumable()
+            ->where('quantity', '>', 0) // Hanya tampilkan yang ada stoknya
+            ->whereColumn('quantity', '>', 'min_stock') // Hanya yang stoknya di atas min_stock
+            ->with(['category'])
+            ->orderBy('name')
+            ->get();
+
+        return view('portal.bhp', compact('items'));
+    }
+
+    /**
+     * Proses Permintaan BHP (Sementara redirect, logika di 4C)
+     */
+    public function bhpStore(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'item_id' => 'required|exists:items,id',
+            'quantity' => 'required|integer|min:1',
+            'purpose' => 'required|string|min:10|max:500',
+            'identity_nis_nip' => 'required|string',
+            'identity_name' => 'required|string',
+            'identity_phone' => 'nullable|string',
+            'identity_type' => 'required|in:student,user',
+        ]);
+
+        try {
+            $this->bhpService->createRequest($validated);
+            
+            // ← KUNCI: Gunakan session 'success_popup'
+            return redirect()->route('portal.index')->with('success_popup', 'Permintaan BHP berhasil! Silakan ambil barang Anda di ruang Sarpras.');
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Form Peminjaman (Multi-item)
+     */
+    public function loanForm(): View
+    {
+        $items = Item::asset() // Hanya barang aset (bukan consumable)
+            ->available() // Status = tersedia
+            ->with(['category', 'location'])
+            ->orderBy('name')
+            ->get();
+
+        return view('portal.loan', compact('items'));
+    }
+
+    public function loanStore(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'items' => 'required|array|min:1',
+            'items.*.item_id' => 'required|exists:items,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'purpose' => 'required|string|min:10|max:500',
+            'identity_nis_nip' => 'required|string',
+            'identity_name' => 'required|string',
+            'identity_phone' => 'nullable|string',
+            'identity_type' => 'required|in:student,user',
+        ]);
+
+        try {
+            $this->loanService->createRequest($validated);
+            
+            // ← KUNCI: Gunakan session 'success_popup' agar memicu modal di /portal
+            return redirect()->route('portal.index')->with('success_popup', 'Permintaan peminjaman Anda berhasil diajukan! Silakan tunggu approval dari petugas.');
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+    }
+
 }

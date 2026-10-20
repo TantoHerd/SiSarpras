@@ -28,12 +28,12 @@ class StockRequestController extends Controller
 
         $filters = [
             'search'    => $request->input('search'),
-            'status'    => $request->input('status'),
+            // ← FIX: Ubah default dari 'pending' menjadi kosong (Semua)
+            'status'    => $request->input('status', ''), 
             'date_from' => $request->input('date_from'),
             'date_to'   => $request->input('date_to'),
         ];
 
-        // Kalau guru/staf → hanya lihat milik sendiri
         if ($user->isGuru()) {
             return $this->myRequests($request);
         }
@@ -41,9 +41,7 @@ class StockRequestController extends Controller
         $requests = $this->service->paginate($filters, 15);
         $stats    = $this->service->getStats();
 
-        return view('stock-requests.index', compact(
-            'requests', 'stats', 'filters'
-        ));
+        return view('stock-requests.index', compact('requests', 'stats', 'filters'));
     }
 
     /**

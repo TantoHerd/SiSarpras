@@ -126,6 +126,26 @@
                 </option>
             </select>
         </div>
+
+        {{-- ← BARU: Pengingat Garansi --}}
+        <div>
+            <label for="warranty_reminder_days" class="form-label">Pengingat Garansi (Hari)</label>
+            <div class="relative">
+                <input id="warranty_reminder_days" 
+                    type="number" 
+                    name="warranty_reminder_days" 
+                    value="{{ old('warranty_reminder_days', setting('warranty_reminder_days', 30)) }}"
+                    min="1" 
+                    max="365"
+                    class="form-input pr-16">
+                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-caption text-steel font-bold">
+                    Hari
+                </span>
+            </div>
+            <p class="text-caption text-steel mt-1">
+                Notifikasi akan muncul otomatis di lonceng jika garansi aset akan habis dalam kurun waktu ini.
+            </p>
+        </div>
     </div>
 
     {{-- ============ ACTION ============ --}}

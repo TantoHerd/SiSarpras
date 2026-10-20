@@ -145,10 +145,22 @@
 
                                 {{-- Pemohon --}}
                                 <td class="px-5 py-4">
+                                    {{-- Tampilkan Nama Snapshot (berlaku untuk user internal maupun guest) --}}
                                     <p class="text-body-sm-bold text-ink-deep">
-                                        {{ $req->requester->name ?? '-' }}
+                                        {{ $req->requester_name ?? $req->requester->name ?? '-' }}
                                     </p>
-                                    <span class="badge-neutral text-xs">{{ ucfirst($req->requester_type) }}</span>
+                                    
+                                    <div class="flex items-center gap-1 mt-1 flex-wrap">
+                                        {{-- Badge Sumber Permintaan --}}
+                                        @if($req->source === 'portal')
+                                            <span class="badge-info text-xs"><i class="fas fa-globe mr-1"></i> Portal</span>
+                                        @else
+                                            <span class="badge-neutral text-xs"><i class="fas fa-building mr-1"></i> Internal</span>
+                                        @endif
+
+                                        {{-- Badge Tipe Pemohon --}}
+                                        <span class="badge-neutral text-xs">{{ ucfirst($req->requester_type) }}</span>
+                                    </div>
                                 </td>
 
                                 {{-- Items --}}

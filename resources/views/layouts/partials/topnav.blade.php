@@ -162,23 +162,23 @@
                                 <a :href="'/notifications/' + notif.id + '/read'"
                                 class="flex items-start gap-3 px-5 py-4 hover:bg-surface-soft transition-colors border-b border-hairline-soft last:border-0"
                                 :class="!notif.read_at ? 'bg-primary/5' : ''">
-                                    {{-- Icon --}}
-                                    <div class="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center flex-shrink-0">
-                                        <i class="fas fa-exclamation-triangle text-warning text-sm"></i>
+                                    
+                                    {{-- Ikon Dinamis: Cek tipe notifikasi --}}
+                                    <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                                        :class="notif.type === 'warranty_expiring' ? 'bg-warning/10' : 'bg-critical/10'">
+                                        
+                                        <i class="fas text-sm"
+                                        :class="notif.type === 'warranty_expiring' ? 'fa-shield-alt text-warning' : 'fa-exclamation-triangle text-critical'"></i>
                                     </div>
 
-                                    {{-- Content --}}
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-body-sm text-ink-deep font-semibold mb-0.5">
-                                            Stok Menipis
-                                        </p>
+                                        <p class="text-body-sm text-ink-deep font-semibold mb-0.5"
+                                        x-text="notif.type === 'warranty_expiring' ? 'Garansi Akan Habis' : 'Stok Menipis'"></p>
                                         <p class="text-caption text-steel leading-snug line-clamp-2" x-text="notif.message"></p>
                                         <p class="text-[11px] text-stone mt-1" x-text="notif.created_at"></p>
                                     </div>
 
-                                    {{-- Unread dot --}}
-                                    <div x-show="!notif.read_at" 
-                                        class="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+                                    <div x-show="!notif.read_at" class="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
                                 </a>
                             </template>
                         </div>

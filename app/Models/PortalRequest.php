@@ -45,9 +45,9 @@ class PortalRequest extends Model
         return $this->belongsTo(Student::class);
     }
 
-    public function item()
+    public function items()
     {
-        return $this->belongsTo(Item::class);
+        return $this->hasMany(PortalRequestItem::class);
     }
 
     public function processor()

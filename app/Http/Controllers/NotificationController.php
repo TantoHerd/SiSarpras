@@ -40,6 +40,7 @@ class NotificationController extends Controller
             ->get()
             ->map(fn($n) => [
                 'id'         => $n->id,
+                'type'       => $n->data['type'] ?? 'stock_low',
                 'message'    => $n->data['message'] ?? 'Notifikasi',
                 'url'        => $n->data['url'] ?? '#',
                 'item_name'  => $n->data['item_name'] ?? '',

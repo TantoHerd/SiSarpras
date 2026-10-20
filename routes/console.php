@@ -24,3 +24,6 @@ Schedule::command('loans:update-overdue')
 Schedule::command('stock:check-low-stock')
     ->everySixHours()
     ->description('Cek item dengan stok menipis');
+    
+// Cek garansi
+Schedule::command('warranty:check-expiring')->daily();
