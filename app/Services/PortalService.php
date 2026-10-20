@@ -12,6 +12,11 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use App\Models\Loan;
+use App\Models\PortalRequestItem;
+use App\Enums\LoanStatusEnum;
+use App\Enums\ItemStatusEnum;
+use Carbon\Carbon;
 
 class PortalService
 {
@@ -119,7 +124,7 @@ class PortalService
     }
 
     /**
-     * Approve permintaan → buat loan
+     * Approve permintaan → buat loan (multi-item)
      */
     public function approveRequest(PortalRequest $portalRequest, int $processedBy): PortalRequest
     {
@@ -130,21 +135,66 @@ class PortalService
         }
 
         return DB::transaction(function () use ($portalRequest, $processedBy) {
-            // Buat loan via LoanService
-            $loan = $this->loanService->createLoan([
-                'item_id'      => $portalRequest->item_id,
-                'quantity'     => $portalRequest->quantity,
-                'borrower_id'  => null, // bukan user, tapi kita butuh field
-                'processed_by' => $processedBy,
-                'purpose'      => "[Portal Siswa - {$portalRequest->student_name} ({$portalRequest->student_class})] " . $portalRequest->purpose,
-            ]);
+            // 1. Cek & Validasi Stok Semua Item
+            foreach ($portalRequest->items as $reqItem) {
+                $item = Item::lockForUpdate()->find($reqItem->item_id);
+                
+                if (!$item || !$item->isAvailable()) {
+                    throw ValidationException::withMessages([
+                        'items' => "Barang \"{$reqItem->item->name}\" tidak tersedia saat ini.",
+                    ]);
+                }
 
-            // Update portal request
+                // Validasi quantity untuk per_batch
+                if ($item->isPerBatch() && $reqItem->quantity > $item->quantity) {
+                    throw ValidationException::withMessages([
+                        'items' => "Stok \"{$item->name}\" tidak mencukupi. Tersedia: {$item->quantity}.",
+                    ]);
+                }
+            }
+
+            // 2. Buat Loan untuk setiap item
+            $loanDate = Carbon::parse($portalRequest->loan_date);
+            $dueDate = Carbon::parse($portalRequest->due_date);
+
+            foreach ($portalRequest->items as $reqItem) {
+                $item = $reqItem->item; // Relasi dari PortalRequestItem
+                
+                // Buat transaksi Loan
+                $loan = Loan::create([
+                    'item_id'      => $item->id,
+                    'quantity'     => $reqItem->quantity,
+                    'borrower_id'  => null, // Guest (bukan user terdaftar)
+                    'processed_by' => $processedBy,
+                    'loan_date'    => $loanDate,
+                    'due_date'     => $dueDate,
+                    'status'       => LoanStatusEnum::DIPINJAM->value,
+                    'purpose'      => "[Portal] {$portalRequest->student_name} - " . $portalRequest->purpose,
+                    'fine_amount'  => 0,
+                    'is_fine_paid' => false,
+                ]);
+
+                // Potong stok (untuk per_batch)
+                if ($item->isPerBatch()) {
+                    $item->decrement('quantity', $reqItem->quantity);
+                    if ($item->quantity <= 0) {
+                        $item->update(['status' => ItemStatusEnum::TIDAK_AKTIF->value]);
+                    }
+                } else {
+                    // Per unit: ubah status jadi dipinjam
+                    $item->update(['status' => ItemStatusEnum::DIPINJAM->value]);
+                }
+
+                // Simpan loan_id ke portal_request_items (opsional, untuk tracking)
+                $reqItem->update(['loan_id' => $loan->id]);
+            }
+
+            // 3. Update status Portal Request
             return $this->portalRepository->update($portalRequest, [
                 'status'       => 'approved',
                 'processed_by' => $processedBy,
                 'processed_at' => now(),
-                'loan_id'      => $loan->id,
+                // 'loan_id' dihapus karena sekarang multi-item
             ]);
         });
     }

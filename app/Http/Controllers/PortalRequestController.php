@@ -41,7 +41,9 @@ class PortalRequestController extends Controller
      */
     public function show(PortalRequest $portalRequest): View
     {
-        $portalRequest->load(['item', 'item.category', 'item.location', 'student', 'processor', 'loan']);
+        // ← PERBAIKAN: Ubah 'item' menjadi 'items'
+        $portalRequest->load(['items.item', 'items.item.category', 'items.item.location', 'student', 'processor', 'loan']);
+        
         return view('portal-requests.show', compact('portalRequest'));
     }
 

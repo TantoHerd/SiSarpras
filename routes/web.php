@@ -38,18 +38,22 @@ Route::get('/', function () {
 */
 Route::prefix('portal')
     ->name('portal.')
+    ->middleware('throttle:60,1')
     ->group(function () {
-        // GET — halaman (rate limit longgar)
-        Route::middleware('throttle:60,1')->group(function () {
-            Route::get('/', [PortalController::class, 'index'])->name('index');
-            Route::get('/success', [PortalController::class, 'success'])->name('success');
-            Route::get('/status', [PortalController::class, 'status'])->name('status');
-        });
-
-        // POST — submit (rate limit ketat untuk anti-spam)
-        Route::middleware('throttle:10,1')->group(function () {
-            Route::post('/', [PortalController::class, 'store'])->name('store');
-        });
+        Route::get('/', [PortalController::class, 'index'])->name('index');
+        
+        // ← BARU: Halaman BHP & Peminjaman
+        Route::get('/bhp', [PortalController::class, 'bhpForm'])->name('bhp');
+        Route::post('/bhp', [PortalController::class, 'bhpStore'])->name('bhp.store');
+        
+        Route::get('/loan', [PortalController::class, 'loanForm'])->name('loan');
+        Route::post('/loan', [PortalController::class, 'loanStore'])->name('loan.store');
+        
+        // API Autofill
+        Route::get('/search-identity', [PortalController::class, 'searchIdentity'])->name('search-identity');
+        
+        Route::get('/success', [PortalController::class, 'success'])->name('success');
+        Route::get('/status', [PortalController::class, 'status'])->name('status');
     });
 
 /*
@@ -89,6 +93,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Users
         Route::patch('/users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
         Route::post('/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
+        Route::get('/users/import', [UserController::class, 'importForm'])->name('users.import.form');
+        Route::post('/users/import', [UserController::class, 'importStore'])->name('users.import.store');
+        Route::get('/users/import/template', [UserController::class, 'downloadTemplate'])->name('users.import.template');
         Route::resource('users', UserController::class);
 
         // Master Data

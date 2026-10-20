@@ -26,18 +26,14 @@ class StudentImport implements
     protected array $errors = [];
     protected array $skipped = [];
 
-    /**
-     * Map setiap baris Excel ke model Student
-     */
     public function model(array $row)
     {
-        // Ambil field (dengan normalisasi key)
+        // Pastikan NIS dan No HP dibaca sebagai string murni
         $nis   = trim((string) ($row['nis'] ?? ''));
         $name  = trim((string) ($row['nama'] ?? $row['name'] ?? ''));
         $class = trim((string) ($row['kelas'] ?? $row['class'] ?? ''));
         $phone = trim((string) ($row['no_hp'] ?? $row['phone'] ?? $row['hp'] ?? ''));
 
-        // Skip kalau NIS kosong
         if (empty($nis)) {
             $this->skipCount++;
             $this->skipped[] = [
@@ -47,7 +43,6 @@ class StudentImport implements
             return null;
         }
 
-        // Skip kalau nama kosong
         if (empty($name)) {
             $this->skipCount++;
             $this->skipped[] = [
@@ -57,7 +52,6 @@ class StudentImport implements
             return null;
         }
 
-        // Skip kalau kelas kosong
         if (empty($class)) {
             $this->skipCount++;
             $this->skipped[] = [
@@ -67,7 +61,6 @@ class StudentImport implements
             return null;
         }
 
-        // UpdateOrCreate by NIS
         $existing = Student::where('nis', $nis)->first();
 
         if ($existing) {
@@ -77,7 +70,7 @@ class StudentImport implements
                 'phone' => $phone ?: null,
             ]);
             $this->updateCount++;
-            return null; // sudah di-update
+            return null;
         } else {
             $this->successCount++;
             return new Student([
@@ -90,17 +83,11 @@ class StudentImport implements
         }
     }
 
-    /**
-     * Skip chunk untuk performa (opsional)
-     */
     public function chunkSize(): int
     {
         return 100;
     }
 
-    /**
-     * Handle error per baris
-     */
     public function onError(Throwable $e)
     {
         $this->errors[] = [
@@ -108,9 +95,6 @@ class StudentImport implements
         ];
     }
 
-    /**
-     * Handle validation failure per baris
-     */
     public function onFailure(Failure ...$failures)
     {
         foreach ($failures as $failure) {
@@ -123,31 +107,9 @@ class StudentImport implements
         }
     }
 
-    /**
-     * Getter untuk statistik
-     */
-    public function getSuccessCount(): int
-    {
-        return $this->successCount;
-    }
-
-    public function getUpdateCount(): int
-    {
-        return $this->updateCount;
-    }
-
-    public function getSkipCount(): int
-    {
-        return $this->skipCount;
-    }
-
-    public function getErrors(): array
-    {
-        return $this->errors;
-    }
-
-    public function getSkipped(): array
-    {
-        return $this->skipped;
-    }
+    public function getSuccessCount(): int { return $this->successCount; }
+    public function getUpdateCount(): int { return $this->updateCount; }
+    public function getSkipCount(): int { return $this->skipCount; }
+    public function getErrors(): array { return $this->errors; }
+    public function getSkipped(): array { return $this->skipped; }
 }

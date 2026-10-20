@@ -10,6 +10,9 @@ use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Imports\UserImport;
+use App\Exports\UserTemplateExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
@@ -175,5 +178,34 @@ class UserController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal menghapus user: ' . $e->getMessage());
         }
+    }
+
+    public function importForm()
+    {
+        return view('users.import');
+    }
+
+    public function importStore(Request $request)
+    {
+        $request->validate(['file' => 'required|mimes:xlsx,xls,csv|max:5120']);
+
+        try {
+            $import = new UserImport();
+            Excel::import($import, $request->file('file'));
+
+            $message = "Import selesai: {$import->getSuccessCount()} baru, {$import->getUpdateCount()} diperbarui";
+            if ($import->getSkipCount() > 0) {
+                $message .= ", {$import->getSkipCount()} dilewati";
+            }
+
+            return redirect()->route('users.index')->with('success', $message . '.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal import: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        return Excel::download(new UserTemplateExport(), 'Template-Import-User.xlsx');
     }
 }

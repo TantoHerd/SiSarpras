@@ -571,6 +571,37 @@
                                 </p>
                             @enderror
                         </div>
+
+                        {{-- ← BARU: Garansi (Hanya Aset) --}}
+                        <div id="warranty-section" class="{{ old('item_type', $item->item_type ?? 'asset') === 'consumable' ? 'hidden' : 'grid grid-cols-1 md:grid-cols-2 gap-5' }}">
+                            <div>
+                                <label for="warranty_start_date" class="form-label">Tanggal Mulai Garansi</label>
+                                <input id="warranty_start_date" 
+                                    type="date" 
+                                    name="warranty_start_date" 
+                                    value="{{ old('warranty_start_date', isset($item) && $item->warranty_start_date ? $item->warranty_start_date->format('Y-m-d') : '') }}"
+                                    class="form-input @error('warranty_start_date') form-input-error @enderror">
+                                <p class="text-caption text-steel mt-1">Kosongkan jika tidak ada garansi.</p>
+                                @error('warranty_start_date')
+                                    <p class="mt-2 text-body-sm text-critical-strong">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="warranty_duration_months" class="form-label">Durasi Garansi (Bulan)</label>
+                                <input id="warranty_duration_months" 
+                                    type="number" 
+                                    name="warranty_duration_months" 
+                                    value="{{ old('warranty_duration_months', $item->warranty_duration_months ?? '') }}"
+                                    min="0"
+                                    max="120"
+                                    placeholder="Contoh: 12"
+                                    class="form-input @error('warranty_duration_months') form-input-error @enderror">
+                                @error('warranty_duration_months')
+                                    <p class="mt-2 text-body-sm text-critical-strong">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -815,6 +846,7 @@
     function toggleMinStock(radio) {
         const wrapper = document.getElementById('min-stock-wrapper');
         const input = document.getElementById('min_stock');
+        const warrantySection = document.getElementById('warranty-section');
         
         // Reset highlight semua card
         document.querySelectorAll('.item-type-card').forEach(card => {
@@ -829,10 +861,14 @@
         if (radio.value === 'consumable') {
             card.classList.add('border-warning', 'bg-warning/5');
             wrapper.classList.remove('hidden');
+            warrantySection.classList.add('hidden');
+            warrantySection.classList.remove('grid', 'grid-cols-1', 'md:grid-cols-2', 'gap-5');
         } else {
             card.classList.add('border-primary', 'bg-primary/5');
             wrapper.classList.add('hidden');
             input.value = ''; // reset min_stock kalau asset
+            warrantySection.classList.remove('hidden');
+            warrantySection.classList.add('grid', 'grid-cols-1', 'md:grid-cols-2', 'gap-5');
         }
     }
 

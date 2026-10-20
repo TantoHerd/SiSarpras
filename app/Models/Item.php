@@ -17,7 +17,7 @@ class Item extends Model
         'code', 'name', 'category_id', 'location_id', 'supplier_id',
         'brand', 'type', 'serial_number', 'purchase_year', 'price',
         'condition', 'status', 'quantity','tracking_mode', 'item_type', 'min_stock', 'image', 'barcode',
-        'created_by', 'funding_source_id', 'updated_by'
+        'warranty_start_date', 'warranty_duration_months','created_by', 'funding_source_id', 'updated_by'
     ];
 
     protected $casts = [
@@ -26,6 +26,8 @@ class Item extends Model
         'purchase_year' => 'integer',
         'condition' => ItemConditionEnum::class,
         'status' => ItemStatusEnum::class,
+        'warranty_start_date' => 'date',
+        'warranty_duration_months' => 'integer',
     ];
 
     // Relations
@@ -208,5 +210,41 @@ class Item extends Model
     public function stockMovements()
     {
         return $this->hasMany(StockMovement::class)->latest('created_at');
+    }
+
+    /**
+     * Hitung otomatis tanggal berakhir garansi.
+     */
+    public function getWarrantyEndDateAttribute()
+    {
+        if (!$this->warranty_start_date || !$this->warranty_duration_months) {
+            return null;
+        }
+        return $this->warranty_start_date->addMonths($this->warranty_duration_months);
+    }
+
+    /**
+     * Cek apakah garansi masih aktif.
+     */
+    public function isWarrantyActive(): bool
+    {
+        if (!$this->warranty_end_date) {
+            return false;
+        }
+        return $this->warranty_end_date->isFuture();
+    }
+
+    /**
+     * Label status garansi untuk badge.
+     */
+    public function getWarrantyStatusAttribute(): string
+    {
+        if (!$this->warranty_start_date) {
+            return 'Tidak Ada Data';
+        }
+        if ($this->isWarrantyActive()) {
+            return 'Aktif';
+        }
+        return 'Habis';
     }
 }

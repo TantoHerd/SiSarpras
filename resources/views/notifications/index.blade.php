@@ -1,4 +1,5 @@
 {{-- resources/views/notifications/index.blade.php --}}
+
 @extends('layouts.app')
 
 @section('title', 'Notifikasi')
@@ -55,13 +56,15 @@
             @php
                 $isUnread = !$notif->read_at;
                 $data = $notif->data;
+                $isWarranty = ($data['type'] ?? '') === 'warranty_expiring';
             @endphp
 
             <div class="card {{ $isUnread ? 'border-primary/30 bg-primary/5' : '' }} hover:border-primary/30 transition-colors">
                 <div class="flex items-start gap-4">
-                    {{-- Icon --}}
-                    <div class="w-12 h-12 rounded-lg bg-warning/10 flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-exclamation-triangle text-warning text-lg"></i>
+                    {{-- Icon Dinamis --}}
+                    <div class="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0
+                                {{ $isWarranty ? 'bg-warning/10' : 'bg-critical/10' }}">
+                        <i class="fas text-lg {{ $isWarranty ? 'fa-shield-alt text-warning' : 'fa-exclamation-triangle text-critical' }}"></i>
                     </div>
 
                     {{-- Content --}}
@@ -69,7 +72,7 @@
                         <div class="flex items-start justify-between gap-3 mb-1">
                             <div class="min-w-0 flex-1">
                                 <p class="text-body-sm-bold text-ink-deep">
-                                    Stok Menipis
+                                    {{ $isWarranty ? 'Garansi Akan Habis' : 'Stok Menipis' }}
                                     @if($isUnread)
                                         <span class="badge-info text-xs ml-1">Baru</span>
                                     @endif
@@ -83,8 +86,8 @@
                             </p>
                         </div>
 
-                        {{-- Info --}}
-                        @if(isset($data['item_name']))
+                        {{-- Info Tambahan --}}
+                        @if(!$isWarranty && isset($data['item_name']))
                             <div class="flex flex-wrap items-center gap-3 mt-2 text-caption">
                                 <span class="text-steel">
                                     <i class="fas fa-box text-xs"></i>
@@ -105,7 +108,7 @@
                                 <a href="{{ route('notifications.read', $notif->id) }}" 
                                    class="text-caption text-primary hover:underline font-bold">
                                     <i class="fas fa-external-link-alt text-xs"></i>
-                                    Lihat Barang
+                                    {{ $isWarranty ? 'Lihat Aset' : 'Lihat Barang' }}
                                 </a>
                             @endif
 

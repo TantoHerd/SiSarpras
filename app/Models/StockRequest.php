@@ -15,7 +15,11 @@ class StockRequest extends Model
     protected $fillable = [
         'request_number',
         'requester_id',
+        'requester_name',        
+        'requester_nis_nip',     
+        'requester_phone',       
         'requester_type',
+        'source',                
         'purpose',
         'status',
         'processed_by',
