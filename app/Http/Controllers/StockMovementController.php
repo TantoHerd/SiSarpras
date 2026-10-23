@@ -23,20 +23,16 @@ class StockMovementController extends Controller
         $filters = [
             'item_id'   => $request->input('item_id'),
             'type'      => $request->input('type'),
-            'date_from' => $request->input('date_from'),
-            'date_to'   => $request->input('date_to'),
+            'date_from' => $request->input('date_from'), // ← PASTIKAN ADA
+            'date_to'   => $request->input('date_to'),   // ← PASTIKAN ADA
             'search'    => $request->input('search'),
         ];
 
         $movements = $this->service->paginate($filters, 20);
         $stats     = $this->service->getStats();
-        $items     = Item::consumable()
-            ->orderBy('name')
-            ->get(['id', 'name', 'code']);
+        $items     = Item::consumable()->orderBy('name')->get(['id', 'name', 'code']);
 
-        return view('stock-movements.index', compact(
-            'movements', 'stats', 'items', 'filters'
-        ));
+        return view('stock-movements.index', compact('movements', 'stats', 'items', 'filters'));
     }
 
     /**

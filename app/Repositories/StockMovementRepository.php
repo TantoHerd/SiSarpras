@@ -22,6 +22,7 @@ class StockMovementRepository
             ->with(['item', 'item.category', 'creator'])
             ->when(!empty($filters['item_id']), fn($q) => $q->where('item_id', $filters['item_id']))
             ->when(!empty($filters['type']), fn($q) => $q->where('type', $filters['type']))
+            // ↓ TAMBAHKAN INI
             ->when(!empty($filters['date_from']), fn($q) => $q->where('created_at', '>=', $filters['date_from']))
             ->when(!empty($filters['date_to']), fn($q) => $q->where('created_at', '<=', \Carbon\Carbon::parse($filters['date_to'])->endOfDay()))
             ->when(!empty($filters['search']), function ($q) use ($filters) {
@@ -67,15 +68,20 @@ class StockMovementRepository
         return $this->model->create($data);
     }
 
-    /**
+        /**
      * Stats untuk dashboard widget
      */
-    public function getStats(): array
+        public function getStats(): array
     {
         $today = now()->startOfDay();
 
         return [
             'total'         => $this->model->count(),
+            'total_in'      => $this->model->where('type', 'in')->count(),
+            'total_out'     => $this->model->where('type', 'out')->count(),
+            'total_adjust'  => $this->model->where('type', 'adjustment')->count(),
+            
+            // Tetap pertahankan yang ini jika Anda ingin menampilkannya nanti
             'today'         => $this->model->where('created_at', '>=', $today)->count(),
             'in_today'      => $this->model->where('created_at', '>=', $today)->where('type', 'in')->count(),
             'out_today'     => $this->model->where('created_at', '>=', $today)->where('type', 'out')->count(),

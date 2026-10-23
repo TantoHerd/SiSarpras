@@ -14,7 +14,7 @@ class Item extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'code', 'name', 'category_id', 'location_id', 'supplier_id',
+        'code', 'name', 'category_id', 'location_id', 'supplier_id', 'unit_id',
         'brand', 'type', 'serial_number', 'purchase_year', 'price',
         'condition', 'status', 'quantity','tracking_mode', 'item_type', 'min_stock', 'image', 'barcode',
         'warranty_start_date', 'warranty_duration_months','created_by', 'funding_source_id', 'updated_by'
@@ -246,5 +246,15 @@ class Item extends Model
             return 'Aktif';
         }
         return 'Habis';
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
+    }
+
+    public function receivingItems()
+    {
+        return $this->hasMany(ReceivingItem::class);
     }
 }

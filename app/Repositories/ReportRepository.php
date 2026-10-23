@@ -19,7 +19,7 @@ class ReportRepository
     public function getInventoryData(array $filters = [])
     {
         $query = Item::query()
-            ->with(['category', 'location', 'supplier', 'fundingSource'])  // ← tambah fundingSource
+            ->with(['category', 'location', 'supplier', 'fundingSource', 'unit'])  // ← tambah fundingSource
             ->when(!empty($filters['category_id']), fn($q) => $q->where('category_id', $filters['category_id']))
             ->when(!empty($filters['location_id']), fn($q) => $q->where('location_id', $filters['location_id']))
             ->when(!empty($filters['condition']), fn($q) => $q->where('condition', $filters['condition']))

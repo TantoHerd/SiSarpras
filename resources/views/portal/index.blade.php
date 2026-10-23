@@ -57,6 +57,8 @@
         </p>
     </div>
 
+    <br>
+
     {{-- Flash Error --}}
     @if(session('error'))
         <div class="mb-8 p-4 rounded-xl bg-critical/10 border border-critical/20 text-critical flex items-center gap-3">
@@ -111,6 +113,8 @@
         </a>
 
     </div>
+
+    <br>
 
     {{-- Footer Info --}}
     <div class="mt-12 text-center">

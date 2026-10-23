@@ -20,6 +20,8 @@ use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\StockRequestController;
 use App\Http\Controllers\StockOpnameController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\UnitController;
+use App\Http\Controllers\ReceivingController;
 
 /*
 |----------------------------------------------------------------------
@@ -102,6 +104,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('categories', CategoryController::class);
         Route::resource('locations', LocationController::class);
         Route::resource('suppliers', SupplierController::class);
+        Route::resource('units', UnitController::class)->except(['show']);
 
         // Funding Sources (CRUD - admin only)
         Route::get('/funding-sources/create', [FundingSourceController::class, 'create'])->name('funding-sources.create');
@@ -186,7 +189,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Items
         Route::get('/items/barcode-batch', [ItemController::class, 'barcodeBatch'])->name('items.barcode-batch');
         Route::get('/items/{item}/barcode', [ItemController::class, 'barcode'])->name('items.barcode');
+        Route::get('/items/import', [ItemController::class, 'importForm'])->name('items.import.form');
+        Route::post('/items/import', [ItemController::class, 'importStore'])->name('items.import.store');
+        Route::get('/items/import/template', [ItemController::class, 'downloadTemplate'])->name('items.import.template');
         Route::resource('items', ItemController::class);
+
+        // Receiving
+        Route::resource('receivings', ReceivingController::class)->only(['index', 'create', 'store', 'show']);
 
         // Loans — return dulu (statis dengan parameter), baru resource
         Route::get('/loans/{loan}/return', [LoanController::class, 'returnForm'])->name('loans.return.form');

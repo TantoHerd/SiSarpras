@@ -11,9 +11,13 @@ use App\Models\Category;
 use App\Models\Item;
 use App\Models\Location;
 use App\Models\Supplier;
+use App\Models\Unit;
 use App\Services\ItemService;
 use Illuminate\Http\Request;
 use App\Services\FundingSourceService;
+use App\Imports\ItemImport;
+use App\Exports\ItemTemplateExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ItemController extends Controller
 {
@@ -54,9 +58,10 @@ class ItemController extends Controller
         $categories = Category::orderBy('name')->get();
         $locations = Location::orderBy('name')->get();
         $suppliers = Supplier::orderBy('name')->get();
+        $units = Unit::orderBy('name')->get();
         $fundingSources = $this->fundingSourceService->allActive();
 
-        return view('items.create', compact('categories', 'locations', 'suppliers', 'fundingSources'));
+        return view('items.create', compact('categories', 'locations', 'suppliers', 'fundingSources', 'units'));
     }
 
     /**
@@ -105,9 +110,10 @@ class ItemController extends Controller
         $categories = Category::orderBy('name')->get();
         $locations = Location::orderBy('name')->get();
         $suppliers = Supplier::orderBy('name')->get();
+        $units = Unit::orderBy('name')->get();
         $fundingSources = $this->fundingSourceService->allActive();
 
-        return view('items.edit', compact('item', 'categories', 'locations', 'suppliers', 'fundingSources'));
+        return view('items.edit', compact('item', 'categories', 'locations', 'suppliers', 'fundingSources', 'units'));
     }
 
     /**
@@ -207,5 +213,39 @@ class ItemController extends Controller
         }
 
         return view('items.barcode-batch', compact('items'));
+    }
+
+    public function importForm()
+    {
+        return view('items.import');
+    }
+
+    public function importStore(Request $request)
+    {
+        $request->validate(['file' => 'required|mimes:xlsx,xls,csv|max:5120']);
+
+        try {
+            $import = new ItemImport();
+            Excel::import($import, $request->file('file'));
+
+            // Simpan detail error ke session
+            if ($import->getSkipCount() > 0) {
+                session()->flash('import_skipped', $import->getSkipped());
+            }
+
+            $message = "Import selesai: {$import->getSuccessCount()} barang baru ditambahkan.";
+            if ($import->getSkipCount() > 0) {
+                $message .= ", {$import->getSkipCount()} dilewati.";
+            }
+            
+            return redirect()->route('items.index')->with('success', $message);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal import: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        return Excel::download(new ItemTemplateExport(), 'Template-Import-Barang.xlsx');
     }
 }

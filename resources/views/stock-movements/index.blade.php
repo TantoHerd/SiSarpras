@@ -17,8 +17,8 @@
                     <i class="fas fa-exchange-alt text-primary"></i>
                 </div>
             </div>
-            <p class="text-caption text-steel uppercase tracking-wider">Hari Ini</p>
-            <p class="text-heading-lg text-ink-deep">{{ number_format($stats['today']) }}</p>
+            <p class="text-caption text-steel uppercase tracking-wider">Total Pergerakan</p>
+            <p class="text-heading-lg text-ink-deep">{{ number_format($stats['total']) }}</p>
         </div>
 
         <div class="card-sm">
@@ -27,8 +27,8 @@
                     <i class="fas fa-arrow-down text-success"></i>
                 </div>
             </div>
-            <p class="text-caption text-steel uppercase tracking-wider">Masuk</p>
-            <p class="text-heading-lg text-success">{{ number_format($stats['in_today']) }}</p>
+            <p class="text-caption text-steel uppercase tracking-wider">Total Masuk</p>
+            <p class="text-heading-lg text-success">{{ number_format($stats['total_in']) }}</p>
         </div>
 
         <div class="card-sm">
@@ -37,8 +37,8 @@
                     <i class="fas fa-arrow-up text-critical"></i>
                 </div>
             </div>
-            <p class="text-caption text-steel uppercase tracking-wider">Keluar</p>
-            <p class="text-heading-lg text-critical">{{ number_format($stats['out_today']) }}</p>
+            <p class="text-caption text-steel uppercase tracking-wider">Total Keluar</p>
+            <p class="text-heading-lg text-critical">{{ number_format($stats['total_out']) }}</p>
         </div>
 
         <div class="card-sm">
@@ -47,8 +47,8 @@
                     <i class="fas fa-balance-scale text-warning"></i>
                 </div>
             </div>
-            <p class="text-caption text-steel uppercase tracking-wider">Penyesuaian</p>
-            <p class="text-heading-lg text-warning">{{ number_format($stats['adjust_today']) }}</p>
+            <p class="text-caption text-steel uppercase tracking-wider">Total Penyesuaian</p>
+            <p class="text-heading-lg text-warning">{{ number_format($stats['total_adjust']) }}</p>
         </div>
     </div>
 
@@ -63,77 +63,73 @@
 
     {{-- ==================== FILTER ==================== --}}
     <div class="card">
-        <form method="GET" action="{{ route('stock-movements.index') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
-            {{-- Search --}}
-            <div class="lg:col-span-2 relative">
-                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-steel text-sm pointer-events-none"></i>
-                <input type="text" 
-                       name="search" 
-                       value="{{ $filters['search'] ?? '' }}"
-                       placeholder="Cari nama atau kode barang..."
-                       class="form-input pl-11">
-            </div>
-
-            {{-- Barang --}}
-            <select name="item_id" class="form-input">
-                <option value="">Semua Barang</option>
-                @foreach($items as $item)
-                    <option value="{{ $item->id }}" @selected(($filters['item_id'] ?? '') == $item->id)>
-                        {{ $item->name }}
-                    </option>
-                @endforeach
-            </select>
-
-            {{-- Type --}}
-            <select name="type" class="form-input">
-                <option value="">Semua Tipe</option>
-                <option value="in" @selected(($filters['type'] ?? '') === 'in')>Masuk</option>
-                <option value="out" @selected(($filters['type'] ?? '') === 'out')>Keluar</option>
-                <option value="adjustment" @selected(($filters['type'] ?? '') === 'adjustment')>Penyesuaian</option>
-            </select>
-
-            {{-- Submit --}}
-            <div class="flex items-center gap-2">
-                <button type="submit" class="btn-ink flex-1">
-                    <i class="fas fa-filter"></i> Filter
-                </button>
-                @if(array_filter($filters))
-                    <a href="{{ route('stock-movements.index') }}" class="btn-ghost" title="Reset">
-                        <i class="fas fa-times"></i>
-                    </a>
-                @endif
-            </div>
-        </form>
-
-        {{-- Date Range --}}
-        <div class="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-hairline-soft">
-            <span class="text-caption text-steel mr-2">Periode:</span>
+        <form method="GET" action="{{ route('stock-movements.index') }}" class="space-y-4">
             
-            <form method="GET" action="{{ route('stock-movements.index') }}" class="flex flex-wrap items-center gap-2">
-                @foreach(request()->except(['date_from', 'date_to']) as $key => $value)
-                    @if(is_array($value))
-                        @foreach($value as $v)
-                            <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
+            {{-- BARIS 1: Pencarian & Tipe --}}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {{-- Search --}}
+                <div class="md:col-span-2 relative">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-steel text-sm pointer-events-none"></i>
+                    <input type="text" 
+                           name="search" 
+                           value="{{ $filters['search'] ?? '' }}"
+                           placeholder="Cari nama atau kode barang..."
+                           class="form-input pl-11">
+                </div>
+
+                {{-- Type --}}
+                <select name="type" class="form-input">
+                    <option value="">Semua Tipe</option>
+                    <option value="in" @selected(($filters['type'] ?? '') === 'in')>Masuk</option>
+                    <option value="out" @selected(($filters['type'] ?? '') === 'out')>Keluar</option>
+                    <option value="adjustment" @selected(($filters['type'] ?? '') === 'adjustment')>Penyesuaian</option>
+                </select>
+            </div>
+
+            {{-- BARIS 2: Barang, Tanggal, & Tombol --}}
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center pt-4 border-t border-hairline-soft">
+                {{-- Dropdown Barang (Lebar 4/12) --}}
+                <div class="md:col-span-4">
+                    <select name="item_id" class="form-input w-full">
+                        <option value="">Semua Barang</option>
+                        @foreach($items as $item)
+                            <option value="{{ $item->id }}" @selected(($filters['item_id'] ?? '') == $item->id)>
+                                {{ $item->name }}
+                            </option>
                         @endforeach
-                    @else
-                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    </select>
+                </div>
+
+                {{-- Filter Tanggal (Lebar 5/12) --}}
+                <div class="md:col-span-5 flex items-center gap-2">
+                    <span class="text-caption text-steel whitespace-nowrap">Periode:</span>
+                    <input type="date" 
+                           name="date_from" 
+                           value="{{ $filters['date_from'] ?? '' }}" 
+                           class="form-input flex-1"
+                           title="Dari Tanggal">
+                    <span class="text-caption text-steel">s/d</span>
+                    <input type="date" 
+                           name="date_to" 
+                           value="{{ $filters['date_to'] ?? '' }}" 
+                           class="form-input flex-1"
+                           title="Sampai Tanggal">
+                </div>
+
+                {{-- Tombol Aksi (Lebar 3/12) --}}
+                <div class="md:col-span-3 flex items-center justify-end gap-2">
+                    <button type="submit" class="btn-ink w-full justify-center">
+                        <i class="fas fa-filter"></i> Terapkan
+                    </button>
+                    @if(array_filter($filters))
+                        <a href="{{ route('stock-movements.index') }}" class="btn-ghost px-3" title="Reset">
+                            <i class="fas fa-times"></i>
+                        </a>
                     @endif
-                @endforeach
-                
-                <input type="date" 
-                       name="date_from" 
-                       value="{{ $filters['date_from'] ?? '' }}"
-                       class="form-input !w-auto !h-10">
-                <span class="text-caption text-steel">s/d</span>
-                <input type="date" 
-                       name="date_to" 
-                       value="{{ $filters['date_to'] ?? '' }}"
-                       class="form-input !w-auto !h-10">
-                <button type="submit" class="btn-ghost !py-2 !px-3 !text-xs">
-                    <i class="fas fa-calendar"></i> Terapkan
-                </button>
-            </form>
-        </div>
+                </div>
+            </div>
+
+        </form>
     </div>
 
     {{-- ==================== TABEL ==================== --}}

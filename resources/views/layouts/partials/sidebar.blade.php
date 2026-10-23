@@ -56,6 +56,13 @@
                     <span>Supplier</span>
                 </a>
 
+                <a href="{{ route('units.index') }}"
+                   class="flex items-center gap-3 px-4 py-2.5 rounded-pill text-body-sm transition-colors
+                          {{ request()->routeIs('units.*') ? 'bg-primary text-white' : 'text-ink hover:bg-surface-soft' }}">
+                    <i class="fas fa-ruler-combined w-5 text-center {{ request()->routeIs('units.*') ? '' : 'text-steel' }}"></i>
+                    <span>Satuan</span>
+                </a>
+
                 <a href="{{ route('funding-sources.index') }}"
                    class="flex items-center gap-3 px-4 py-2.5 rounded-pill text-body-sm transition-colors
                           {{ request()->routeIs('funding-sources.*') ? 'bg-primary text-white' : 'text-ink hover:bg-surface-soft' }}">
@@ -85,6 +92,13 @@
                           {{ request()->routeIs('items.*') ? 'bg-primary text-white' : 'text-ink hover:bg-surface-soft' }}">
                     <i class="fas fa-boxes w-5 text-center {{ request()->routeIs('items.*') ? '' : 'text-steel' }}"></i>
                     <span>Data Barang</span>
+                </a>
+
+                <a href="{{ route('receivings.index') }}"
+                   class="flex items-center gap-3 px-4 py-2.5 rounded-pill text-body-sm transition-colors
+                          {{ request()->routeIs('receivings.*') ? 'bg-primary text-white' : 'text-ink hover:bg-surface-soft' }}">
+                    <i class="fas fa-truck-loading w-5 text-center {{ request()->routeIs('receivings.*') ? '' : 'text-steel' }}"></i>
+                    <span>Penerimaan Barang</span>
                 </a>
 
                 <a href="{{ route('loans.index') }}"

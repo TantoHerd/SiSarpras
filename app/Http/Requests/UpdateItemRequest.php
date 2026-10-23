@@ -23,6 +23,7 @@ class UpdateItemRequest extends FormRequest
             'category_id'               => ['required', 'exists:categories,id'],
             'location_id'               => ['required', 'exists:locations,id'],
             'supplier_id'               => ['nullable', 'exists:suppliers,id'],
+            'unit_id'                   => ['required', 'exists:units,id'],
             'funding_source_id'         => ['nullable', 'exists:funding_sources,id'],
             'tracking_mode'             => ['nullable', 'in:per_unit,per_batch'],  // ← BARU
             'brand'                     => ['nullable', 'string', 'max:100'],
@@ -48,6 +49,7 @@ class UpdateItemRequest extends FormRequest
             'category_id.exists'            => 'Kategori yang dipilih tidak valid.',
             'location_id.required'          => 'Lokasi wajib dipilih.',
             'location_id.exists'            => 'Lokasi yang dipilih tidak valid.',
+            'unit.required'                 => 'Satuan barang wajib diisi.',
             'serial_number.unique'          => 'Nomor seri sudah terdaftar di barang lain.',
             'purchase_year.min'             => 'Tahun perolehan tidak valid.',
             'purchase_year.max'             => 'Tahun perolehan tidak boleh melebihi tahun depan.',

@@ -27,4 +27,9 @@ class Supplier extends Model
                      ->orWhere('contact_person', 'ILIKE', "%{$term}%")
                      ->orWhere('phone', 'ILIKE', "%{$term}%");
     }
+
+    public function receivings()
+    {
+        return $this->hasMany(Receiving::class);
+    }
 }
