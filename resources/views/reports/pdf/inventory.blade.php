@@ -354,6 +354,7 @@
                     <th style="width: 55px;">Sumber Dana</th>
                     <th style="width: 55px;" class="text-center">Kondisi</th>
                     <th style="width: 32px;" class="text-center">Qty</th>
+                    <th style="width: 45px;" class="text-center">Satuan</th>
                     <th style="width: 65px;" class="text-right">Harga</th>
                     <th style="width: 75px;" class="text-right">Total</th>
                 </tr>
@@ -380,6 +381,7 @@
                             </span>
                         </td>
                         <td class="text-center">{{ $item->quantity }}</td>
+                        <td class="text-center">{{ $item->unit->name ?? '-' }}</td>
                         <td class="text-right">
                             {{ $item->price > 0 ? number_format($item->price, 0, ',', '.') : '-' }}
                         </td>

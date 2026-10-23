@@ -21,7 +21,7 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
 
     // Konstanta layout
     protected const HEADER_ROW = 9;
-    protected const TOTAL_COLUMNS = 'O';  // ← dari N ke O (tambah 1 kolom: Sumber Dana)
+    protected const TOTAL_COLUMNS = 'P';  // ← FIX: Dari O menjadi P (karena ada kolom Satuan)
 
     public function __construct($items, $summary, $filters = [])
     {
@@ -49,9 +49,6 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
         ];
     }
 
-    /**
-     * Build laporan lengkap
-     */
     protected function buildReport(Worksheet $sheet): void
     {
         $this->buildHeader($sheet);
@@ -62,26 +59,17 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
 
         $this->buildSignature($sheet, $totalRow);
 
-        // Freeze pane di bawah header tabel
         $sheet->freezePane('A' . (self::HEADER_ROW + 1));
-
-        // Auto-filter di header
         $sheet->setAutoFilter('A' . self::HEADER_ROW . ':' . self::TOTAL_COLUMNS . self::HEADER_ROW);
     }
 
-    /**
-     * Kop surat — logo, nama, alamat, kontak
-     */
     protected function buildHeader(Worksheet $sheet): void
     {
-        // ============ LOGO (jika ada) ============
+        // LOGO
         $logoFile = setting('school_logo', 'logo-default.png');
         $logoPath = storage_path('app/public/' . $logoFile);
-        $logoExists = $logoFile
-            && $logoFile !== 'logo-default.png'
-            && file_exists($logoPath);
+        $logoExists = $logoFile && $logoFile !== 'logo-default.png' && file_exists($logoPath);
 
-        // Set tinggi baris untuk kop
         $sheet->getRowDimension(2)->setRowHeight(28);
         $sheet->getRowDimension(3)->setRowHeight(20);
         $sheet->getRowDimension(4)->setRowHeight(16);
@@ -96,91 +84,65 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
             $drawing->setOffsetY(5);
             $drawing->setWorksheet($sheet);
         } else {
-            // Fallback: inisial sekolah
             $sheet->mergeCells('A2:A4');
             $sheet->setCellValue('A2', strtoupper(substr(setting('school_name', 'S'), 0, 1)));
             $sheet->getStyle('A2')->applyFromArray([
                 'font' => ['bold' => true, 'size' => 28, 'color' => ['rgb' => 'FFFFFF']],
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => '0064E0'],
-                ],
-                'alignment' => [
-                    'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical' => Alignment::VERTICAL_CENTER,
-                ],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '0064E0']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
             ]);
         }
 
-        // ============ NAMA SEKOLAH (baris 2) ============
-        $sheet->mergeCells('B2:O2');  // ← dari N2
+        // NAMA SEKOLAH (Merge B2:P2)
+        $sheet->mergeCells('B2:P2');
         $sheet->setCellValue('B2', strtoupper(setting('school_name', 'NAMA SEKOLAH')));
         $sheet->getStyle('B2')->applyFromArray([
             'font' => ['bold' => true, 'size' => 16, 'color' => ['rgb' => '0A1317']],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
         ]);
 
-        // ============ ALAMAT (baris 3) ============
-        $sheet->mergeCells('B3:O3');  // ← dari N3
+        // ALAMAT (Merge B3:P3)
+        $sheet->mergeCells('B3:P3');
         $sheet->setCellValue('B3', setting('school_address', 'Alamat Sekolah'));
         $sheet->getStyle('B3')->applyFromArray([
             'font' => ['size' => 10, 'color' => ['rgb' => '1C1E21']],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
         ]);
 
-        // ============ KONTAK (baris 4) ============
+        // KONTAK (Merge B4:P4)
         $contact = [];
         if (setting('school_phone')) $contact[] = 'Telp: ' . setting('school_phone');
         if (setting('school_email')) $contact[] = 'Email: ' . setting('school_email');
         if (setting('school_npsn'))  $contact[] = 'NPSN: ' . setting('school_npsn');
 
-        $sheet->mergeCells('B4:O4');  // ← dari N4
+        $sheet->mergeCells('B4:P4');
         $sheet->setCellValue('B4', implode(' | ', $contact));
         $sheet->getStyle('B4')->applyFromArray([
             'font' => ['size' => 9, 'color' => ['rgb' => '5D6C7B']],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
         ]);
 
-        // ============ GARIS PEMISAH KOP (baris 5) ============
+        // GARIS PEMISAH (A5:P5)
         $sheet->getRowDimension(5)->setRowHeight(4);
-        $sheet->getStyle('A5:O5')->applyFromArray([  // ← dari N5
-            'borders' => [
-                'bottom' => [
-                    'borderStyle' => Border::BORDER_DOUBLE,
-                    'color' => ['rgb' => '0A1317'],
-                ],
-            ],
+        $sheet->getStyle('A5:P5')->applyFromArray([
+            'borders' => ['bottom' => ['borderStyle' => Border::BORDER_DOUBLE, 'color' => ['rgb' => '0A1317']]],
         ]);
 
-        // ============ JUDUL LAPORAN (baris 6) ============
+        // JUDUL (A6:P6)
         $sheet->getRowDimension(6)->setRowHeight(24);
-        $sheet->mergeCells('A6:O6');  // ← dari N6
+        $sheet->mergeCells('A6:P6');
         $sheet->setCellValue('A6', 'LAPORAN INVENTARIS BARANG');
         $sheet->getStyle('A6')->applyFromArray([
             'font' => ['bold' => true, 'size' => 14, 'color' => ['rgb' => '0A1317']],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
         ]);
 
-        // ============ SUB-JUDUL (baris 7) ============
-        $sheet->mergeCells('A7:O7');  // ← dari N7
+        // SUB-JUDUL (A7:P7)
+        $sheet->mergeCells('A7:P7');
         $subtitle = 'Dicetak: ' . now()->translatedFormat('d F Y, H:i') . ' WIB';
-        if (!empty($this->filters['category_id']) 
-            || !empty($this->filters['location_id'])
-            || !empty($this->filters['condition']) 
-            || !empty($this->filters['status'])
-            || !empty($this->filters['funding_source_id'])) {  // ← BARU
+        if (!empty($this->filters['category_id']) || !empty($this->filters['location_id'])
+            || !empty($this->filters['condition']) || !empty($this->filters['status'])
+            || !empty($this->filters['funding_source_id'])) {
             $subtitle = 'Dengan filter diterapkan — ' . $subtitle;
         }
         $sheet->setCellValue('A7', $subtitle);
@@ -189,9 +151,9 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ]);
 
-        // ============ RINGKASAN (baris 8) ============
+        // RINGKASAN (A8:P8)
         $sheet->getRowDimension(8)->setRowHeight(28);
-        $sheet->mergeCells('A8:O8');  // ← dari N8
+        $sheet->mergeCells('A8:P8');
 
         $summaryText = sprintf(
             'Total Item: %s   |   Quantity: %s   |   Nilai Aset: %s   |   Baik: %s   |   Rusak: %s',
@@ -204,33 +166,18 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
         $sheet->setCellValue('A8', $summaryText);
         $sheet->getStyle('A8')->applyFromArray([
             'font' => ['size' => 10, 'bold' => true, 'color' => ['rgb' => '0A1317']],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => 'F1F4F7'],
-            ],
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['rgb' => 'DEE3E9'],
-                ],
-            ],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F1F4F7']],
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'DEE3E9']]],
         ]);
     }
 
-    /**
-     * Header tabel
-     */
     protected function buildTableHeader(Worksheet $sheet): void
     {
         $headers = [
             'No', 'Kode', 'Nama Barang', 'Kategori', 'Lokasi',
-            'Sumber Dana',  // ← BARU (setelah Lokasi)
-            'Merk', 'Tipe', 'Serial Number', 'Tahun',
-            'Kondisi', 'Status', 'Jumlah', 'Harga Beli', 'Total Harga'
+            'Sumber Dana', 'Merk', 'Tipe', 'Serial Number', 'Tahun',
+            'Kondisi', 'Status', 'Jumlah', 'Satuan', 'Harga Beli', 'Total Harga'
         ];
 
         $row = self::HEADER_ROW;
@@ -242,35 +189,20 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
             $col++;
         }
 
-        $sheet->getStyle("A{$row}:O{$row}")->applyFromArray([  // ← dari N
+        $sheet->getStyle("A{$row}:P{$row}")->applyFromArray([
             'font' => ['bold' => true, 'size' => 10, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '0A1317'],
-            ],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-                'wrapText' => true,
-            ],
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['rgb' => '0A1317'],
-                ],
-            ],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '0A1317']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '0A1317']]],
         ]);
     }
 
-    /**
-     * Data tabel — return last data row
-     */
     protected function buildTableData(Worksheet $sheet): int
     {
         $row = self::HEADER_ROW + 1;
 
         if ($this->items->count() === 0) {
-            $sheet->mergeCells("A{$row}:O{$row}");  // ← dari N
+            $sheet->mergeCells("A{$row}:P{$row}");
             $sheet->setCellValue("A{$row}", 'Tidak ada data barang untuk filter yang dipilih.');
             $sheet->getStyle("A{$row}")->applyFromArray([
                 'font' => ['italic' => true, 'color' => ['rgb' => '8595A4']],
@@ -290,52 +222,40 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
             $sheet->setCellValue("C{$row}", $item->name);
             $sheet->setCellValue("D{$row}", $item->category->name ?? '-');
             $sheet->setCellValue("E{$row}", $item->location->name ?? '-');
-            $sheet->setCellValue("F{$row}", $item->fundingSource->code ?? '-');   // ← BARU
-            $sheet->setCellValue("G{$row}", $item->brand ?? '-');                 // ← geser dari F
-            $sheet->setCellValue("H{$row}", $item->type ?? '-');                  // ← geser dari G
-            $sheet->setCellValue("I{$row}", $item->serial_number ?? '-');         // ← geser dari H
-            $sheet->setCellValue("J{$row}", $item->purchase_year ?? '-');         // ← geser dari I
-            $sheet->setCellValue("K{$row}", $item->condition->label());           // ← geser dari J
-            $sheet->setCellValue("L{$row}", $item->status->label());              // ← geser dari K
-            $sheet->setCellValue("M{$row}", $item->quantity);                     // ← geser dari L
-            $sheet->setCellValue("N{$row}", (float) $item->price);                // ← geser dari M
-            $sheet->setCellValue("O{$row}", (float) ($item->price * $item->quantity));  // ← geser dari N
-
+            $sheet->setCellValue("F{$row}", $item->fundingSource->code ?? '-');
+            $sheet->setCellValue("G{$row}", $item->brand ?? '-');
+            $sheet->setCellValue("H{$row}", $item->type ?? '-');
+            $sheet->setCellValue("I{$row}", $item->serial_number ?? '-');
+            $sheet->setCellValue("J{$row}", $item->purchase_year ?? '-');
+            $sheet->setCellValue("K{$row}", $item->condition->label());
+            $sheet->setCellValue("L{$row}", $item->status->label());
+            $sheet->setCellValue("M{$row}", $item->quantity);
+            $sheet->setCellValue("N{$row}", $item->unit->name ?? '-'); // Satuan
+            $sheet->setCellValue("O{$row}", (float) $item->price); // Harga
+            $sheet->setCellValue("P{$row}", (float) ($item->price * $item->quantity)); // Total
             $row++;
         }
 
         $endDataRow = $row - 1;
 
-        // Style body
-        $sheet->getStyle("A{$startDataRow}:O{$endDataRow}")->applyFromArray([  // ← dari N
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['rgb' => 'DEE3E9'],
-                ],
-            ],
+        $sheet->getStyle("A{$startDataRow}:P{$endDataRow}")->applyFromArray([
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'DEE3E9']]],
             'font' => ['size' => 10, 'color' => ['rgb' => '1C1E21']],
             'alignment' => ['vertical' => Alignment::VERTICAL_CENTER],
         ]);
 
-        // Alignment per kolom (geser +1 karena ada kolom baru)
-        $sheet->getStyle("A{$startDataRow}:A{$endDataRow}")
-            ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-        $sheet->getStyle("M{$startDataRow}:M{$endDataRow}")  // ← dari L (sekarang M = Jumlah)
-            ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-        $sheet->getStyle("N{$startDataRow}:O{$endDataRow}")  // ← dari M:N (sekarang N:O = Harga & Total)
-            ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        // Alignment per kolom
+        $sheet->getStyle("A{$startDataRow}:A{$endDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("M{$startDataRow}:N{$endDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Jumlah & Satuan
+        $sheet->getStyle("O{$startDataRow}:P{$endDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT); // Harga & Total
 
         // Format angka
-        $sheet->getStyle("N{$startDataRow}:O{$endDataRow}")  // ← dari M:N
-            ->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle("O{$startDataRow}:P{$endDataRow}")->getNumberFormat()->setFormatCode('#,##0');
 
         // Zebra striping
         for ($i = $startDataRow; $i <= $endDataRow; $i++) {
             if (($i - $startDataRow) % 2 === 1) {
-                $sheet->getStyle("A{$i}:O{$i}")->getFill()  // ← dari N
+                $sheet->getStyle("A{$i}:P{$i}")->getFill()
                     ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()->setRGB('F8FAFC');
             }
@@ -344,117 +264,90 @@ class InventoryReportExport implements FromCollection, WithEvents, WithTitle
         return $endDataRow;
     }
 
-    /**
-     * Baris total — return total row number
-     */
     protected function buildTotalRow(Worksheet $sheet, int $lastDataRow): int
     {
         $totalRow = $lastDataRow + 1;
         $sheet->getRowDimension($totalRow)->setRowHeight(30);
 
-        // Label — merge A sampai M (dari A:L)
-        $sheet->mergeCells("A{$totalRow}:M{$totalRow}");
+        // Label — merge A sampai N
+        $sheet->mergeCells("A{$totalRow}:N{$totalRow}");
         $sheet->setCellValue("A{$totalRow}", 'TOTAL NILAI ASET');
         $sheet->getStyle("A{$totalRow}")->applyFromArray([
             'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'FFFFFF']],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_RIGHT,
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT, 'vertical' => Alignment::VERTICAL_CENTER],
         ]);
 
-        // Nilai — merge N:O (dari M:N)
-        $sheet->mergeCells("N{$totalRow}:O{$totalRow}");
-        $sheet->setCellValue("N{$totalRow}", (float) $this->summary['total_value']);
-        $sheet->getStyle("N{$totalRow}")->applyFromArray([
+        // Nilai — merge O:P
+        $sheet->mergeCells("O{$totalRow}:P{$totalRow}");
+        $sheet->setCellValue("O{$totalRow}", (float) $this->summary['total_value']);
+        $sheet->getStyle("O{$totalRow}")->applyFromArray([
             'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'FFFFFF']],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_RIGHT,
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT, 'vertical' => Alignment::VERTICAL_CENTER],
         ]);
-        $sheet->getStyle("N{$totalRow}")->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle("O{$totalRow}")->getNumberFormat()->setFormatCode('#,##0');
 
-        // Background hitam + border
-        $sheet->getStyle("A{$totalRow}:O{$totalRow}")->applyFromArray([  // ← dari N
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '0A1317'],
-            ],
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['rgb' => '0A1317'],
-                ],
-            ],
+        $sheet->getStyle("A{$totalRow}:P{$totalRow}")->applyFromArray([
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '0A1317']],
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '0A1317']]],
         ]);
 
         return $totalRow;
     }
 
-    /**
-     * Tanda tangan
-     */
     protected function buildSignature(Worksheet $sheet, int $totalRow): void
     {
         $startRow = $totalRow + 3;
 
-        // Kota & tanggal — geser dari J:N ke K:O
-        $sheet->mergeCells("K{$startRow}:O{$startRow}");
-        $sheet->setCellValue("K{$startRow}", now()->translatedFormat('d F Y'));
-        $sheet->getStyle("K{$startRow}")->applyFromArray([
+        // Kota & tanggal — merge L:P
+        $sheet->mergeCells("L{$startRow}:P{$startRow}");
+        $sheet->setCellValue("L{$startRow}", now()->translatedFormat('d F Y'));
+        $sheet->getStyle("L{$startRow}")->applyFromArray([
             'font' => ['size' => 10, 'color' => ['rgb' => '1C1E21']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ]);
 
         // Jabatan
         $row = $startRow + 1;
-        $sheet->mergeCells("K{$row}:O{$row}");
-        $sheet->setCellValue("K{$row}", 'Kepala Sekolah,');
-        $sheet->getStyle("K{$row}")->applyFromArray([
+        $sheet->mergeCells("L{$row}:P{$row}");
+        $sheet->setCellValue("L{$row}", 'Kepala Sekolah,');
+        $sheet->getStyle("L{$row}")->applyFromArray([
             'font' => ['size' => 10, 'color' => ['rgb' => '1C1E21']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ]);
 
-        // Space untuk tanda tangan
         $row += 4;
 
         // Nama
-        $sheet->mergeCells("K{$row}:O{$row}");
-        $sheet->setCellValue("K{$row}", setting('headmaster_name', '_______________________'));
-        $sheet->getStyle("K{$row}")->applyFromArray([
+        $sheet->mergeCells("L{$row}:P{$row}");
+        $sheet->setCellValue("L{$row}", setting('headmaster_name', '_______________________'));
+        $sheet->getStyle("L{$row}")->applyFromArray([
             'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => '0A1317']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
-            'borders' => [
-                'top' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['rgb' => '0A1317'],
-                ],
-            ],
+            'borders' => ['top' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '0A1317']]],
         ]);
 
         // NIP
         if (setting('headmaster_nip')) {
             $row++;
-            $sheet->mergeCells("K{$row}:O{$row}");
-            $sheet->setCellValue("K{$row}", 'NIP. ' . setting('headmaster_nip'));
-            $sheet->getStyle("K{$row}")->applyFromArray([
+            $sheet->mergeCells("L{$row}:P{$row}");
+            $sheet->setCellValue("L{$row}", 'NIP. ' . setting('headmaster_nip'));
+            $sheet->getStyle("L{$row}")->applyFromArray([
                 'font' => ['size' => 9, 'color' => ['rgb' => '5D6C7B']],
                 'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
             ]);
         }
 
-        // Auto-size kolom — range A:O (dari A:N)
-        foreach (range('A', 'O') as $col) {
+        // Auto-size kolom A sampai P
+        foreach (range('A', 'P') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
-        // Set minimum width untuk kolom tertentu
+        // Set minimum width
         $sheet->getColumnDimension('C')->setWidth(35);  // Nama Barang
         $sheet->getColumnDimension('D')->setWidth(15);  // Kategori
         $sheet->getColumnDimension('E')->setWidth(18);  // Lokasi
-        $sheet->getColumnDimension('F')->setWidth(12);  // Sumber Dana ← BARU
-        $sheet->getColumnDimension('N')->setWidth(15);  // Harga Beli (dari M)
-        $sheet->getColumnDimension('O')->setWidth(15);  // Total Harga (dari N)
+        $sheet->getColumnDimension('F')->setWidth(12);  // Sumber Dana
+        $sheet->getColumnDimension('O')->setWidth(15);  // Harga Beli
+        $sheet->getColumnDimension('P')->setWidth(15);  // Total Harga
     }
 }

@@ -183,14 +183,15 @@
                         </div>
                     </div>
 
-                    {{-- Supplier + Jumlah --}}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {{-- Supplier + Jumlah + Satuan --}}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        {{-- Supplier --}}
                         <div>
                             <label for="supplier_id" class="form-label">Supplier</label>
                             <select id="supplier_id" 
                                     name="supplier_id" 
                                     class="form-input @error('supplier_id') form-input-error @enderror">
-                                <option value="">Pilih Supplier (Opsional)</option>
+                                <option value="">Pilih Supplier</option>
                                 @foreach($suppliers as $sup)
                                     <option value="{{ $sup->id }}" 
                                             @selected(old('supplier_id') == $sup->id)>
@@ -206,6 +207,7 @@
                             @enderror
                         </div>
 
+                        {{-- Jumlah --}}
                         <div>
                             <label for="quantity" class="form-label">
                                 Jumlah <span class="text-critical">*</span>
@@ -218,6 +220,31 @@
                                    required
                                    class="form-input @error('quantity') form-input-error @enderror">
                             @error('quantity')
+                                <p class="mt-2 text-body-sm text-critical-strong flex items-center gap-1.5">
+                                    <i class="fas fa-exclamation-circle text-xs"></i>
+                                    {{ $message }}
+                                </p>
+                            @enderror
+                        </div>
+
+                        {{-- Satuan --}}
+                        <div>
+                            <label for="unit_id" class="form-label">
+                                Satuan <span class="text-critical">*</span>
+                            </label>
+                            <select id="unit_id" 
+                                    name="unit_id" 
+                                    required
+                                    class="form-input @error('unit_id') form-input-error @enderror">
+                                <option value="">-- Pilih --</option>
+                                @foreach($units as $unit)
+                                    <option value="{{ $unit->id }}" 
+                                            @selected(old('unit_id') == $unit->id)>
+                                        {{ $unit->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('unit_id')
                                 <p class="mt-2 text-body-sm text-critical-strong flex items-center gap-1.5">
                                     <i class="fas fa-exclamation-circle text-xs"></i>
                                     {{ $message }}

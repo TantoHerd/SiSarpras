@@ -44,48 +44,25 @@
         <form method="POST" action="{{ route('portal.bhp.store') }}" id="bhp-form" class="space-y-6">
             @csrf
 
-            {{-- ═══════════════════════════════════════════════ --}}
-            {{-- SECTION 1: Identitas (Autofill) --}}
-            {{-- ═══════════════════════════════════════════════ --}}
+            {{-- Identitas --}}
             @include('portal.partials.identity-autofill', ['type' => 'all'])
 
-            {{-- ═══════════════════════════════════════════════ --}}
-            {{-- SECTION 2: Pilih Barang --}}
-            {{-- ═══════════════════════════════════════════════ --}}
+            {{-- Daftar Barang --}}
             <div>
-                <h3 class="text-lg font-bold text-ink-deep mb-4">Barang yang Diminta</h3>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {{-- Pilih Barang --}}
-                    <div class="md:col-span-2">
-                        <label class="form-label">Pilih Barang <span class="text-critical">*</span></label>
-                        <select name="item_id" id="item_id" required class="form-input">
-                            <option value="">-- Pilih Barang --</option>
-                            @foreach($items as $item)
-                                <option value="{{ $item->id }}" 
-                                        data-stock="{{ $item->quantity }}"
-                                        data-unit="{{ $item->unit ?? 'unit' }}"
-                                        {{ $item->quantity <= $item->min_stock ? 'disabled' : '' }}>
-                                    {{ $item->name }} 
-                                    (Stok: {{ $item->quantity }})
-                                    {{ $item->quantity <= $item->min_stock ? ' - HABIS' : '' }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-ink-deep">Barang yang Diminta</h3>
+                    <button type="button" onclick="addBhpItem()" class="btn-ghost !py-2 !px-4 !text-sm">
+                        <i class="fas fa-plus mr-1"></i> Tambah
+                    </button>
+                </div>
 
-                    {{-- Jumlah --}}
-                    <div>
-                        <label class="form-label">Jumlah <span class="text-critical">*</span></label>
-                        <input type="number" name="quantity" id="quantity" min="1" value="1" required class="form-input">
-                        <p class="text-caption text-steel mt-1" id="stock-info">Pilih barang dulu.</p>
-                    </div>
+                <div id="bhp-items" class="space-y-4"></div>
+                <div id="bhp-empty" class="text-center py-8 border-2 border-dashed border-hairline-soft rounded-xl hidden">
+                    <p class="text-steel">Belum ada barang dipilih.</p>
                 </div>
             </div>
 
-            {{-- ═══════════════════════════════════════════════ --}}
-            {{-- SECTION 3: Keperluan --}}
-            {{-- ═══════════════════════════════════════════════ --}}
+            {{-- Keperluan --}}
             <div>
                 <label class="form-label">Keperluan <span class="text-critical">*</span></label>
                 <textarea name="purpose" rows="3" required class="form-input !h-auto resize-none" placeholder="Contoh: Untuk keperluan ATK kelas X..."></textarea>
@@ -102,25 +79,91 @@
     </div>
 </div>
 
+{{-- Template Item Row --}}
+<template id="bhp-item-template">
+    <div class="bhp-item p-4 rounded-xl border border-hairline-soft bg-surface-soft/50">
+        <div class="flex items-start gap-4">
+            <div class="flex-1 grid grid-cols-1 md:grid-cols-12 gap-4">
+                <div class="md:col-span-8">
+                    <label class="text-caption text-steel mb-1 block">Barang</label>
+                    <select name="items[INDEX][item_id]" required class="form-input select-item" onchange="checkStock(this)">
+                        <option value="">-- Pilih Barang --</option>
+                        @foreach($items as $item)
+                            <option value="{{ $item->id }}" 
+                                    data-stock="{{ $item->quantity }}"
+                                    {{ $item->quantity <= $item->min_stock ? 'disabled' : '' }}>
+                                {{ $item->name }} (Stok: {{ $item->quantity }})
+                                {{ $item->quantity <= $item->min_stock ? ' - HABIS' : '' }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <p class="stock-info text-caption text-steel mt-1"></p>
+                </div>
+                <div class="md:col-span-4">
+                    <label class="text-caption text-steel mb-1 block">Jumlah</label>
+                    <input type="number" name="items[INDEX][quantity]" min="1" value="1" required class="form-input input-qty">
+                </div>
+            </div>
+            <button type="button" onclick="removeBhpItem(this)" 
+                    class="btn-icon hover:bg-critical/10 hover:text-critical mt-5">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+</template>
+
 @endsection
 
 @push('scripts')
 <script>
-    // Update info stok saat barang dipilih
-    document.getElementById('item_id').addEventListener('change', function() {
-        const opt = this.options[this.selectedIndex];
-        const stock = opt.dataset.stock;
-        const info = document.getElementById('stock-info');
-        const qty = document.getElementById('quantity');
+    let bhpIndex = 0;
+
+    // Fungsi untuk menambah baris barang
+    function addBhpItem() {
+        const container = document.getElementById('bhp-items');
+        const template = document.getElementById('bhp-item-template').innerHTML;
+        
+        // Ganti INDEX dengan angka unik
+        const html = template.replace(/INDEX/g, bhpIndex++);
+        container.insertAdjacentHTML('beforeend', html);
+        
+        document.getElementById('bhp-empty').classList.add('hidden');
+    }
+
+    // Fungsi untuk menghapus baris barang
+    function removeBhpItem(btn) {
+        btn.closest('.bhp-item').remove();
+        checkEmpty();
+    }
+
+    // Cek apakah container kosong
+    function checkEmpty() {
+        const container = document.getElementById('bhp-items');
+        if (container.children.length === 0) {
+            document.getElementById('bhp-empty').classList.remove('hidden');
+        }
+    }
+
+    // Fungsi update info stok
+    function checkStock(select) {
+        const selected = select.options[select.selectedIndex];
+        const stock = selected.dataset.stock;
+        const stockInfo = select.closest('div').querySelector('.stock-info');
+        const qtyInput = select.closest('.bhp-item').querySelector('.input-qty');
         
         if (stock) {
-            info.innerHTML = `Stok tersedia: <strong>${stock}</strong>`;
-            qty.max = stock;
-            qty.value = 1;
+            stockInfo.innerHTML = `<i class="fas fa-info-circle text-primary"></i> Stok tersedia: <strong>${stock}</strong>`;
+            qtyInput.max = stock;
+            qtyInput.value = 1;
         } else {
-            info.textContent = 'Pilih barang dulu.';
-            qty.max = '';
+            stockInfo.textContent = '';
+            qtyInput.max = '';
         }
+    }
+
+    // Init 1 row saat halaman selesai load
+    document.addEventListener('DOMContentLoaded', function() {
+        addBhpItem();
     });
 </script>
 @endpush

@@ -17,29 +17,6 @@
 </nav>
 
 <div class="space-y-6">
-
-    {{-- Flash --}}
-    @if(session('success'))
-        <div class="flex items-start gap-3 p-4 rounded-xl bg-success/10 border border-success/20">
-            <i class="fas fa-check-circle text-success text-lg mt-0.5"></i>
-            <p class="text-body-sm text-ink">{{ session('success') }}</p>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="flex items-start gap-3 p-4 rounded-xl bg-critical/10 border border-critical/20">
-            <i class="fas fa-exclamation-circle text-critical text-lg mt-0.5"></i>
-            <p class="text-body-sm text-ink">{{ session('error') }}</p>
-        </div>
-    @endif
-
-    @if(session('warning'))
-        <div class="flex items-start gap-3 p-4 rounded-xl bg-warning/10 border border-warning/20">
-            <i class="fas fa-exclamation-triangle text-warning text-lg mt-0.5"></i>
-            <p class="text-body-sm text-ink">{{ session('warning') }}</p>
-        </div>
-    @endif
-
     {{-- ============ HEADER CARD ============ --}}
     <div class="card">
         <div class="flex flex-wrap items-start justify-between gap-4 mb-5">

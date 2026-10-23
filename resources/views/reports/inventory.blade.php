@@ -150,6 +150,7 @@
                             <th class="text-left px-4 py-3 text-caption-bold text-steel uppercase tracking-wider hidden lg:table-cell">Sumber Dana</th>
                             <th class="text-center px-4 py-3 text-caption-bold text-steel uppercase tracking-wider">Kondisi</th>
                             <th class="text-center px-4 py-3 text-caption-bold text-steel uppercase tracking-wider">Qty</th>
+                            <th class="text-center px-4 py-3 text-caption-bold text-steel uppercase tracking-wider">Satuan</th> 
                             <th class="text-right px-4 py-3 text-caption-bold text-steel uppercase tracking-wider">Harga</th>
                             <th class="text-right px-4 py-3 text-caption-bold text-steel uppercase tracking-wider">Total</th>
                         </tr>
@@ -196,6 +197,7 @@
                                     </span>
                                 </td>
                                 <td class="text-center px-4 py-3 text-body-sm-bold">{{ $item->quantity }}</td>
+                                <td class="text-center px-4 py-3 text-body-sm">{{ $item->unit->name ?? '-' }}</td>
                                 <td class="text-right px-4 py-3 text-body-sm">
                                     {{ $item->price > 0 ? number_format($item->price, 0, ',', '.') : '-' }}
                                 </td>
@@ -207,7 +209,7 @@
                     </tbody>
                     <tfoot class="bg-ink-deep text-white">
                         <tr>
-                            <td colspan="9" class="text-right px-4 py-4 text-body-md-bold uppercase tracking-wider">
+                            <td colspan="10" class="text-right px-4 py-4 text-body-md-bold uppercase tracking-wider">
                                 Total Nilai Aset
                             </td>
                             <td class="text-right px-4 py-4 text-body-md-bold">

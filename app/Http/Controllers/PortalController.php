@@ -220,8 +220,9 @@ class PortalController extends Controller
     public function bhpStore(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'item_id' => 'required|exists:items,id',
-            'quantity' => 'required|integer|min:1',
+            'items' => 'required|array|min:1',
+            'items.*.item_id' => 'required|exists:items,id',
+            'items.*.quantity' => 'required|integer|min:1',
             'purpose' => 'required|string|min:10|max:500',
             'identity_nis_nip' => 'required|string',
             'identity_name' => 'required|string',
@@ -231,9 +232,7 @@ class PortalController extends Controller
 
         try {
             $this->bhpService->createRequest($validated);
-            
-            // ← KUNCI: Gunakan session 'success_popup'
-            return redirect()->route('portal.index')->with('success_popup', 'Permintaan BHP berhasil! Silakan ambil barang Anda di ruang Sarpras.');
+            return redirect()->route('portal.index')->with('success_popup', 'Permintaan BHP berhasil! Silakan ambil barang di ruang Sarpras.');
         } catch (\Exception $e) {
             return back()->withInput()->with('error', $e->getMessage());
         }

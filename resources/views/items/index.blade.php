@@ -9,6 +9,27 @@
 
 <div class="space-y-6">
 
+    {{-- ← BARU: Tampilkan Barang yang Dilewati --}}
+    @if(session('import_skipped'))
+        <div class="card bg-warning/5 border-warning/20">
+            <h3 class="text-body-md-bold text-ink-deep mb-3 flex items-center gap-2">
+                <i class="fas fa-exclamation-triangle text-warning"></i>
+                Beberapa Barang Dilewati
+            </h3>
+            <p class="text-body-sm text-steel mb-4">
+                Berikut adalah daftar barang yang gagal di-import beserta alasannya:
+            </p>
+            <div class="max-h-60 overflow-y-auto space-y-2">
+                @foreach(session('import_skipped') as $skip)
+                    <div class="p-2 rounded-lg bg-canvas border border-hairline-soft text-body-sm flex gap-2">
+                        <span class="font-bold text-ink-deep min-w-[150px]">{{ $skip['baris'] }}</span>
+                        <span class="text-critical">{{ $skip['alasan'] }}</span>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     {{-- ==================== HEADER + ACTION ==================== --}}
     <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -25,6 +46,9 @@
                 <span>Cetak Label Massal</span>
                 <span id="selected-count" class="badge-info ml-1">0</span>
             </button>
+            <a href="{{ route('items.import.form') }}" class="btn-ghost">
+                <i class="fas fa-file-excel"></i> Import Excel
+            </a>
             <a href="{{ route('items.create') }}" class="btn-primary">
                 <i class="fas fa-plus"></i>
                 Tambah Barang
