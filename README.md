@@ -1,11 +1,11 @@
 <p align="center">
-   <a href="https://github.com/USERNAME/sisarpras" target="_blank">
+   <a href="https://github.com/TantoHerd/sisarpras" target="_blank">
       <img src="https://ui-avatars.com/api/?name=SISARPRAS&background=0064e0&color=fff&size=128&bold=true" alt="sisarpras-logo" width="80px" height="auto">
    </a>
 </p>
 
 <h1 align="center">
-   <a href="https://github.com/USERNAME/sisarpras" target="_blank" align="center">
+   <a href="https://github.com/TantoHerd/sisarpras" target="_blank" align="center">
       SISARPRAS — Sistem Informasi Sarana & Prasarana Sekolah
    </a>
 </h1>
@@ -15,22 +15,19 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/USERNAME/sisarpras/blob/main/LICENSE">
+  <a href="https://github.com/TantoHerd/sisarpras/blob/main/LICENSE">
     <img src="https://img.shields.io/github/license/TantoHerd/sisarpras?style=flat-square" alt="license">
   </a>
-  <a href="https://github.com/USERNAME/sisarpras/releases/">
+  <a href="https://github.com/TantoHerd/sisarpras/releases/">
     <img src="https://img.shields.io/github/release/TantoHerd/sisarpras.svg?style=flat-square" alt="GitHub release">
   </a>
-  <a href="https://github.com/USERNAME/sisarpras/issues">
+  <a href="https://github.com/TantoHerd/sisarpras/issues">
     <img src="https://img.shields.io/github/issues/TantoHerd/sisarpras.svg?style=flat-square" alt="GitHub issues">
   </a>
-  <a href="https://github.com/USERNAME/sisarpras/issues">
-    <img src="https://img.shields.io/github/issues-closed/TantoHerd/sisarpras.svg?style=flat-square" alt="GitHub closed issues">
-  </a>
-  <a href="https://github.com/USERNAME/sisarpras/stargazers">
+  <a href="https://github.com/TantoHerd/sisarpras/stargazers">
     <img src="https://img.shields.io/github/stars/TantoHerd/sisarpras?style=flat-square" alt="GitHub stars">
   </a>
-  <a href="https://github.com/USERNAME/sisarpras/network/members">
+  <a href="https://github.com/TantoHerd/sisarpras/network/members">
     <img src="https://img.shields.io/github/forks/TantoHerd/sisarpras?style=flat-square" alt="GitHub forks">
   </a>
 </p>
@@ -41,7 +38,7 @@
   <img src="https://img.shields.io/badge/PostgreSQL-18-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL 18">
   <img src="https://img.shields.io/badge/Tailwind-3.x-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">
   <img src="https://img.shields.io/badge/Alpine.js-3.x-8BC0D0?style=flat-square&logo=alpine.js&logoColor=white" alt="Alpine.js">
-  <img src="https://img.shields.io/badge/Version-1.1.0--sprint1-blue?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/Version-1.3.0-blue?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/Status-Active-success?style=flat-square" alt="Status">
   <img src="https://img.shields.io/badge/PRs-Welcome-brightgreen?style=flat-square" alt="PRs Welcome">
 </p>
@@ -70,7 +67,7 @@ Getting started is super simple! Follow the steps below:
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/USERNAME/sisarpras.git
+   git clone https://github.com/TantoHerd/sisarpras.git
    cd sisarpras
 
 2. **Install Composer Dependencies**
@@ -119,11 +116,37 @@ Getting started is super simple! Follow the steps below:
 🚀 Open http://127.0.0.1:8000 in your browser, and you're good to go!
 
 Default Login:
-Role	        Email	                Password
-Admin	        admin@sekolah.sch.id	password123
-Petugas	        petugas@sekolah.sch.id	password123
-Kepala Sekolah	kepsek@sekolah.sch.id	password123
-Guru	        budi@sekolah.sch.id	    password123
+<table>
+<thead>
+   <tr>
+      <th>Role</th>
+      <th>Email</th>
+      <th>Password</th>
+   </tr>
+</thead>
+<tbody>
+   <tr>
+      <td>
+         <p>Admin</p>
+         <p>Petugas</p>
+         <p>Kepala Sekolah</p>
+         <p>Guru</p>
+      </td>
+      <td>
+         <p>admin@sekolah.sch.id</p>
+         <p>petugas@sekolah.sch.id</p>
+         <p>kepsek@sekolah.sch.id</p>
+         <p>budi@sekolah.sch.id</p>
+      </td>
+      <td>
+         <p>password123</p>
+         <p>password123</p>
+         <p>password123</p>
+         <p>password123</p>
+      </td>
+   </tr>
+</tbody>
+</table>
 
 ⚠️ Ganti password default setelah login pertama!
 
@@ -133,8 +156,16 @@ Guru	        budi@sekolah.sch.id	    password123
 1. Data barang dengan kode otomatis format KATEGORI-TAHUN-BULAN-URUTAN
 2. Kategorisasi, lokasi, supplier, dan Sumber Dana perolehan aset
 3. Upload foto & generate barcode/QR code
-4. Tracking kondisi (baik, rusak ringan, rusak berat)
-5. Filter multi-kriteria & pencarian global
+4. Hybrid Tracking: Per Unit (aset unik) & Per Batch (quantity)
+5. Garansi Aset: Pencatatan tanggal mulai & durasi garansi (auto-hitung expired)
+6. Master Satuan: Unit, Pcs, Box, Rim, dll.
+7. Filter multi-kriteria & pencarian global
+
+📥 Penerimaan Barang (Receiving)
+1. Pencatatan barang masuk dari supplier/pembelian
+2. Mode Hybrid: Pilih barang existing ATAU buat barang baru langsung dari form penerimaan
+3. Otomatis menambah stok & mencatat log pergerakan stok
+4. Fitur "Lengkapi Detail" untuk melengkapi foto/spesifikasi barang baru
 
 📋 Peminjaman
 1. Pengajuan peminjaman oleh guru & staf
@@ -142,6 +173,19 @@ Guru	        budi@sekolah.sch.id	    password123
 3. Pengembalian dengan tracking keterlambatan
 4. Denda opsional (aktif/nonaktif via settings)
 5. Riwayat peminjaman per user
+
+🌐 Portal Publik (Siswa & Guru)
+1. Akses tanpa login (khusus komputer sarpras)
+2. Autofill Identitas: Ketik nama → NIS/NIP & No HP otomatis terisi
+3. Permintaan BHP: Tanpa approval, langsung potong stok
+4. Peminjaman Multi-item: Bisa pinjam lebih dari 1 jenis barang
+5. Cek status permintaan via NIS/NIP
+
+🛒 Barang Habis Pakai (BHP)
+1. Permintaan BHP oleh guru/staf (via portal atau petugas)
+2. Approve → stok otomatis berkurang
+3. Notifikasi stok menipis (bell icon + dashboard)
+4. Stok Opname: Sesi hitung fisik per lokasi + koreksi stok otomatis
 
 🔧 Perawatan
 1. 2 jenis perawatan: Rutin & Perbaikan
@@ -162,6 +206,8 @@ Guru	        budi@sekolah.sch.id	    password123
 2. Data kepala sekolah untuk tanda tangan laporan
 3. Preferensi aplikasi (nama, versi, timezone, format tanggal)
 4. Pengaturan peminjaman (durasi, batas, denda)
+5. Pengaturan Portal Siswa (toggle on/off, max loan)
+6. Pengaturan Pengingat Garansi (default 30 hari sebelum expired)
 
 🔐 Manajemen User & Role
 1. 4 role dengan hak akses berbeda: Admin, Petugas Sarpras, Kepala Sekolah, Guru/Staf
@@ -265,54 +311,6 @@ Design System (Meta-inspired)
 4. Reset Database (⚠️ Fresh Migrate):
    ```bash
    php artisan migrate:fresh --seed
-
-📦 What's Included?
-
-✅ Modul Selesai (Sprint 0-1)
-1. Authentication
-   - Login, Register, Forgot Password, Reset Password
-   - Profile management
-
-2. Dashboard
-   - Statistik inventaris, peminjaman, perawatan
-   - Widget Top 5 Sumber Dana (Sprint 1)
-
-3. Master Data
-   - Kategori, Lokasi, Supplier
-   - Sumber Dana (Sprint 1)
-   - Manajemen User
-
-4. Data Barang (Items)
-   - CRUD lengkap dengan upload foto
-   - Barcode/QR generation
-   - Kode otomatis
-
-5. Peminjaman (Loans)
-   - Request, approval, return
-   - Denda opsional
-
-6. Perawatan (Maintenances)
-   - Rutin & Perbaikan
-   - Two-stage workflow
-
-7. Laporan (Reports)
-   - Inventaris, Peminjaman, Perawatan
-   - Export PDF & Excel
-
-8. Pengaturan (Settings)
-   - 4 tab: Sekolah, Kepsek, Preferensi, Peminjaman
-
-🚧 Sedang Dikerjakan (Sprint 2-3)
-- Cetak Label Massal (in progress)
-- Hybrid Tracking Mode (per_unit / per_batch)
-- Portal Siswa untuk Peminjaman
-- Barang Habis Pakai + Stok Opname
-
-📚 Documentation
-📖 CHANGELOG.md — Riwayat versi
-🤝 CONTRIBUTING.md — Panduan kontribusi
-🔒 SECURITY.md — Kebijakan keamanan
-📋 CODE_OF_CONDUCT.md — Kode etik
 
 🖥️ Browser Support
 <table>
@@ -429,24 +427,31 @@ Tested on:
 
 1. ✅ Sprint 1 — Quick Wins (Sedang Berjalan)
     - ☑ Fitur 1: Sumber Dana Aset
-    - □ Fitur 2: Cetak Label Massal (in progress)
+    - ☑ Fitur 2: Cetak Label Massal (in progress)
 
-2. 🚧 Sprint 2 — Fitur Menengah (Planned)
-    - □ Fitur 3: Hybrid Tracking Mode (per_unit / per_batch)
-    - □ Fitur 4: Portal Siswa untuk Peminjaman
+2. ✅ Sprint 2 — Fitur Menengah (Planned)
+    - ☑ Fitur 3: Hybrid Tracking Mode (per_unit / per_batch)
+    - ☑ Fitur 4: Portal Siswa untuk Peminjaman
 
 3. 🔮 Sprint 3 — Fitur Besar (Planned)
-    - □ Fitur 5: Barang Habis Pakai + Stok Opname
-    - □ Notifikasi stok menipis (dashboard + bell icon)
-    - □ Approval workflow untuk permintaan BHP
+    - ☑ Fitur 5: Barang Habis Pakai + Stok Opname
+    - ☑ Notifikasi stok menipis (dashboard + bell icon)
 
-4. 💡 Future Ideas
+4. ✅ Sprint 4-9 — Revisi & Penyempurnaan (Selesai)
+    - ☑ Revisi Portal Publik (Autofill, Multi-item, BHP tanpa approval)
+    - ☑ Import User, Siswa, & Barang via Excel
+    - ☑ Garansi Aset + Pengingat Notifikasi
+    - ☑ Master Satuan (Unit)
+    - ☑ Penerimaan Barang (Receiving) Hybrid
+    - ☑ Filter Tanggal Laporan Mutasi Stok
+
+5. 💡 Future Ideas
     - □ Barcode scanner integration (mobile-friendly)
     - □ Multi-warehouse / multi-lokasi support
-    - □ Import barang via Excel
     - □ REST API untuk mobile app
     - □ Notifikasi WhatsApp/Email untuk peminjaman & perawatan
     - □ Audit log lengkap (siapa, kapan, apa)
+    - □ Procurement (Permintaan Pengadaan Barang)
 
 🦸 Contributing
 Contributions are welcome! Berikut caranya:
@@ -466,7 +471,7 @@ Contributions are welcome! Berikut caranya:
 
 📅 Changelog
 - Check out the CHANGELOG.md for detailed release notes.
-- Latest Release: v1.1.0-sprint1 — Sumber Dana Module
+- Latest Release: v1.3.0-sprint6-9 — Penerimaan Barang & Master Satuan
 
 🛠️ Support
 1. 🐛 Bug Report
@@ -487,6 +492,12 @@ Untuk pertanyaan yang tidak cocok di issue tracker:
 This project is open-sourced software licensed under the MIT license.
 ```text
 MIT License
+
+Copyright (c) 2026 SISARPRAS
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction...
 
 Copyright (c) 2026 SISARPRAS
 
@@ -526,4 +537,4 @@ Dibuat dengan ❤️ untuk pendidikan Indonesia
 
 ⬆ Kembali ke atas
 
-</div>
+</div>```
